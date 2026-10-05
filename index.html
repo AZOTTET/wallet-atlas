@@ -1,0 +1,1730 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wallet Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --font-sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,'SF Mono',monospace;
+  --bg:#0a0b0f; --bg2:#121319; --bg3:#181a22; --bg-hover:#1e2029;
+  --border:#25272f; --border-soft:#1c1e26;
+  --text:#f1f2f5; --text-dim:#9497a6; --text-faint:#5e6170;
+  --accent:#5b7cff; --accent-rgb:91,124,255; --accent-soft:rgba(91,124,255,.14);
+  --green:#34d399; --green-rgb:52,211,153; --green-soft:rgba(52,211,153,.14);
+  --amber:#f5a524; --amber-rgb:245,165,36; --amber-soft:rgba(245,165,36,.14);
+  --red:#f5556c; --red-rgb:245,85,108; --red-soft:rgba(245,85,108,.14);
+  --gray:#8890a0; --gray-soft:rgba(136,144,160,.14);
+  --purple:#a78bfa; --purple-soft:rgba(167,139,250,.14);
+  --shadow:0 8px 28px rgba(0,0,0,.35);
+  --radius:12px; --radius-sm:8px;
+}
+:root[data-theme="light"]{
+  --bg:#f6f7fa; --bg2:#ffffff; --bg3:#eef0f5; --bg-hover:#e7e9f0;
+  --border:#e1e3ea; --border-soft:#eceef3;
+  --text:#181a22; --text-dim:#5e6170; --text-faint:#9497a6;
+  --accent:#3358f4; --accent-rgb:51,88,244; --accent-soft:rgba(51,88,244,.09);
+  --shadow:0 8px 24px rgba(20,20,40,.08);
+}
+*{margin:0;box-sizing:border-box;}
+html,body{height:100%;}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+::selection{background:var(--accent);color:#fff;}
+button,input,select,textarea{font-family:inherit;color:inherit;}
+button{cursor:pointer;}
+a{color:inherit;}
+.hidden{display:none !important;}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+
+#lockscreen{position:fixed;inset:0;z-index:260;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;}
+#sitegate{position:fixed;inset:0;z-index:270;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;}
+.lock-error{color:var(--red);font-size:12.5px;min-height:16px;margin:-4px 0 10px;}
+.pin-set-form{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;}
+#onboarding{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;}
+.onboard-card{width:100%;max-width:440px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:36px 32px;box-shadow:var(--shadow);}
+.onboard-logo{display:flex;align-items:center;gap:10px;margin-bottom:22px;}
+.onboard-logo .mark{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#6b8bff,#9945ff);display:flex;align-items:center;justify-content:center;color:#fff;}
+.onboard-logo .mark svg{width:20px;height:20px;}
+.onboard-logo b{font-size:16px;letter-spacing:.04em;}
+.onboard-card h1{font-size:22px;font-weight:700;margin-bottom:8px;}
+.onboard-card p.sub{color:var(--text-dim);font-size:14px;line-height:1.55;margin-bottom:24px;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:12.5px;color:var(--text-dim);margin-bottom:6px;font-weight:500;}
+.field input[type=text],.field input[type=date],.field input[type=number],.field select,.field textarea{
+  width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+  padding:11px 13px;font-size:14px;color:var(--text);outline:none;transition:border-color .15s;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);}
+.avatar-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.avatar-opt{width:42px;height:42px;border-radius:11px;background:var(--bg3);border:2px solid transparent;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0;}
+.avatar-opt svg{width:24px;height:24px;}
+.avatar-opt.selected{border-color:var(--accent);}
+.check-row{display:flex;align-items:center;gap:9px;margin:18px 0 22px;font-size:13.5px;color:var(--text-dim);}
+.check-row input{width:16px;height:16px;accent-color:var(--accent);}
+.btn{border:none;border-radius:10px;padding:11px 18px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:7px;justify-content:center;transition:opacity .15s,transform .1s;white-space:nowrap;}
+.btn:active{transform:scale(.98);}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{opacity:.9;}
+.btn-block{width:100%;}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text);}
+.btn-ghost:hover{background:var(--bg-hover);}
+.btn-soft{background:var(--bg3);border:1px solid var(--border);color:var(--text);}
+.btn-danger{background:var(--red-soft);color:var(--red);border:1px solid transparent;}
+.privacy-note svg{width:17px;height:17px;flex-shrink:0;color:var(--accent);margin-top:1px;}
+.forgotten-banner .ficon svg{width:18px;height:18px;}
+.row-menu button svg{width:15px;height:15px;flex-shrink:0;}
+.privacy-note{display:flex;gap:10px;background:var(--bg3);border:1px solid var(--border-soft);border-radius:10px;padding:12px 13px;font-size:12.5px;color:var(--text-dim);line-height:1.5;}
+
+#app{display:none;grid-template-columns:230px 1fr;min-height:100vh;transition:grid-template-columns .25s ease;}
+#app.collapsed{grid-template-columns:72px 1fr;}
+#app.collapsed .brand b,#app.collapsed .navitem span,#app.collapsed .aw-full,#app.collapsed .profile-meta,#app.collapsed .profile-chevron{display:none;}
+#app.collapsed .aw-compact{display:inline;}
+#app.collapsed .navitem,#app.collapsed .sidebar-add,#app.collapsed .profile-btn,#app.collapsed .brand{justify-content:center;}
+#app.active{display:grid;}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 14px;position:sticky;top:0;height:100vh;padding-top:calc(20px + env(safe-area-inset-top,0px));}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 8px 22px;cursor:pointer;}
+.brand .mark{position:relative;width:32px;height:32px;border-radius:9px;overflow:hidden;background:linear-gradient(135deg,var(--accent),#9945ff);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;}
+.brand .mark>svg{width:17px;height:17px;transition:opacity .2s ease;}
+.brand .mark .ham{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s ease;background:linear-gradient(135deg,var(--accent),#9945ff);color:#fff;}
+.brand .mark .ham svg{width:15px;height:15px;}
+.brand:hover .mark>svg{opacity:0;}
+.brand:hover .mark .ham{opacity:1;}
+.brand b{font-size:14px;letter-spacing:.06em;}
+.navlist{display:flex;flex-direction:column;gap:2px;flex:1;}
+.navitem{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:9px;font-size:14px;color:var(--text-dim);background:transparent;border:none;text-align:left;width:100%;}
+.navitem svg{width:18px;height:18px;flex-shrink:0;}
+.navitem:hover{background:var(--bg-hover);color:var(--text);}
+.navitem.active{background:var(--accent-soft);color:var(--accent);font-weight:600;}
+.sidebar-add{margin:16px 0 4px;}
+.aw-compact{display:none;font-size:18px;line-height:1;}
+.sidebar-footer{border-top:1px solid var(--border-soft);padding-top:12px;margin-top:10px;position:relative;}
+.profile-btn{display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;padding:8px;border-radius:9px;}
+.profile-btn:hover{background:var(--bg-hover);}
+.profile-avatar{width:32px;height:32px;border-radius:9px;background:var(--bg3);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;}
+.profile-avatar svg{width:19px;height:19px;}
+.profile-meta{text-align:left;flex:1;min-width:0;}
+.profile-meta .name{font-size:13px;font-weight:600;}
+.profile-meta .sub{font-size:11px;color:var(--text-faint);}
+.profile-menu{position:absolute;bottom:56px;left:8px;right:8px;background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:6px;box-shadow:var(--shadow);display:none;}
+.profile-menu.open{display:block;}
+.profile-menu button{display:flex;align-items:center;gap:9px;width:100%;background:none;border:none;text-align:left;padding:9px 10px;border-radius:8px;font-size:13px;color:var(--text);}
+.profile-menu button:hover{background:var(--bg-hover);}
+
+.main{padding:22px 26px 60px;min-width:0;}
+.topbar{display:flex;align-items:center;gap:10px;margin-bottom:22px;flex-wrap:wrap;}
+.pagehead{flex:1;min-width:200px;}
+.pagehead h1{font-size:24px;font-weight:800;letter-spacing:-.01em;}
+.pagehead p{font-size:13px;color:var(--text-dim);margin-top:3px;}
+.search-box{position:relative;flex:1;min-width:180px;max-width:340px;}
+.search-box svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--text-faint);}
+.search-box input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:9px 12px 9px 34px;font-size:13.5px;outline:none;}
+.search-box input:focus{border-color:var(--accent);}
+.icon-btn{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:9px 12px;display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text-dim);white-space:nowrap;}
+.icon-btn:hover{color:var(--text);background:var(--bg-hover);}
+.icon-btn svg{width:15px;height:15px;}
+.sq-btn{width:36px;height:36px;padding:0;justify-content:center;font-size:15px;}
+.sq-btn svg{width:17px;height:17px;}
+
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:16px;}
+.stat-card{position:relative;overflow:hidden;background:radial-gradient(130% 110% at 22% 118%, var(--glow) 0%, transparent 58%), var(--bg2);border:1px solid var(--sc-border,var(--border));border-radius:16px;padding:18px 16px 16px;transition:transform .15s ease, box-shadow .15s ease;}
+.stat-card:hover{transform:translateY(-2px);box-shadow:0 10px 28px -10px var(--glow-strong,transparent);}
+.stat-card .wm{position:absolute;right:-10px;bottom:-12px;opacity:.06;pointer-events:none;}
+.stat-card .top{display:flex;align-items:center;gap:9px;margin-bottom:14px;}
+.stat-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;border:1px solid var(--sc-border,transparent);}
+.stat-card .value{font-size:25px;font-weight:800;letter-spacing:-.01em;position:relative;}
+.stat-card .label{font-size:12px;color:var(--text-dim);margin-top:4px;line-height:1.4;position:relative;}
+.stat-link{font-size:11.5px;font-weight:700;margin-top:11px;display:inline-flex;align-items:center;gap:4px;position:relative;}
+
+.forgotten-banner{background:linear-gradient(180deg,var(--amber-soft),transparent),var(--bg2);border:1px solid rgba(245,165,36,.3);border-radius:var(--radius);padding:15px 18px;margin-bottom:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.forgotten-banner .ftext{display:flex;align-items:center;gap:12px;flex:1;min-width:220px;}
+.forgotten-banner .ficon{width:34px;height:34px;border-radius:9px;background:var(--amber-soft);color:var(--amber);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.forgotten-banner .ftitle{font-size:14px;font-weight:700;}
+.forgotten-banner .fdesc{font-size:12.5px;color:var(--text-dim);}
+.addr-hint{font-size:11.5px;margin-top:6px;line-height:1.4;}
+.addr-hint:empty{display:none;}
+.addr-hint.ok{color:var(--green);}
+.addr-hint.warn{color:var(--amber);}
+.head-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.sort-select{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:7px 10px;font-size:12.5px;color:var(--text);outline:none;max-width:210px;}
+.sort-select:focus{border-color:var(--accent);}
+.forgotten-banner.nudge{background:linear-gradient(180deg,rgba(var(--accent-rgb),.12),transparent),var(--bg2);border-color:rgba(var(--accent-rgb),.32);}
+.forgotten-banner.nudge .ficon{background:rgba(var(--accent-rgb),.16);color:var(--accent);}
+.forgotten-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.fchip{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:6px 10px;font-size:12px;display:flex;flex-direction:column;gap:1px;}
+.fchip b{font-size:12px;}
+.fchip span{color:var(--text-faint);font-size:10.5px;}
+
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);}
+.panel-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border-soft);gap:10px;flex-wrap:wrap;}
+.panel-head h2{font-size:15px;font-weight:700;}
+.panel-head .count{font-size:12.5px;color:var(--text-faint);}
+.link-btn{background:none;border:none;color:var(--accent);font-size:12.5px;font-weight:600;}
+
+.content-grid{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start;}
+@media(max-width:980px){.content-grid{grid-template-columns:1fr;} .detail-panel{position:static;top:auto;}}
+
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;min-width:720px;}
+thead th{text-align:left;font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.04em;font-weight:600;padding:10px 14px;border-bottom:1px solid var(--border-soft);white-space:nowrap;}
+tbody td{padding:12px 14px;border-bottom:1px solid var(--border-soft);font-size:13px;vertical-align:middle;}
+tbody tr{cursor:pointer;transition:background .1s;}
+tbody tr:hover{background:var(--bg-hover);}
+tbody tr.selected{background:var(--accent-soft);}
+tbody tr:last-child td{border-bottom:none;}
+.wallet-cell{display:flex;align-items:center;gap:10px;}
+.wallet-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.wallet-icon svg{width:17px;height:17px;}
+.wallet-name{font-weight:600;font-size:13.5px;}
+.wallet-addr{font-family:var(--font-mono);font-size:11px;color:var(--text-faint);margin-top:1px;}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:20px;font-size:11.5px;font-weight:600;white-space:nowrap;}
+.net-badge{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;}
+.usedwith-chips{display:flex;gap:5px;flex-wrap:wrap;max-width:180px;}
+.uw-chip{font-size:11px;color:var(--text-dim);background:var(--bg3);padding:2px 7px;border-radius:6px;}
+.row-actions{position:relative;}
+.dots-btn{background:none;border:none;color:var(--text-faint);font-size:16px;padding:4px 8px;border-radius:6px;}
+.dots-btn:hover{background:var(--bg3);color:var(--text);}
+.row-menu{position:fixed;background:var(--bg2);border:1px solid var(--border);border-radius:9px;box-shadow:var(--shadow);z-index:260;min-width:170px;padding:5px;display:none;}
+.row-menu.open{display:block;}
+.row-menu button{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;text-align:left;padding:8px 9px;border-radius:7px;font-size:12.5px;color:var(--text);}
+.row-menu button:hover{background:var(--bg-hover);}
+.row-menu button.danger{color:var(--red);}
+.empty-state{padding:50px 20px;text-align:center;color:var(--text-dim);}
+.empty-state .em-icon{margin-bottom:10px;display:flex;justify-content:center;}
+.empty-state .em-icon svg{width:36px;height:36px;color:var(--text-faint);}
+.empty-state h3{font-size:15px;color:var(--text);margin-bottom:5px;}
+.empty-state p{font-size:13px;max-width:320px;margin:0 auto 16px;}
+
+.detail-panel{position:sticky;top:22px;}
+.detail-empty{padding:50px 20px;text-align:center;color:var(--text-faint);font-size:13px;}
+.detail-top{padding:18px;border-bottom:1px solid var(--border-soft);display:flex;gap:12px;align-items:flex-start;}
+.detail-icon{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.detail-icon svg{width:22px;height:22px;}
+.detail-name{font-size:15px;font-weight:700;}
+.detail-sub{font-size:12px;color:var(--text-dim);font-family:var(--font-mono);margin-top:2px;display:flex;align-items:center;gap:5px;}
+.detail-sub2{font-size:11.5px;color:var(--text-faint);margin-top:3px;}
+.detail-body{padding:16px 18px;display:flex;flex-direction:column;gap:16px;max-height:calc(100vh - 220px);overflow-y:auto;}
+.detail-balance{font-size:26px;font-weight:800;}
+.dsec-label{font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.04em;font-weight:600;margin-bottom:8px;}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;}
+.tag-chip{display:inline-flex;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--border);color:var(--text-dim);padding:3px 6px 3px 9px;border-radius:20px;font-size:11px;white-space:nowrap;max-width:100%;}
+.tag-chip span{overflow:hidden;text-overflow:ellipsis;}
+.kv-row{display:flex;justify-content:space-between;font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--border-soft);}
+.kv-row:last-child{border-bottom:none;}
+.kv-row .k{color:var(--text-faint);}
+.notes-box{background:var(--bg3);border:1px solid var(--border-soft);border-radius:9px;padding:10px 12px;font-size:12.5px;color:var(--text-dim);line-height:1.55;white-space:pre-wrap;}
+.timeline{display:flex;flex-direction:column;gap:0;}
+.tl-item{display:flex;gap:10px;position:relative;padding-bottom:14px;}
+.tl-item:last-child{padding-bottom:0;}
+.tl-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);margin-top:4px;flex-shrink:0;position:relative;z-index:1;}
+.tl-item:not(:last-child):before{content:'';position:absolute;left:4px;top:12px;bottom:-4px;width:1px;background:var(--border);}
+.tl-date{font-size:11px;color:var(--text-faint);}
+.tl-label{font-size:12.5px;}
+.detail-actions{display:flex;gap:8px;padding:14px 18px;border-top:1px solid var(--border-soft);}
+.addr-copy{cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:color .15s;}
+.addr-copy:hover{color:var(--accent);}
+.addr-copy.copied{color:var(--green);}
+.copy-ic{font-size:10px;opacity:.7;}
+.det-explorer-btn{width:44px;flex-shrink:0;padding:0;justify-content:center;}
+.sec-list{display:flex;flex-direction:column;gap:10px;padding:18px;}
+.sec-card{background:var(--bg3);border:1px solid var(--border);border-radius:11px;padding:14px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.sec-main{display:flex;align-items:center;gap:12px;flex:1;min-width:220px;}
+.sec-meta{font-size:12px;color:var(--text-faint);margin-top:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.sec-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.sec-actions .btn{padding:8px 12px;font-size:12.5px;}
+
+.groups-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;padding:18px;}
+.group-card{background:var(--bg3);border:1px solid var(--border);border-radius:11px;padding:14px;display:flex;flex-direction:column;gap:8px;cursor:pointer;}
+.group-card:hover{border-color:var(--accent);}
+.group-top{display:flex;align-items:center;gap:10px;}
+.group-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;}
+.group-icon svg{width:17px;height:17px;}
+.group-name{font-size:13.5px;font-weight:600;}
+.group-count{font-size:11.5px;color:var(--text-faint);}
+.group-filter-bar{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:14px;}
+.group-filter-bar .gname{font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:8px;}
+.group-filter-bar .gname svg{width:16px;height:16px;flex-shrink:0;}
+
+.activity-bars{display:flex;align-items:flex-end;gap:6px;height:110px;padding:18px;}
+.abar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.abar{width:100%;max-width:26px;background:var(--accent);border-radius:4px 4px 0 0;min-height:3px;}
+.abar-label{font-size:9.5px;color:var(--text-faint);}
+
+.settings-section{padding:18px;border-bottom:1px solid var(--border-soft);}
+.settings-section:last-child{border-bottom:none;}
+.settings-section h3{font-size:13.5px;font-weight:700;margin-bottom:4px;}
+.settings-section p.desc{font-size:12.5px;color:var(--text-dim);margin-bottom:12px;line-height:1.5;}
+.settings-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.theme-switch{display:flex;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:3px;gap:2px;}
+.theme-opt{padding:7px 14px;border-radius:8px;font-size:12.5px;border:none;background:none;color:var(--text-dim);}
+.theme-opt.active{background:var(--accent);color:#fff;}
+.recovery-code{font-family:var(--font-mono);font-size:14px;background:var(--bg3);border:1px dashed var(--border);border-radius:9px;padding:10px 14px;letter-spacing:.06em;opacity:.55;}
+.switch{width:38px;height:22px;border-radius:20px;background:var(--bg3);border:1px solid var(--border);position:relative;padding:0;}
+.switch.disabled{opacity:.4;}
+.switch .dot{width:16px;height:16px;border-radius:50%;background:var(--text-faint);position:absolute;top:2px;left:2px;}
+.switch.on{background:var(--accent);}
+.switch.on .dot{left:18px;background:#fff;}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:150;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:16px;width:100%;max-width:560px;max-height:88vh;display:flex;flex-direction:column;box-shadow:var(--shadow);}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border-soft);}
+.modal-head h2{font-size:16px;font-weight:700;}
+.modal-close{background:none;border:none;color:var(--text-faint);font-size:20px;padding:2px 6px;}
+.modal-body{padding:18px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:520px){.form-row{grid-template-columns:1fr;}}
+.chip-input{display:flex;flex-wrap:wrap;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:8px 10px;min-height:42px;}
+.chip-input .tag-chip button{background:none;border:none;color:inherit;font-size:12px;flex-shrink:0;line-height:1;padding:0;}
+.chip-input input{flex:1;min-width:80px;background:none;border:none;outline:none;font-size:13px;color:var(--text);}
+.uw-rows{display:flex;flex-direction:column;gap:8px;}
+.uw-row{display:grid;grid-template-columns:1fr 90px auto;gap:8px;}
+.uw-row input{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12.5px;color:var(--text);}
+.uw-row button{background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text-faint);font-size:14px;}
+.color-swatches{display:flex;gap:7px;flex-wrap:wrap;}
+.swatch{width:26px;height:26px;border-radius:50%;border:2px solid transparent;}
+.swatch.selected{border-color:var(--text);}
+.emoji-picker{display:flex;flex-wrap:wrap;gap:6px;}
+.emoji-opt{width:36px;height:36px;border-radius:9px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-dim);}
+.emoji-opt svg{width:18px;height:18px;}
+.emoji-opt.selected{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);}
+.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:16px 20px;border-top:1px solid var(--border-soft);}
+
+.net-filter-btn{width:34px;height:34px;padding:0;display:flex;align-items:center;justify-content:center;background:var(--bg2);border:1px solid var(--border);border-radius:9px;}
+.net-filter-btn.active{border-color:var(--accent);background:var(--accent-soft);}
+.st-filter-btn{padding:7px 12px;border-radius:9px;background:var(--bg2);border:1px solid var(--border);font-size:12px;}
+.st-filter-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);}
+.filter-label{font-size:12px;color:var(--text-faint);align-self:center;}
+
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(0);background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:11px 18px;border-radius:10px;font-size:13px;box-shadow:var(--shadow);z-index:300;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(-6px);}
+
+@media(max-width:860px){
+  #app.active{grid-template-columns:1fr;}
+  .sidebar{position:fixed;left:-260px;top:0;height:100vh;width:230px;z-index:100;transition:left .2s;box-shadow:var(--shadow);}
+  .sidebar.open{left:0;}
+  .main{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px));}
+  .mobile-tabbar{display:flex;}
+}
+.sidebar-scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;}
+.sidebar-scrim.open{display:block;}
+
+.mobile-tabbar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:120;background:var(--bg2);border-top:1px solid var(--border);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));justify-content:space-around;align-items:flex-end;}
+.mtab{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text-faint);font-size:10px;padding:6px 6px;border-radius:9px;flex:1;min-width:0;}
+.mtab svg{width:21px;height:21px;flex-shrink:0;}
+.mtab span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.mtab.active{color:var(--accent);}
+.mtab-fab .fab-circle{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:1px;line-height:1;}
+.mtab-fab{color:var(--accent);}
+.mobile-only-btn{display:none;}
+.mobile-only-btn svg{width:19px;height:19px;}
+@media(max-width:860px){.mobile-only-btn{display:flex;}}
+
+@media(max-width:640px){
+  .table-wrap{overflow-x:visible;}
+  table{min-width:0;width:100%;}
+  thead{display:none;}
+  tbody tr{display:block;padding:13px 14px;border-bottom:1px solid var(--border-soft);}
+  tbody tr td{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border:none;font-size:13px;gap:10px;}
+  tbody tr td:first-child{display:block;padding-bottom:10px;}
+  tbody tr td[data-label]:before{content:attr(data-label);color:var(--text-faint);font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;flex-shrink:0;}
+  tbody tr td:last-child{justify-content:flex-end;padding-top:8px;border-top:1px solid var(--border-soft);margin-top:2px;}
+  .usedwith-chips{max-width:65%;justify-content:flex-end;}
+  .empty-state{padding:34px 14px;}
+}
+</style>
+<!-- Analytics: after deploying, replace REPLACE_WITH_YOUR_UMAMI_WEBSITE_ID with your own Umami website id (see DEPLOYMENT.md). Safe to leave as-is for local use or the Claude preview — it will just fail to load silently. -->
+<script defer src="https://cloud.umami.is/script.js" data-website-id="REPLACE_WITH_YOUR_UMAMI_WEBSITE_ID"></script>
+</head>
+<body>
+
+<div id="sitegate" class="hidden">
+  <div class="onboard-card">
+    <div class="onboard-logo"><div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="9.5" rx="2.2"/><path d="M8.2 10.5V8a3.8 3.8 0 0 1 7.6 0v2.5"/></svg></div><b>WALLET ATLAS</b></div>
+    <h1 data-i18n="gate_title">Закрытый доступ</h1>
+    <p class="sub" data-i18n="gate_sub">Эта версия ещё не для всех — её тестируют по приглашению. Если у тебя есть код доступа, введи его.</p>
+    <div class="field"><input type="password" id="gate-pass" placeholder="••••••"></div>
+    <div id="gate-error" class="lock-error"></div>
+    <button class="btn btn-primary btn-block" id="gate-enter-btn" data-i18n="gate_enter">Войти</button>
+  </div>
+</div>
+
+<div id="onboarding">
+  <div class="onboard-card">
+    <div class="onboard-logo"><div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 19 7v10l-7 3.8L5 17V7z"/><circle cx="12" cy="9.3" r="1.15" fill="currentColor" stroke="none"/><circle cx="9" cy="14.2" r="1.15" fill="currentColor" stroke="none"/><circle cx="15" cy="14.2" r="1.15" fill="currentColor" stroke="none"/><path d="M12 9.3 9 14.2M12 9.3l3 4.9M9 14.2h6"/></svg></div><b>WALLET ATLAS</b></div>
+    <h1 data-i18n="ob_title">Помни каждый свой кошелёк</h1>
+    <p class="sub" data-i18n="ob_sub">Без почты, без X, без подписи кошельков. Просто ник и аватар — этого достаточно, чтобы начать вести свою базу.</p>
+    <div class="field">
+      <label data-i18n="ob_nickname_label">Как тебя называть</label>
+      <input type="text" id="ob-nickname" data-i18n-ph="ob_nickname_ph" placeholder="Ник" maxlength="24">
+    </div>
+    <div class="field">
+      <label data-i18n="ob_avatar_label">Выбери аватар</label>
+      <div class="avatar-grid" id="ob-avatars"></div>
+    </div>
+    <label class="check-row"><input type="checkbox" id="ob-seed" checked> <span data-i18n="ob_seed_label">Заполнить примерами кошельков, чтобы посмотреть как это выглядит</span></label>
+    <button class="btn btn-primary btn-block" id="ob-continue" data-i18n="ob_continue">Создать базу →</button>
+    <div style="height:14px"></div>
+    <div class="privacy-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="9.5" rx="2.2"/><path d="M8.2 10.5V8a3.8 3.8 0 0 1 7.6 0v2.5"/></svg><span data-i18n="ob_privacy">Всё хранится только в этом браузере. Ничего не отправляется на сервер. Резервную копию и перенос на другое устройство делаешь через Экспорт в Настройках.</span></div>
+  </div>
+</div>
+
+<div id="lockscreen" class="hidden">
+  <div class="onboard-card">
+    <div class="onboard-logo"><div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="9.5" rx="2.2"/><path d="M8.2 10.5V8a3.8 3.8 0 0 1 7.6 0v2.5"/></svg></div><b>WALLET ATLAS</b></div>
+    <h1 data-i18n="lock_title">Введи PIN</h1>
+    <p class="sub" data-i18n="lock_sub">Экран приватности для этого устройства. Это не шифрование — просто закрывает экран от посторонних глаз.</p>
+    <div class="field"><input type="password" inputmode="numeric" maxlength="8" id="lock-pin" placeholder="••••"></div>
+    <div id="lock-error" class="lock-error"></div>
+    <button class="btn btn-primary btn-block" id="lock-unlock-btn" data-i18n="lock_unlock">Разблокировать</button>
+    <div style="height:10px"></div>
+    <button class="btn btn-ghost btn-block" id="lock-reset-btn" data-i18n="lock_reset" style="font-size:12px">Забыл PIN — сбросить всё</button>
+  </div>
+</div>
+
+<div class="sidebar-scrim" id="sidebar-scrim"></div>
+<nav class="mobile-tabbar" id="mobile-tabbar">
+  <button class="mtab" data-view="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.2" y="3.2" width="7.2" height="8.6" rx="1.6"/><rect x="13.6" y="3.2" width="7.2" height="5" rx="1.6"/><rect x="13.6" y="11.4" width="7.2" height="9.4" rx="1.6"/><rect x="3.2" y="15.4" width="7.2" height="5.4" rx="1.6"/></svg><span data-i18n="nav_overview">Обзор</span></button>
+  <button class="mtab" data-view="wallets"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.2A2 2 0 0 1 6 6.2h9.6A2 2 0 0 1 17.6 8.2v1"/><rect x="3" y="8.4" width="18" height="11" rx="2.2"/><path d="M21 13.5h-3a1.9 1.9 0 1 0 0 3.8h3"/></svg><span data-i18n="nav_wallets">Кошельки</span></button>
+  <button class="mtab mtab-fab" id="mtab-add"><div class="fab-circle">+</div><span data-i18n="add_wallet_short">Добавить</span></button>
+  <button class="mtab" data-view="groups"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.6" cy="8.6" r="2.9"/><circle cx="16.6" cy="7.6" r="2.1"/><circle cx="12" cy="16.6" r="2.5"/><path d="M9.4 10.7 11 14.4M15 9.4 13 14.6"/></svg><span data-i18n="nav_groups">Группы</span></button>
+  <button class="mtab" id="mtab-more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg><span data-i18n="nav_more">Ещё</span></button>
+</nav>
+<div id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand" id="brand-toggle" title=""><div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 19 7v10l-7 3.8L5 17V7z"/><circle cx="12" cy="9.3" r="1.15" fill="currentColor" stroke="none"/><circle cx="9" cy="14.2" r="1.15" fill="currentColor" stroke="none"/><circle cx="15" cy="14.2" r="1.15" fill="currentColor" stroke="none"/><path d="M12 9.3 9 14.2M12 9.3l3 4.9M9 14.2h6"/></svg><div class="ham"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></div></div><b>WALLET ATLAS</b></div>
+    <nav class="navlist">
+      <button class="navitem active" data-view="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.2" y="3.2" width="7.2" height="8.6" rx="1.6"/><rect x="13.6" y="3.2" width="7.2" height="5" rx="1.6"/><rect x="13.6" y="11.4" width="7.2" height="9.4" rx="1.6"/><rect x="3.2" y="15.4" width="7.2" height="5.4" rx="1.6"/></svg><span data-i18n="nav_overview">Обзор</span></button>
+      <button class="navitem" data-view="wallets"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.2A2 2 0 0 1 6 6.2h9.6A2 2 0 0 1 17.6 8.2v1"/><rect x="3" y="8.4" width="18" height="11" rx="2.2"/><path d="M21 13.5h-3a1.9 1.9 0 1 0 0 3.8h3"/></svg><span data-i18n="nav_wallets">Мои кошельки</span></button>
+      <button class="navitem" data-view="groups"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.6" cy="8.6" r="2.9"/><circle cx="16.6" cy="7.6" r="2.1"/><circle cx="12" cy="16.6" r="2.5"/><path d="M9.4 10.7 11 14.4M15 9.4 13 14.6"/></svg><span data-i18n="nav_groups">Группы</span></button>
+      <button class="navitem" data-view="activity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 15.4 7 10.6l3.4 3 3.8-7.2 3 4.6"/><circle cx="17.2" cy="11" r="1.3" fill="currentColor" stroke="none"/></svg><span data-i18n="nav_activity">Активность</span></button>
+      <button class="navitem" data-view="security"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 18.8 6v5.4c0 4.5-2.9 7.5-6.8 9.2-3.9-1.7-6.8-4.7-6.8-9.2V6z"/><path d="M9 12.2l2 2 4-4.4"/></svg><span data-i18n="nav_security">Безопасность</span></button>
+      <button class="navitem" data-view="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3.6v2.6M12 17.8v2.6M4.4 12H7M17 12h2.6M6.4 6.4l1.8 1.8M15.8 15.8l1.8 1.8M17.6 6.4l-1.8 1.8M8.2 15.8l-1.8 1.8"/></svg><span data-i18n="nav_settings">Настройки</span></button>
+    </nav>
+    <button class="btn btn-primary sidebar-add" id="add-wallet-btn"><span class="aw-full" data-i18n="add_wallet_btn">+ Добавить кошелёк</span><span class="aw-compact">+</span></button>
+    <div class="sidebar-footer">
+      <div class="profile-menu" id="profile-menu">
+        <button id="menu-export" data-i18n="menu_export">⤓ Экспорт базы</button>
+        <button id="menu-import" data-i18n="menu_import">⤒ Импорт базы</button>
+        <button id="menu-reset" style="color:var(--red)" data-i18n="menu_reset">⨯ Очистить всё</button>
+      </div>
+      <button class="profile-btn" id="profile-btn">
+        <div class="profile-avatar" id="profile-avatar"></div>
+        <div class="profile-meta"><div class="name" id="profile-name"></div><div class="sub" id="profile-count"></div></div>
+        <span class="profile-chevron" style="color:var(--text-faint)">⋯</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <button class="icon-btn sq-btn mobile-only-btn" id="mobile-logo-btn"></button>
+      <div class="pagehead"><h1 id="page-title">My Wallet Universe</h1><p id="page-sub"></p></div>
+      <div class="search-box" id="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="search-input" data-i18n-ph="search_ph" placeholder="Поиск по имени, тегу, адресу, protocol...">
+      </div>
+      <button class="icon-btn" id="filter-btn"><span data-i18n="filter_btn">Фильтр</span><span id="filter-badge"></span></button>
+      <button class="icon-btn sq-btn mobile-only-btn" id="mobile-settings-btn" title=""></button>
+      <button class="icon-btn sq-btn" id="balance-toggle-btn" title=""></button>
+      <button class="icon-btn sq-btn" id="theme-toggle-btn" title=""></button>
+      <button class="icon-btn sq-btn" id="lang-toggle-btn" title="" style="font-size:12px;font-weight:700">EN</button>
+    </div>
+
+    <div id="filter-bar" class="hidden" style="display:flex;gap:8px;flex-wrap:wrap;margin:-10px 0 16px;align-items:center;"></div>
+
+    <div id="view-overview">
+      <div class="stats-row" id="stats-row"></div>
+      <div id="forgotten-banner-slot"></div>
+      <div id="backup-nudge-slot"></div>
+      <div class="panel">
+        <div class="panel-head"><h2 data-i18n="overview_panel_title">Недавняя активность</h2><button class="link-btn" id="ov-show-all" data-i18n="show_all_btn">Показать все →</button></div>
+        <div class="table-wrap"><table id="wallets-table"><thead></thead><tbody></tbody></table></div>
+      </div>
+      <div style="height:16px"></div>
+      <div class="panel" id="groups-preview"></div>
+    </div>
+
+    <div id="view-wallets" class="hidden">
+      <div id="group-filter-slot"></div>
+      <div class="content-grid">
+        <div class="panel">
+          <div class="panel-head"><h2 data-i18n="wallets_panel_title">Все кошельки</h2><div class="head-tools"><select id="sort-select" class="sort-select"></select><span class="count" id="wallets-count-label-2"></span></div></div>
+          <div class="table-wrap"><table id="wallets-table-2"><thead></thead><tbody></tbody></table></div>
+        </div>
+        <div class="panel detail-panel" id="detail-panel-2"></div>
+      </div>
+    </div>
+
+    <div id="view-groups" class="hidden">
+      <div class="panel">
+        <div class="panel-head"><h2 data-i18n="nav_groups">Группы</h2><button class="icon-btn" id="add-group-btn" data-i18n="groups_new_btn">+ Новая группа</button></div>
+        <div class="groups-grid" id="groups-grid"></div>
+      </div>
+    </div>
+
+    <div id="view-activity" class="hidden">
+      <div class="panel">
+        <div class="panel-head"><h2 data-i18n="activity_bars_title">Активность за 12 месяцев</h2></div>
+        <div class="activity-bars" id="activity-bars"></div>
+        <div id="activity-insight" style="padding:0 18px 18px;font-size:12.5px;color:var(--text-dim)"></div>
+      </div>
+    </div>
+
+    <div id="view-security" class="hidden">
+      <div class="panel">
+        <div class="panel-head"><h2 data-i18n="security_panel_title">Требуют внимания</h2><span class="count" data-i18n="security_panel_count">Review / High risk</span></div>
+        <div class="sec-list" id="security-list"></div>
+      </div>
+    </div>
+
+    <div id="view-settings" class="hidden">
+      <div class="panel">
+        <div class="settings-section">
+          <h3 data-i18n="settings_profile_title">Профиль</h3>
+          <p class="desc" data-i18n="settings_profile_desc">Ник и аватар видны только тебе, локально в этом браузере.</p>
+          <div class="settings-row">
+            <div class="field" style="flex:1;min-width:160px"><label data-i18n="settings_nickname_label">Ник</label><input type="text" id="set-nickname"></div>
+            <div class="field"><label data-i18n="settings_avatar_label">Аватар</label><div class="avatar-grid" id="set-avatars"></div></div>
+          </div>
+          <button class="btn btn-soft" id="save-profile-btn" data-i18n="settings_save_btn" style="margin-top:6px">Сохранить</button>
+        </div>
+        <div class="settings-section">
+          <h3 data-i18n="settings_theme_title">Тема</h3>
+          <p class="desc" data-i18n="settings_theme_desc">Тёмная — по умолчанию, светлая — по желанию.</p>
+          <div class="theme-switch">
+            <button class="theme-opt" data-theme="dark" data-i18n="theme_dark">🌙 Тёмная</button>
+            <button class="theme-opt" data-theme="light" data-i18n="theme_light">☀️ Светлая</button>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h3 data-i18n="settings_lang_title">Язык</h3>
+          <p class="desc" data-i18n="settings_lang_desc">Интерфейс переключается мгновенно, без перезагрузки.</p>
+          <div class="theme-switch">
+            <button class="theme-opt" data-lang="ru">RU</button>
+            <button class="theme-opt" data-lang="en">EN</button>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h3 data-i18n="balance_privacy_title">Приватность баланса</h3>
+          <p class="desc" data-i18n="balance_privacy_desc">Скрывай суммы, когда показываешь экран кому-то — структура и заметки останутся видимыми.</p>
+          <div class="settings-row">
+            <div id="balance-toggle-label" style="font-size:13px"></div>
+            <button class="switch" id="balance-switch"><div class="dot"></div></button>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h3 data-i18n="settings_backup_title">Резервная копия</h3>
+          <p class="desc" data-i18n="settings_backup_desc">Данные живут только в этом браузере. Экспортируй файл, чтобы сохранить копию или перенести базу на другое устройство.</p>
+          <div id="last-backup-label" class="desc" style="margin:-4px 0 10px"></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-soft" id="set-export-btn" data-i18n="settings_export_btn">⤓ Экспортировать JSON</button>
+            <button class="btn btn-soft" id="set-import-btn" data-i18n="settings_import_btn">⤒ Импортировать JSON</button>
+            <input type="file" id="import-file" accept=".json" class="hidden">
+          </div>
+        </div>
+        <div class="settings-section">
+          <h3 data-i18n="settings_sync_title">Синхронизация между устройствами</h3>
+          <p class="desc" data-i18n="settings_sync_desc">Будущая опция: сквозное шифрование на твоём устройстве перед отправкой — сервер никогда не увидит расшифрованные данные. Пока недоступно.</p>
+          <div class="settings-row">
+            <div data-i18n="settings_sync_enable">Включить синхронизацию</div>
+            <button class="switch disabled" disabled><div class="dot"></div></button>
+          </div>
+          <div style="margin-top:10px" class="recovery-code" data-i18n="settings_recovery_placeholder">Код восстановления будет здесь</div>
+        </div>
+        <div class="settings-section">
+          <h3 data-i18n="pin_title">PIN-защита</h3>
+          <p class="desc" data-i18n="pin_desc">Экран блокировки при открытии на этом устройстве. Не шифрование, не аккаунт — просто приватный экран, если телефон или ноутбук может увидеть кто-то ещё.</p>
+          <div class="settings-row">
+            <div data-i18n="pin_enable">Включить PIN</div>
+            <button class="switch" id="pin-switch"><div class="dot"></div></button>
+          </div>
+          <div id="pin-set-form" class="hidden pin-set-form">
+            <div class="field" style="margin:0"><label data-i18n="pin_new">Новый PIN (4-8 цифр)</label><input type="password" inputmode="numeric" maxlength="8" id="pin-new" style="width:130px"></div>
+            <button class="btn btn-primary" id="pin-save-btn" data-i18n="pin_save">Сохранить</button>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h3 data-i18n="analytics_title">Анонимная аналитика</h3>
+          <p class="desc" data-i18n="analytics_desc">Помогает понять, какими функциями реально пользуются, и быстрее чинить баги. Отправляются только действия («открыл вкладку Кошельки», «добавлен кошелёк в сети Solana») и технические ошибки — никогда название, адрес, баланс, теги или заметки твоих кошельков.</p>
+          <div class="settings-row">
+            <div data-i18n="analytics_enable">Отправлять анонимную статистику</div>
+            <button class="switch" id="analytics-switch"><div class="dot"></div></button>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h3 style="color:var(--red)" data-i18n="settings_danger_title">Опасная зона</h3>
+          <p class="desc" data-i18n="settings_danger_desc">Полностью удаляет все кошельки, группы и профиль из этого браузера. Действие необратимо.</p>
+          <button class="btn btn-danger" id="wipe-btn" data-i18n="settings_wipe_btn">Очистить всю базу</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="wallet-modal">
+  <div class="modal">
+    <div class="modal-head"><h2 id="modal-title">Добавить кошелёк</h2><button class="modal-close" id="modal-close">×</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="field"><label data-i18n="f_name_label">Название *</label><input type="text" id="f-name" data-i18n-ph="f_name_ph" placeholder="Meme Trading #03"></div>
+        <div class="field"><label data-i18n="f_network_label">Сеть *</label><select id="f-network"></select></div>
+      </div>
+      <div class="field"><label data-i18n="f_address_label">Публичный адрес *</label><input type="text" id="f-address" data-i18n-ph="f_address_ph" placeholder="7xK...93F2" style="font-family:var(--font-mono)" autocomplete="off" spellcheck="false"><div class="addr-hint" id="f-addr-hint"></div></div>
+      <div class="form-row">
+        <div class="field"><label data-i18n="f_purpose_label">Назначение</label><select id="f-purpose"></select></div>
+        <div class="field"><label data-i18n="f_status_label">Статус</label><select id="f-status"></select></div>
+      </div>
+      <div class="field"><label data-i18n="f_icon_label">Иконка</label><div class="emoji-picker" id="f-icons"></div></div>
+      <div class="field"><label data-i18n="f_color_label">Цвет метки</label><div class="color-swatches" id="f-colors"></div></div>
+      <div class="form-row">
+        <div class="field"><label data-i18n="f_balance_label">Баланс (необязательно)</label><input type="text" id="f-balance" data-i18n-ph="f_balance_ph" placeholder="$1,284"></div>
+        <div class="field"><label data-i18n="f_group_label">Группа</label><select id="f-group"></select></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label data-i18n="f_lastused_label">Последнее использование</label><input type="date" id="f-lastused"></div>
+        <div class="field"><label data-i18n="f_firstseen_label">Первая активность</label><input type="date" id="f-firstseen"></div>
+      </div>
+      <div class="field"><label data-i18n="f_tags_label">Теги (Enter чтобы добавить)</label>
+        <div class="chip-input" id="f-tags-wrap"><input type="text" id="f-tags-input" data-i18n-ph="f_tags_ph" placeholder="trading, solana..."></div>
+      </div>
+      <div class="field">
+        <label data-i18n="f_usedwith_label">Использовался с (сервисы / терминалы)</label>
+        <div class="uw-rows" id="f-usedwith"></div>
+        <button class="btn btn-soft" id="f-uw-add" data-i18n="f_uw_add_btn" style="margin-top:8px;font-size:12.5px;padding:7px 12px">+ Добавить сервис</button>
+      </div>
+      <div class="field"><label data-i18n="f_notes_label">Заметки</label><textarea id="f-notes" rows="3" data-i18n-ph="f_notes_ph" placeholder="Зачем этот кошелёк, что важно помнить..."></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-danger hidden" id="f-delete" data-i18n="f_delete_btn">Удалить</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-ghost" id="f-cancel" data-i18n="f_cancel_btn">Отмена</button>
+      <button class="btn btn-primary" id="f-save" data-i18n="f_save_btn">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="group-modal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-head"><h2 data-i18n="group_modal_title">Новая группа</h2><button class="modal-close" id="group-modal-close">×</button></div>
+    <div class="modal-body">
+      <div class="field"><label data-i18n="g_name_label">Название</label><input type="text" id="g-name" data-i18n-ph="g_name_ph" placeholder="Trading"></div>
+      <div class="field"><label data-i18n="g_icon_label">Иконка</label><div class="emoji-picker" id="g-icons"></div></div>
+      <div class="field"><label data-i18n="g_color_label">Цвет</label><div class="color-swatches" id="g-colors"></div></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="g-cancel" data-i18n="g_cancel_btn">Отмена</button>
+      <button class="btn btn-primary" id="g-save" data-i18n="g_save_btn">Создать</button>
+    </div>
+  </div>
+</div>
+
+<div class="row-menu" id="global-row-menu"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+window.addEventListener('error', function(e){ try{ track('js_error', {message:String(e.message||'').slice(0,200), file:String(e.filename||'').split('/').pop(), line:e.lineno||0}); }catch(x){} });
+window.addEventListener('unhandledrejection', function(e){ try{ track('js_error', {message:'unhandled: '+String(e.reason&&e.reason.message||e.reason||'').slice(0,200)}); }catch(x){} });
+
+/* ================= i18n ================= */
+var STRINGS = {
+ru:{
+ob_title:"Помни каждый свой кошелёк", ob_sub:"Без почты, без X, без подписи кошельков. Просто ник и аватар — этого достаточно, чтобы начать вести свою базу.",
+ob_nickname_label:"Как тебя называть", ob_nickname_ph:"Ник", ob_avatar_label:"Выбери аватар",
+ob_seed_label:"Заполнить примерами кошельков, чтобы посмотреть как это выглядит", ob_continue:"Создать базу →",
+ob_privacy:"Всё хранится только в этом браузере. Ничего не отправляется на сервер. Резервную копию и перенос на другое устройство делаешь через Экспорт в Настройках.",
+nav_overview:"Обзор", nav_wallets:"Мои кошельки", nav_groups:"Группы", nav_activity:"Активность", nav_security:"Безопасность", nav_settings:"Настройки",
+add_wallet_btn:"+ Добавить кошелёк", menu_export:"Экспорт базы", menu_import:"Импорт базы", menu_reset:"Очистить всё",
+search_ph:"Поиск по имени, тегу, адресу, protocol...", filter_btn:"Фильтр",
+balance_show_title:"Показать баланс", balance_hide_title:"Скрыть баланс", theme_toggle_title:"Сменить тему", lang_toggle_title:"Switch to English",
+stat_wallets:"Кошельков в базе", stat_balance:"Суммарный баланс", stat_active:"Активны ≤ 90 дней", stat_forgotten:"Забыты (>180 дней)",
+forgotten_title:"Что я забыл?", forgotten_desc:"{n} кошельков не использовались больше 180 дней.", forgotten_btn:"Проверить →",
+overview_panel_title:"Недавняя активность", wallets_panel_title:"Все кошельки", show_all_btn:"Показать все →",
+col_wallet:"Кошелёк", col_purpose:"Назначение", col_network:"Сеть", col_balance:"Баланс", col_lastused:"Использован", col_usedwith:"Связан с", col_status:"Статус",
+empty_title:"Пока пусто", empty_desc:"Добавь первый кошелёк — вставь публичный адрес, без подписи и подключения.", empty_add_btn:"+ Добавить кошелёк",
+menu_edit:"Редактировать", menu_delete:"Удалить", open_in:"Открыть в", no_explorer_toast:"Для этой сети нет эксплорера",
+detail_placeholder:"Выбери кошелёк слева, чтобы увидеть подробности", detail_purpose:"Назначение", detail_tags:"Теги",
+detail_lastused:"Последнее использование", detail_firstseen:"Первая активность", detail_usedwith:"Использован с", detail_notes:"Заметки", detail_timeline:"Хронология",
+detail_no_usedwith:"Пока не отмечено", detail_no_timeline:"Нет данных", detail_edit_btn:"Редактировать",
+detail_created_known:"первая активность на цепочке: {date}", detail_created_unknown:"дата первой активности неизвестна",
+uw_interactions:"{n} взаимод.",
+groups_new_btn:"+ Новая группа", groups_count:"{n} групп", groups_empty_title:"Пока нет групп", groups_empty_desc:"Группируй кошельки по смыслу: Trading, Farming, Storage...",
+group_wallets_count:"{n} кошельков", group_view_title:"Группа: {name}", group_clear_filter:"Убрать фильтр",
+activity_bars_title:"Активность за 12 месяцев", activity_list_title:"Кошельки по последней активности",
+security_panel_title:"Требуют внимания", security_panel_count:"Review / High risk",
+settings_profile_title:"Профиль", settings_profile_desc:"Ник и аватар видны только тебе, локально в этом браузере.",
+settings_nickname_label:"Ник", settings_avatar_label:"Аватар", settings_save_btn:"Сохранить",
+settings_theme_title:"Тема", settings_theme_desc:"Тёмная — по умолчанию, светлая — по желанию.", theme_dark:"Тёмная", theme_light:"Светлая",
+settings_lang_title:"Язык", settings_lang_desc:"Интерфейс переключается мгновенно, без перезагрузки.",
+balance_privacy_title:"Приватность баланса", balance_privacy_desc:"Скрывай суммы, когда показываешь экран кому-то — структура и заметки останутся видимыми.",
+balance_hidden_label:"Баланс скрыт", balance_visible_label:"Баланс виден",
+settings_backup_title:"Резервная копия", settings_backup_desc:"Данные живут только в этом браузере. Экспортируй файл, чтобы сохранить копию или перенести базу на другое устройство.",
+settings_export_btn:"Экспортировать JSON", settings_import_btn:"Импортировать JSON",
+settings_sync_title:"Синхронизация между устройствами", settings_sync_desc:"Будущая опция: сквозное шифрование на твоём устройстве перед отправкой — сервер никогда не увидит расшифрованные данные. Пока недоступно.",
+settings_sync_enable:"Включить синхронизацию", settings_recovery_placeholder:"Код восстановления будет здесь",
+settings_danger_title:"Опасная зона", settings_danger_desc:"Полностью удаляет все кошельки, группы и профиль из этого браузера. Действие необратимо.", settings_wipe_btn:"Очистить всю базу",
+modal_add_title:"Добавить кошелёк", modal_edit_title:"Редактировать кошелёк",
+f_name_label:"Название *", f_name_ph:"Meme Trading #03", f_network_label:"Сеть *", f_address_label:"Публичный адрес *", f_address_ph:"7xK...93F2",
+f_purpose_label:"Назначение", f_status_label:"Статус", f_icon_label:"Иконка", f_color_label:"Цвет метки",
+f_balance_label:"Баланс (необязательно)", f_balance_ph:"$1,284", f_group_label:"Группа", f_group_none:"Без группы",
+f_lastused_label:"Последнее использование", f_firstseen_label:"Первая активность",
+f_tags_label:"Теги (Enter чтобы добавить)", f_tags_ph:"trading, solana...",
+f_usedwith_label:"Использовался с (сервисы / терминалы)", f_uw_service_ph:"Сервис (GMGN, Axiom...)", f_uw_interactions_ph:"Взаимод.", f_uw_add_btn:"+ Добавить сервис",
+f_notes_label:"Заметки", f_notes_ph:"Зачем этот кошелёк, что важно помнить...",
+f_delete_btn:"Удалить", f_cancel_btn:"Отмена", f_save_btn:"Сохранить",
+group_modal_title:"Новая группа", g_name_label:"Название", g_name_ph:"Trading", g_icon_label:"Иконка", g_color_label:"Цвет", g_cancel_btn:"Отмена", g_save_btn:"Создать",
+toast_wallet_updated:"Кошелёк обновлён", toast_wallet_added:"Кошелёк добавлен", toast_wallet_deleted:"Кошелёк удалён",
+toast_fill_required:"Укажи название и адрес", toast_group_required:"Укажи название группы", toast_group_created:"Группа создана",
+toast_export_done:"Файл сохранён", toast_import_done:"База импортирована", toast_import_fail:"Не удалось прочитать файл",
+toast_save_fail:"Не удалось сохранить данные", toast_profile_saved:"Профиль сохранён",
+confirm_delete_wallet:"Удалить этот кошелёк из базы? Действие необратимо.", confirm_wipe:"Точно удалить всю базу? Это нельзя отменить.",
+overview_sub:"{n} кошельков в {k} сетях", wallets_sub:"Полный список, фильтры и сортировка",
+groups_sub:"Организуй кошельки по смыслу", activity_sub:"Тренд активности по всем кошелькам за год",
+security_sub:"Отметь проверенные или заархивируй лишнее", settings_sub:"Профиль, тема, язык, резервная копия",
+count_of:"{n} из {total}", today:"сегодня", yesterday:"вчера", d_ago:"{n} дн назад", mo_ago:"{n} мес назад", y_ago:"{n} г назад",
+copy_address_title:"Нажми, чтобы скопировать", copied_label:"Скопировано", copy_fail:"Не удалось скопировать",
+activity_insight_busiest:"Больше всего активности было в {month}.", activity_insight_none:"Пока недостаточно данных для тренда.",
+security_empty_title:"Нечего проверять", security_empty_desc:"Все кошельки в порядке — нет со статусом Review или High risk.",
+sec_mark_active:"Отметить Active", sec_archive:"Архивировать", sec_edit:"Открыть",
+forgotten_view_title:"Забытые кошельки",
+nav_more:"Ещё", add_wallet_short:"Добавить",
+addr_ok:"Формат адреса корректен", addr_bad:"Адрес не похож на формат {net} — ссылка на эксплорер может не открыться.", addr_dup:"Такой адрес уже есть в базе: {name}",
+sort_lastused_desc:"Сначала недавние", sort_lastused_asc:"Сначала давно не использованные", sort_name:"По имени А→Я", sort_balance:"По балансу ↓", sort_network:"По сети", sort_status:"По статусу",
+nudge_title:"Сделай резервную копию", nudge_text:"Данные хранятся только в этом браузере, а свежей копии нет. Сохрани файл — это секунда.", nudge_export:"Экспорт", nudge_later:"Позже",
+backup_last:"Последняя копия: {date}", backup_never:"Резервных копий ещё не было",
+stat_link_wallets:"Все кошельки", stat_link_balance:"Показать/скрыть", stat_link_active:"Смотреть", stat_link_forgotten:"Проверить",
+brand_toggle_title:"Свернуть/развернуть меню",
+gate_title:"Закрытый доступ", gate_sub:"Эта версия ещё не для всех — её тестируют по приглашению. Если у тебя есть код доступа, введи его.", gate_enter:"Войти", gate_error:"Неверный код",
+pin_title:"PIN-защита", pin_desc:"Экран блокировки при открытии на этом устройстве. Не шифрование, не аккаунт — просто приватный экран, если телефон или ноутбук может увидеть кто-то ещё.",
+pin_enable:"Включить PIN", pin_new:"Новый PIN (4-8 цифр)", pin_save:"Сохранить",
+lock_title:"Введи PIN", lock_sub:"Экран приватности для этого устройства. Это не шифрование — просто закрывает экран от посторонних глаз.", lock_unlock:"Разблокировать", lock_reset:"Забыл PIN — сбросить всё", lock_error:"Неверный PIN",
+analytics_title:"Анонимная аналитика", analytics_desc:"Помогает понять, какими функциями реально пользуются, и быстрее чинить баги. Отправляются только действия и технические ошибки — никогда название, адрес, баланс, теги или заметки твоих кошельков.", analytics_enable:"Отправлять анонимную статистику",
+toast_pin_on:"PIN включён", toast_pin_off:"PIN отключён", toast_pin_invalid:"PIN должен быть из 4-8 цифр",
+months:["янв","фев","мар","апр","май","июн","июл","авг","сен","окт","ноя","дек"]
+},
+en:{
+ob_title:"Remember every wallet you own", ob_sub:"No email, no X, no wallet signing. Just a nickname and an avatar — that's enough to start your own inventory.",
+ob_nickname_label:"What should we call you", ob_nickname_ph:"Nickname", ob_avatar_label:"Pick an avatar",
+ob_seed_label:"Fill in example wallets so I can see how it looks", ob_continue:"Create my atlas →",
+ob_privacy:"Everything stays in this browser only. Nothing is sent to a server. Back up or move to another device with Export in Settings.",
+nav_overview:"Overview", nav_wallets:"My Wallets", nav_groups:"Groups", nav_activity:"Activity", nav_security:"Security", nav_settings:"Settings",
+add_wallet_btn:"+ Add wallet", menu_export:"Export data", menu_import:"Import data", menu_reset:"Clear everything",
+search_ph:"Search name, tag, address, protocol...", filter_btn:"Filter",
+balance_show_title:"Show balance", balance_hide_title:"Hide balance", theme_toggle_title:"Switch theme", lang_toggle_title:"Переключить на русский",
+stat_wallets:"Wallets in your atlas", stat_balance:"Total balance", stat_active:"Active ≤ 90 days", stat_forgotten:"Forgotten (>180 days)",
+forgotten_title:"What have I forgotten?", forgotten_desc:"{n} wallets haven't been used for more than 180 days.", forgotten_btn:"Review →",
+overview_panel_title:"Recent activity", wallets_panel_title:"All wallets", show_all_btn:"Show all →",
+col_wallet:"Wallet", col_purpose:"Purpose", col_network:"Network", col_balance:"Balance", col_lastused:"Last used", col_usedwith:"Used with", col_status:"Status",
+empty_title:"Nothing here yet", empty_desc:"Add your first wallet — just paste a public address, no signing or connecting.", empty_add_btn:"+ Add wallet",
+menu_edit:"Edit", menu_delete:"Delete", open_in:"Open in", no_explorer_toast:"No explorer available for this network",
+detail_placeholder:"Select a wallet to see its details", detail_purpose:"Purpose", detail_tags:"Tags",
+detail_lastused:"Last used", detail_firstseen:"First seen", detail_usedwith:"Used with", detail_notes:"Notes", detail_timeline:"Timeline",
+detail_no_usedwith:"Nothing tagged yet", detail_no_timeline:"No data yet", detail_edit_btn:"Edit",
+detail_created_known:"first seen on-chain: {date}", detail_created_unknown:"first-seen date unknown",
+uw_interactions:"{n} interactions",
+groups_new_btn:"+ New group", groups_count:"{n} groups", groups_empty_title:"No groups yet", groups_empty_desc:"Group wallets by purpose: Trading, Farming, Storage...",
+group_wallets_count:"{n} wallets", group_view_title:"Group: {name}", group_clear_filter:"Clear filter",
+activity_bars_title:"Activity over the last 12 months", activity_list_title:"Wallets by last activity",
+security_panel_title:"Needs attention", security_panel_count:"Review / High risk",
+settings_profile_title:"Profile", settings_profile_desc:"Nickname and avatar are local to this browser only.",
+settings_nickname_label:"Nickname", settings_avatar_label:"Avatar", settings_save_btn:"Save",
+settings_theme_title:"Theme", settings_theme_desc:"Dark by default, switch to light anytime.", theme_dark:"Dark", theme_light:"Light",
+settings_lang_title:"Language", settings_lang_desc:"The interface switches instantly, no reload needed.",
+balance_privacy_title:"Balance privacy", balance_privacy_desc:"Hide amounts when showing your screen to someone — structure and notes stay visible.",
+balance_hidden_label:"Balance hidden", balance_visible_label:"Balance visible",
+settings_backup_title:"Backup", settings_backup_desc:"Your data lives only in this browser. Export a file to keep a copy or move it to another device.",
+settings_export_btn:"Export JSON", settings_import_btn:"Import JSON",
+settings_sync_title:"Cross-device sync", settings_sync_desc:"Planned: end-to-end encryption on your device before anything is sent — the server would never see readable data. Not available yet.",
+settings_sync_enable:"Enable sync", settings_recovery_placeholder:"Your recovery code will appear here",
+settings_danger_title:"Danger zone", settings_danger_desc:"Permanently deletes all wallets, groups and your profile from this browser. This can't be undone.", settings_wipe_btn:"Clear everything",
+modal_add_title:"Add wallet", modal_edit_title:"Edit wallet",
+f_name_label:"Name *", f_name_ph:"Meme Trading #03", f_network_label:"Network *", f_address_label:"Public address *", f_address_ph:"7xK...93F2",
+f_purpose_label:"Purpose", f_status_label:"Status", f_icon_label:"Icon", f_color_label:"Label color",
+f_balance_label:"Balance (optional)", f_balance_ph:"$1,284", f_group_label:"Group", f_group_none:"No group",
+f_lastused_label:"Last used", f_firstseen_label:"First seen",
+f_tags_label:"Tags (press Enter to add)", f_tags_ph:"trading, solana...",
+f_usedwith_label:"Used with (services / terminals)", f_uw_service_ph:"Service (GMGN, Axiom...)", f_uw_interactions_ph:"Interactions", f_uw_add_btn:"+ Add service",
+f_notes_label:"Notes", f_notes_ph:"What this wallet is for, anything worth remembering...",
+f_delete_btn:"Delete", f_cancel_btn:"Cancel", f_save_btn:"Save",
+group_modal_title:"New group", g_name_label:"Name", g_name_ph:"Trading", g_icon_label:"Icon", g_color_label:"Color", g_cancel_btn:"Cancel", g_save_btn:"Create",
+toast_wallet_updated:"Wallet updated", toast_wallet_added:"Wallet added", toast_wallet_deleted:"Wallet deleted",
+toast_fill_required:"Please fill in name and address", toast_group_required:"Please enter a group name", toast_group_created:"Group created",
+toast_export_done:"File saved", toast_import_done:"Data imported", toast_import_fail:"Couldn't read that file",
+toast_save_fail:"Couldn't save data", toast_profile_saved:"Profile saved",
+confirm_delete_wallet:"Delete this wallet from your atlas? This can't be undone.", confirm_wipe:"Really delete everything? This can't be undone.",
+overview_sub:"{n} wallets across {k} networks", wallets_sub:"Full list, filters and sorting",
+groups_sub:"Organize wallets by purpose", activity_sub:"Your overall activity trend across the year",
+security_sub:"Mark wallets reviewed or archive what you don't need", settings_sub:"Profile, theme, language, backup",
+count_of:"{n} of {total}", today:"today", yesterday:"yesterday", d_ago:"{n}d ago", mo_ago:"{n}mo ago", y_ago:"{n}y ago",
+copy_address_title:"Click to copy", copied_label:"Copied", copy_fail:"Couldn't copy",
+activity_insight_busiest:"Most activity happened in {month}.", activity_insight_none:"Not enough data yet for a trend.",
+security_empty_title:"Nothing to review", security_empty_desc:"All wallets look fine — none are Review or High risk.",
+sec_mark_active:"Mark Active", sec_archive:"Archive", sec_edit:"Open",
+forgotten_view_title:"Forgotten wallets",
+nav_more:"More", add_wallet_short:"Add",
+addr_ok:"Address format looks valid", addr_bad:"This doesn't look like a valid {net} address — the explorer link may not open.", addr_dup:"This address is already in your atlas: {name}",
+sort_lastused_desc:"Recently used first", sort_lastused_asc:"Least recently used first", sort_name:"Name A→Z", sort_balance:"Balance high→low", sort_network:"By network", sort_status:"By status",
+nudge_title:"Back up your data", nudge_text:"Your data lives only in this browser and there's no recent backup. Save a file — it takes a second.", nudge_export:"Export", nudge_later:"Later",
+backup_last:"Last backup: {date}", backup_never:"No backup yet",
+stat_link_wallets:"All wallets", stat_link_balance:"Show/hide", stat_link_active:"View", stat_link_forgotten:"Review",
+brand_toggle_title:"Collapse/expand menu",
+gate_title:"Private access", gate_sub:"This version isn't public yet — it's invite-only for testing. If you have an access code, enter it.", gate_enter:"Enter", gate_error:"Wrong code",
+pin_title:"PIN protection", pin_desc:"Shows a lock screen on open, for this device. Not encryption, not an account — just a privacy screen in case someone else picks up your phone or laptop.",
+pin_enable:"Enable PIN", pin_new:"New PIN (4-8 digits)", pin_save:"Save",
+lock_title:"Enter your PIN", lock_sub:"A privacy screen for this device. Not encryption — just keeps it out of sight from others.", lock_unlock:"Unlock", lock_reset:"Forgot PIN — reset everything", lock_error:"Wrong PIN",
+analytics_title:"Anonymous analytics", analytics_desc:"Helps us see which features people actually use and fix bugs faster. Only actions and technical errors are sent — never your wallet names, addresses, balances, tags or notes.", analytics_enable:"Send anonymous usage stats",
+toast_pin_on:"PIN enabled", toast_pin_off:"PIN disabled", toast_pin_invalid:"PIN must be 4-8 digits",
+months:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+}
+};
+function t(key, vars){
+  var d = STRINGS[state.lang] || STRINGS.ru;
+  var s = d[key] != null ? d[key] : (STRINGS.ru[key] != null ? STRINGS.ru[key] : key);
+  if(vars){ Object.keys(vars).forEach(function(k){ s = s.split('{'+k+'}').join(vars[k]); }); }
+  return s;
+}
+function applyI18n(){
+  document.documentElement.lang = state.lang;
+  $all('[data-i18n]').forEach(function(el){ el.textContent = t(el.getAttribute('data-i18n')); });
+  $all('[data-i18n-ph]').forEach(function(el){ el.setAttribute('placeholder', t(el.getAttribute('data-i18n-ph'))); });
+  $('#lang-toggle-btn').textContent = state.lang==='ru' ? 'EN' : 'RU';
+  $('#lang-toggle-btn').title = t('lang_toggle_title');
+  $('#theme-toggle-btn').title = t('theme_toggle_title');
+  $('#mobile-settings-btn').title = t('nav_settings');
+  $('#brand-toggle').title = t('brand_toggle_title');
+  $all('.theme-opt[data-lang]').forEach(function(b){ b.classList.toggle('active', b.dataset.lang===state.lang); });
+}
+
+/* ================= constants ================= */
+var AVATAR_DEFS = {"husky": "<path d=\"M5.4 8.8c-.3-2.6.5-5 1.6-5.6.9 1.7 1.5 3.6 1.7 5.4\"/><path d=\"M18.6 8.8c.3-2.6-.5-5-1.6-5.6-.9 1.7-1.5 3.6-1.7 5.4\"/><path d=\"M6.2 9.2c0-2.4 2.6-4 5.8-4s5.8 1.6 5.8 4c0 4.8-2.6 9-5.8 9s-5.8-4.2-5.8-9z\"/><circle cx=\"9.4\" cy=\"10.6\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"14.6\" cy=\"10.6\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M10.6 14.4h2.8\"/>", "cat": "<path d=\"M6 8.2c-.3-2.4.5-4.6 1.5-5.2.8 1.6 1.4 3.4 1.6 5\"/><path d=\"M18 8.2c.3-2.4-.5-4.6-1.5-5.2-.8 1.6-1.4 3.4-1.6 5\"/><path d=\"M6.6 8.4c0-2.2 2.4-3.6 5.4-3.6s5.4 1.4 5.4 3.6c0 4.6-2.4 8.6-5.4 8.6s-5.4-4-5.4-8.6z\"/><circle cx=\"9.6\" cy=\"10.2\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"14.4\" cy=\"10.2\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M10.6 13.6h2.8M4 11h2.4M17.6 11H20\"/>", "raven": "<circle cx=\"10.2\" cy=\"11.4\" r=\"6\"/><path d=\"M15.4 12 21 10.2l-4 4.4z\"/><circle cx=\"12.4\" cy=\"9.2\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/>", "dragon": "<circle cx=\"10.2\" cy=\"12.4\" r=\"6\"/><path d=\"M8.8 6.6 7.8 2.6l2.6 3\"/><path d=\"M15.6 13.4 20 13l-2.8 3.6z\"/><circle cx=\"12.4\" cy=\"10.2\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/>", "bear": "<circle cx=\"6.3\" cy=\"6.3\" r=\"2.1\"/><circle cx=\"17.7\" cy=\"6.3\" r=\"2.1\"/><path d=\"M6 9.4c0-2.7 2.7-4.6 6-4.6s6 1.9 6 4.6c0 4.9-2.7 9.3-6 9.3s-6-4.4-6-9.3z\"/><circle cx=\"9.4\" cy=\"11.6\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"14.6\" cy=\"11.6\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><ellipse cx=\"12\" cy=\"14.6\" rx=\"1.4\" ry=\"1\"/>", "rabbit": "<path d=\"M8.6 10c-2.4-.4-3.6-6.4-2.2-7.2 1.4-.7 3 3.6 3.1 7\"/><path d=\"M15.4 10c2.4-.4 3.4-6.6 2-7.4-1.4-.7-2.9 3.8-3 7.4\"/><path d=\"M6.4 10.4c0-2.6 2.5-4.2 5.6-4.2s5.6 1.6 5.6 4.2c0 4.6-2.5 8.6-5.6 8.6s-5.6-4-5.6-8.6z\"/><circle cx=\"9.6\" cy=\"11.4\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"14.4\" cy=\"11.4\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/>", "fox": "<path d=\"M5.6 8.8c-.3-2.6.6-4.8 1.7-5.4.9 1.6 1.5 3.4 1.7 5.2\"/><path d=\"M18.4 8.8c.3-2.6-.6-4.8-1.7-5.4-.9 1.6-1.5 3.4-1.7 5.2\"/><path d=\"M6.2 9.4c0-2.6 2.6-4.4 5.8-4.4s5.8 1.8 5.8 4.4c0 4.8-2.6 9-5.8 9s-5.8-4.2-5.8-9z\"/><path d=\"M9.6 15.6 12 18.4l2.4-2.8z\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"9.4\" cy=\"10.8\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"14.6\" cy=\"10.8\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/>", "shark": "<path d=\"M2.5 12.5c3-3.4 6.6-5.2 10.3-5.2 4.7 0 8.7 2.8 8.7 5.2s-4 5.2-8.7 5.2c-3.7 0-7.3-1.8-10.3-5.2z\"/><path d=\"M9 7.3 10 3.6l1.8 4\"/><circle cx=\"8.3\" cy=\"11.4\" r=\"0.9\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M14 14.5 16 16.8M16.5 14 18 16.4M18.6 13.3l1.2 2.2\"/>", "panda": "<circle cx=\"6\" cy=\"6.3\" r=\"2.3\"/><circle cx=\"18\" cy=\"6.3\" r=\"2.3\"/><path d=\"M6 9.6c0-2.7 2.7-4.6 6-4.6s6 1.9 6 4.6c0 4.8-2.7 9-6 9s-6-4.2-6-9z\"/><ellipse cx=\"9\" cy=\"11\" rx=\"1.5\" ry=\"1.8\"/><ellipse cx=\"15\" cy=\"11\" rx=\"1.5\" ry=\"1.8\"/><circle cx=\"9\" cy=\"11.3\" r=\"0.7\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"15\" cy=\"11.3\" r=\"0.7\" fill=\"currentColor\" stroke=\"none\"/>", "owl": "<path d=\"M5.8 7.6c.2-1.4.9-2.6 1.4-2.8.5.9.8 2 .9 3\"/><path d=\"M18.2 7.6c-.2-1.4-.9-2.6-1.4-2.8-.5.9-.8 2-.9 3\"/><path d=\"M6 10.6c0-3.6 2.7-6.2 6-6.2s6 2.6 6 6.2c0 4.2-2.7 7.6-6 7.6s-6-3.4-6-7.6z\"/><circle cx=\"9.2\" cy=\"10.2\" r=\"2\"/><circle cx=\"14.8\" cy=\"10.2\" r=\"2\"/><circle cx=\"9.2\" cy=\"10.2\" r=\"0.7\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"14.8\" cy=\"10.2\" r=\"0.7\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M11 13.8h2l-1 1.4z\" fill=\"currentColor\" stroke=\"none\"/>", "penguin": "<path d=\"M12 3.6c3.1 0 5.2 3 5.2 7 0 5.6-2.3 9.8-5.2 9.8s-5.2-4.2-5.2-9.8c0-4 2.1-7 5.2-7z\"/><path d=\"M12 8.2v10.4\"/><circle cx=\"10.5\" cy=\"7.4\" r=\"0.9\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"13.5\" cy=\"7.4\" r=\"0.9\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M11.1 9.2h1.8l-.9 1.1z\" fill=\"currentColor\" stroke=\"none\"/>", "monkey": "<circle cx=\"5.6\" cy=\"10.2\" r=\"2.4\"/><circle cx=\"18.4\" cy=\"10.2\" r=\"2.4\"/><circle cx=\"12\" cy=\"12.4\" r=\"6.2\"/><circle cx=\"9.6\" cy=\"12\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"14.4\" cy=\"12\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M10 15.4c.6.5 1.4.5 2 0\"/>", "bull": "<path d=\"M4.4 6.2 7.4 3.4\"/><path d=\"M19.6 6.2 16.6 3.4\"/><path d=\"M6.4 11.4c0-3.2 2.8-5.4 5.6-5.4s5.6 2.2 5.6 5.4c0 4.6-2.8 8.2-5.6 8.2s-5.6-3.6-5.6-8.2z\"/><circle cx=\"9.4\" cy=\"10.8\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"14.6\" cy=\"10.8\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><ellipse cx=\"12\" cy=\"14.8\" rx=\"2.2\" ry=\"1.5\"/>", "frog": "<circle cx=\"8.4\" cy=\"7.6\" r=\"2.2\"/><circle cx=\"15.6\" cy=\"7.6\" r=\"2.2\"/><circle cx=\"8.4\" cy=\"7.6\" r=\"0.8\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"15.6\" cy=\"7.6\" r=\"0.8\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M4.4 12c0-1.6 3.4-2.8 7.6-2.8s7.6 1.2 7.6 2.8c0 4-3.4 7.4-7.6 7.4s-7.6-3.4-7.6-7.4z\"/><path d=\"M7.6 15.4h8.8\"/>", "unicorn": "<circle cx=\"12\" cy=\"12.6\" r=\"6.2\"/><path d=\"M12 6.4 13 1.8 13.8 6.2z\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"9.4\" cy=\"11.8\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"14.6\" cy=\"11.8\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M10.4 15.4c.5.5 1.7.5 2.2 0\"/>", "turtle": "<path d=\"M12 4.4c3.7 0 6.6 2.5 6.6 6.6h-13.2c0-4.1 2.9-6.6 6.6-6.6z\"/><path d=\"M5.4 11c0 3.4 3 6.2 6.6 6.2s6.6-2.8 6.6-6.2\"/><path d=\"M12 11v3.4M9 11l-1.6 3M15 11l1.6 3\"/><circle cx=\"9.4\" cy=\"8.4\" r=\"0.8\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"14.6\" cy=\"8.4\" r=\"0.8\" fill=\"currentColor\" stroke=\"none\"/>"};
+function avatarIcon(key){ var d=AVATAR_DEFS[key]||AVATAR_DEFS.fox; return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>'; }
+function avatarColor(key){ var ks=Object.keys(AVATAR_DEFS); var i=Math.max(0,ks.indexOf(key)); return COLORS[i%COLORS.length]; }
+var NETWORKS = {
+  solana:{label:'Solana', color:'#9945FF', explorerName:'Solscan', explorer:function(a){return 'https://solscan.io/account/'+a;}},
+  ethereum:{label:'Ethereum', color:'#627EEA', explorerName:'Etherscan', explorer:function(a){return 'https://etherscan.io/address/'+a;}},
+  base:{label:'Base', color:'#0052FF', explorerName:'Basescan', explorer:function(a){return 'https://basescan.org/address/'+a;}},
+  bnb:{label:'BNB Chain', color:'#F0B90B', explorerName:'BscScan', explorer:function(a){return 'https://bscscan.com/address/'+a;}},
+  ton:{label:'TON', color:'#0098EA', explorerName:'Tonviewer', explorer:function(a){return 'https://tonviewer.com/'+a;}},
+  arbitrum:{label:'Arbitrum', color:'#28A0F0', explorerName:'Arbiscan', explorer:function(a){return 'https://arbiscan.io/address/'+a;}},
+  polygon:{label:'Polygon', color:'#8247E5', explorerName:'PolygonScan', explorer:function(a){return 'https://polygonscan.com/address/'+a;}},
+  other:{label:'Other', color:'#8890a0', explorerName:null, explorer:function(a){return null;}}
+};
+function netIcon(key,size){
+  size=size||16; var n=NETWORKS[key]||NETWORKS.other;
+  switch(key){
+    case 'solana': var gid='solg'+(netIcon._n=(netIcon._n||0)+1); return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 32 32"><defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9945FF"/><stop offset="1" stop-color="#14F195"/></linearGradient></defs><g fill="url(#'+gid+')"><rect x="4" y="5" width="24" height="4.4" rx="2.2" transform="skewX(-16)"/><rect x="4" y="13.8" width="24" height="4.4" rx="2.2" transform="skewX(16)"/><rect x="4" y="22.6" width="24" height="4.4" rx="2.2" transform="skewX(-16)"/></g></svg>';
+    case 'ethereum': return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 32 32"><polygon points="16,3 27,16.5 16,22.5 5,16.5" fill="#627EEA" opacity=".85"/><polygon points="16,24.5 27,18.5 16,29 5,18.5" fill="#627EEA"/></svg>';
+    case 'base': return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="#0052FF"/><rect x="9" y="14.5" width="14" height="3" fill="#fff"/></svg>';
+    case 'bnb': return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 32 32" fill="#F0B90B"><rect x="13" y="4" width="6" height="6" transform="rotate(45 16 7)"/><rect x="13" y="22" width="6" height="6" transform="rotate(45 16 25)"/><rect x="4" y="13" width="6" height="6" transform="rotate(45 7 16)"/><rect x="22" y="13" width="6" height="6" transform="rotate(45 25 16)"/><rect x="13" y="13" width="6" height="6" transform="rotate(45 16 16)"/></svg>';
+    case 'ton': return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="#0098EA"/><path d="M9.5 11h13l-5.6 13.2c-.4.95-1.4.95-1.8 0L9.5 11z" fill="#fff"/></svg>';
+    case 'arbitrum': return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="#213147"/><path d="M11 21l5-12 5 12h-3l-2-5.3-2 5.3z" fill="#28A0F0"/></svg>';
+    case 'polygon': return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 32 32"><polygon points="16,4 26,10 26,22 16,28 6,22 6,10" fill="none" stroke="#8247E5" stroke-width="2.6"/></svg>';
+    default: return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="none" stroke="#8890a0" stroke-width="2.4"/><text x="16" y="21" font-size="14" text-anchor="middle" fill="#8890a0" font-family="sans-serif">?</text></svg>';
+  }
+}
+var PURPOSES = {
+  main:{label:'Main', color:'#5b7cff'}, storage:{label:'Storage', color:'#34d399'},
+  trading:{label:'Trading', color:'#f5a524'}, farming:{label:'Farming', color:'#a3e635'},
+  burner:{label:'Burner', color:'#f5556c'}, nft:{label:'NFT', color:'#a78bfa'},
+  bots:{label:'Bots', color:'#38bdf8'}, gaming:{label:'Gaming', color:'#fb923c'},
+  bridge:{label:'Bridge', color:'#2dd4bf'}, unknown:{label:'Unknown', color:'#8890a0'}
+};
+var STATUSES = {
+  active:{label:'Active', color:'var(--green)', bg:'var(--green-soft)'}, review:{label:'Review', color:'var(--amber)', bg:'var(--amber-soft)'},
+  archived:{label:'Archived', color:'var(--gray)', bg:'var(--gray-soft)'}, unknown:{label:'Unknown', color:'var(--gray)', bg:'var(--gray-soft)'},
+  'high-risk':{label:'High risk', color:'var(--red)', bg:'var(--red-soft)'}
+};
+var AVATARS = ['husky','cat','raven','dragon','bear','rabbit','fox','shark','panda','owl','penguin','monkey','bull','frog','unicorn','turtle'];
+var WALLET_ICON_DEFS = {"briefcase": "<rect x=\"3\" y=\"8\" width=\"18\" height=\"11\" rx=\"2\"/><path d=\"M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\"/><path d=\"M3 13h18\"/>", "chart": "<path d=\"M4 16l5-6 4 3 6-8\"/><path d=\"M15 5h4v4\"/>", "sprout": "<path d=\"M12 20v-8.5\"/><path d=\"M12 11.5c0-3.3 2.2-5.8 5.4-5.8.2 3.3-2.2 5.8-5.4 5.8z\"/><path d=\"M12 14.2c0-2.6-1.8-4.6-4.4-4.6-.2 2.6 1.8 4.6 4.4 4.6z\"/>", "flame": "<path d=\"M12 3.2s4.2 4.4 4.2 8.7a4.2 4.2 0 1 1-8.4 0c0-1.3.5-2.4 1.2-3.3.1 1.4 1.1 2.1 1.1 2.1-.5-1.7.4-3.7 1.9-7.5z\"/>", "coins": "<ellipse cx=\"12\" cy=\"6.8\" rx=\"6\" ry=\"2.2\"/><path d=\"M6 6.8v5c0 1.2 2.7 2.2 6 2.2s6-1 6-2.2v-5\"/><path d=\"M6 11.8v5c0 1.2 2.7 2.2 6 2.2s6-1 6-2.2v-5\"/>", "image": "<rect x=\"3\" y=\"4.5\" width=\"18\" height=\"15\" rx=\"2\"/><circle cx=\"8.4\" cy=\"9.8\" r=\"1.5\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M4 16.5l5-5 4 4 3-3 4 4\"/>", "bot": "<rect x=\"5\" y=\"9\" width=\"14\" height=\"9.5\" rx=\"3\"/><path d=\"M12 9V6\"/><circle cx=\"12\" cy=\"4.7\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"9\" cy=\"13.2\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"15\" cy=\"13.2\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M3 12.5h2M19 12.5h2\"/>", "gamepad": "<rect x=\"3\" y=\"8.2\" width=\"18\" height=\"9\" rx=\"4\"/><path d=\"M8 10.7v4M6 12.7h4\"/><circle cx=\"15.8\" cy=\"11.2\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"17.8\" cy=\"13.7\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/>", "bridge": "<path d=\"M9.5 14.5l5-5\"/><path d=\"M8.2 12 6.4 13.8a2.7 2.7 0 0 0 3.8 3.8l1.8-1.8\"/><path d=\"M15.8 12l1.8-1.8a2.7 2.7 0 0 0-3.8-3.8l-1.8 1.8\"/>", "home": "<path d=\"M4 11.2 12 4.4l8 6.8\"/><path d=\"M6.2 10v9.2h11.6V10\"/>", "bolt": "<path d=\"M13.2 3.2 5.6 13.6h5l-1 7.2 8.8-10.8h-5.2z\"/>", "target": "<circle cx=\"12\" cy=\"12\" r=\"8\"/><circle cx=\"12\" cy=\"12\" r=\"4.4\"/><circle cx=\"12\" cy=\"12\" r=\"1.1\" fill=\"currentColor\" stroke=\"none\"/>", "flask": "<path d=\"M9.5 3.2h5\"/><path d=\"M10.3 3.2v6.2l-5 8.7a2 2 0 0 0 1.7 3h10a2 2 0 0 0 1.7-3l-5-8.7V3.2\"/><path d=\"M8.2 15.2h7.6\"/>", "wave": "<path d=\"M3.2 14.6c2-2 4-2 6 0s4 2 6 0 4-2 6 0\"/><path d=\"M3.2 18.8c2-2 4-2 6 0s4 2 6 0 4-2 6 0\"/>", "question": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M9.4 9.4a2.6 2.6 0 1 1 3.6 2.4c-.8.5-1 1-1 2\"/><circle cx=\"12\" cy=\"16.6\" r=\"0.9\" fill=\"currentColor\" stroke=\"none\"/>", "satellite": "<rect x=\"9.2\" y=\"9.2\" width=\"5.6\" height=\"5.6\" rx=\"1\" transform=\"rotate(45 12 12)\"/><path d=\"M6 6 4.2 4.2M18 6l1.8-1.8M6 18l-1.8 1.8M18 18l1.8 1.8\"/>"};
+function walletIcon(key){ var d=WALLET_ICON_DEFS[key]||WALLET_ICON_DEFS.question; return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>'; }
+var UI_ICONS = {"alert": "<path d=\"M12 4 3.4 19h17.2z\"/><path d=\"M12 10v4.2\"/><circle cx=\"12\" cy=\"16.8\" r=\".9\" fill=\"currentColor\" stroke=\"none\"/>", "folder": "<path d=\"M3.5 7.5A2 2 0 0 1 5.5 5.5h4l2 2.2h7a2 2 0 0 1 2 2v8.3a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z\"/>", "checkcircle": "<circle cx=\"12\" cy=\"12\" r=\"8.6\"/><path d=\"M8.4 12.3l2.4 2.4 4.8-5.2\"/>", "moon": "<path d=\"M19.5 14.6A7.8 7.8 0 0 1 9.4 4.5a7.8 7.8 0 1 0 10.1 10.1z\"/>", "sun": "<circle cx=\"12\" cy=\"12\" r=\"3.8\"/><path d=\"M12 3.4v2M12 18.6v2M3.4 12h2M18.6 12h2M5.9 5.9l1.4 1.4M16.7 16.7l1.4 1.4M18.1 5.9l-1.4 1.4M7.3 16.7l-1.4 1.4\"/>", "eye": "<path d=\"M2.8 12S6.2 5.8 12 5.8 21.2 12 21.2 12 17.8 18.2 12 18.2 2.8 12 2.8 12z\"/><circle cx=\"12\" cy=\"12\" r=\"2.8\"/>", "eyeoff": "<path d=\"M4.2 4.2 19.8 19.8\"/><path d=\"M9.9 6.1A9.6 9.6 0 0 1 12 5.8c5.8 0 9.2 6.2 9.2 6.2a15.6 15.6 0 0 1-2.6 3.3M6.3 7.9C4 9.6 2.8 12 2.8 12s3.4 6.2 9.2 6.2c1.3 0 2.5-.3 3.5-.8\"/><path d=\"M10 10.2a2.8 2.8 0 0 0 3.8 3.8\"/>", "edit": "<path d=\"M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17z\"/><path d=\"M13.6 7.4l3 3\"/>", "trash": "<path d=\"M4.5 7h15\"/><path d=\"M9.5 7V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v2\"/><path d=\"M6.5 7l.8 11.2a2 2 0 0 0 2 1.8h5.4a2 2 0 0 0 2-1.8L17.5 7\"/><path d=\"M10 11v5M14 11v5\"/>", "check": "<path d=\"M5 12.8l4.4 4.4L19 7.4\"/>", "lock": "<rect x=\"5\" y=\"10.5\" width=\"14\" height=\"9.5\" rx=\"2.2\"/><path d=\"M8.2 10.5V8a3.8 3.8 0 0 1 7.6 0v2.5\"/>"};
+function uiIcon(name,size){ var d=UI_ICONS[name]||''; size=size||16; return '<svg viewBox="0 0 24 24" width="'+size+'" height="'+size+'" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>'; }
+var WALLET_ICONS = ["briefcase", "chart", "sprout", "flame", "coins", "image", "bot", "gamepad", "bridge", "home", "bolt", "target", "flask", "wave", "question", "satellite"];
+var COLORS = ['#5b7cff','#34d399','#f5a524','#f5556c','#a78bfa','#38bdf8','#fb923c','#2dd4bf'];
+var LS_PROFILE='wa_profile', LS_WALLETS='wa_wallets', LS_GROUPS='wa_groups', LS_GATE='wa_site_unlocked';
+var SITE_PASSWORD_HASH = '2cc4f3909512f97bded502d4867e35dcd026b34ce06df8818dbbfccb14866ac0';
+
+/* ================= state ================= */
+var state = {
+  profile:null, wallets:[], groups:[], lang:'ru',
+  view:'overview', selectedId:null, search:'', sort:{key:'lastUsed',dir:'desc'},
+  filterNetwork:null, filterStatus:null, filterGroupId:null, filterForgotten:false,
+  formTags:[], formUsedWith:[], formIcon:'briefcase', formColor:COLORS[0], editingId:null,
+  groupIcon:'briefcase', groupColor:COLORS[0]
+};
+
+function uid(){ return Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4); }
+function $(sel,ctx){ return (ctx||document).querySelector(sel); }
+function $all(sel,ctx){ return Array.prototype.slice.call((ctx||document).querySelectorAll(sel)); }
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function shortAddr(a){ if(!a) return ''; return a.length>12 ? a.slice(0,4)+'...'+a.slice(-4) : a; }
+function daysAgo(dateStr){ if(!dateStr) return null; var d=new Date(dateStr); var diff=Math.floor((Date.now()-d.getTime())/86400000); return diff; }
+function fmtAgo(dateStr){
+  var d=daysAgo(dateStr); if(d===null) return '—';
+  if(d<=0) return t('today'); if(d===1) return t('yesterday');
+  if(d<30) return t('d_ago',{n:d}); if(d<365) return t('mo_ago',{n:Math.round(d/30)});
+  return t('y_ago',{n:Math.round(d/365)});
+}
+function fmtDate(dateStr){
+  if(!dateStr) return '—'; var d=new Date(dateStr); var months=t('months');
+  if(typeof months==='string') months=STRINGS[state.lang].months;
+  return months[d.getMonth()]+' '+d.getFullYear();
+}
+function maskBal(val){ return state.profile.hideBalance ? '••••' : val; }
+function toast(msg){ var el=$('#toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(function(){el.classList.remove('show');},2200); }
+function track(event, data){
+  try{
+    if(state.profile && state.profile.analyticsOptOut) return;
+    if(w_umami() && typeof w_umami().track==='function'){ w_umami().track(event, data||{}); }
+  }catch(e){}
+}
+function w_umami(){ return (typeof window!=='undefined') ? window.umami : null; }
+function simpleHash(str){ var h=0; for(var i=0;i<str.length;i++){ h=((h<<5)-h+str.charCodeAt(i))|0; } return 'sh'+Math.abs(h).toString(36); }
+function hashPin(pin){
+  try{
+    if(window.crypto && window.crypto.subtle && window.TextEncoder){
+      return window.crypto.subtle.digest('SHA-256', new TextEncoder().encode('wallet-atlas-pin-'+pin)).then(function(buf){
+        return Array.prototype.map.call(new Uint8Array(buf), function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+      }).catch(function(){ return simpleHash(pin); });
+    }
+  }catch(e){}
+  return Promise.resolve(simpleHash(pin));
+}
+function copyToClipboard(text, el){
+  function done(){
+    var orig = el.innerHTML;
+    el.classList.add('copied');
+    el.innerHTML = uiIcon('check',12)+' '+t('copied_label');
+    setTimeout(function(){ el.classList.remove('copied'); el.innerHTML = orig; }, 1400);
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(function(){ fallbackCopy(text,done); });
+  } else { fallbackCopy(text, done); }
+}
+function fallbackCopy(text, cb){
+  try{
+    var ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); cb();
+  }catch(e){ toast(t('copy_fail')); }
+}
+
+/* ================= persistence ================= */
+function save(){
+  try{
+    localStorage.setItem(LS_PROFILE, JSON.stringify(state.profile));
+    localStorage.setItem(LS_WALLETS, JSON.stringify(state.wallets));
+    localStorage.setItem(LS_GROUPS, JSON.stringify(state.groups));
+  }catch(e){ toast(t('toast_save_fail')); }
+}
+var LEGACY_ICON_MAP = {'💼':'briefcase','📈':'chart','🌾':'sprout','🔥':'flame','💰':'coins','🖼️':'image','🤖':'bot','🎮':'gamepad','🌉':'bridge','🏠':'home','⚡':'bolt','🎯':'target','🧪':'flask','🐳':'wave','❓':'question','🛰️':'satellite','🏗️':'sprout'};
+var LEGACY_DEMO_ADDR = {
+  '7xKQm2vD93FnalQoP8xYzT4h9jL1wRk93F2':'MASi45ub7Qe4ZE36UT5G6cU4ud8Fhhe4deS4F3cw9KTA',
+  '9a1BcD82vFmQoP8xYzT4h9jL1wRk934e2C':'b8dLcukC7edhDQ7cn5d4gEYkbUrMWeWQLGsCmrG6dLaY',
+  '0x3f2A8e9d1C7bB4a6F0912e8dC5b1a7a98':'0xdbc74254770f58904dba41ecccc3fc1626e53a13',
+  '4d8Cx0E3vD93FnalQoP8xYzT4h9jL1f6A':'yNoVKf58ZTBqNAYT3j5qcdsyuMNmPfYetW5v6JXmj54o',
+  '0x9e7Ab21C4D8bB4a6F0912e8dC5b1a3b21':'0x043b026c48bbf33feff9243a8f506b40928b5b7a',
+  'F3a9Bx1C4vD93FnalQoP8xYzT4h9j2c7D':'mLidkuVKnRyjP2WPBg8Y4ErK9pGSSxY6BVScJy9uUxcJ',
+  '0x1a4Dx7E3vC93FnalQoP8xYzT4h9jL8d9F':'0x767c76fb008f86bebb2737f6a6f0fb23c6f5da2c',
+  '0x8b6Fx1C4vD93FnalQoP8xYzT4h9jL5e11':'0xec255404e4fb440034d6608697a8d41bed440e50',
+  'EQAbcXf9d4Ax0000000000000000000000000':'EQptUsGr7CmY-uCu3ZR1zTOlUcR64cXQLioDnkHIfxIq2HZt',
+  '0x2e7Fx1C4vD93FnalQoP8xYzT4h9jL6cF8':'0x454f31af3176813e02ea68ef786e4d3cea27d269'
+};
+function safeId(v){ return (typeof v==='string' && /^[A-Za-z0-9_-]{1,40}$/.test(v)) ? v : uid(); }
+function safeColor(v){ return (typeof v==='string' && /^#[0-9a-fA-F]{6}$/.test(v)) ? v : COLORS[0]; }
+function safeDate(v){ return (typeof v==='string' && /^\d{4}-\d{2}-\d{2}/.test(v)) ? v.slice(0,10) : ''; }
+function normalizeData(){
+  var p=state.profile;
+  if(p && typeof p==='object'){
+    p.nickname = String(p.nickname||'Anon').slice(0,24);
+    if(!AVATAR_DEFS[p.avatar]) p.avatar='fox';
+    if(!p.createdAt) p.createdAt=Date.now();
+    p.hideBalance = !!p.hideBalance; p.analyticsOptOut = !!p.analyticsOptOut; if(p.pinHash===undefined) p.pinHash=null;
+    p.theme = p.theme==='light' ? 'light' : 'dark';
+    p.lang = p.lang==='en' ? 'en' : 'ru';
+  }
+  if(!Array.isArray(state.wallets)) state.wallets=[];
+  if(!Array.isArray(state.groups)) state.groups=[];
+  state.groups = state.groups.filter(function(g){return g && typeof g==='object';}).map(function(g){
+    g.id=safeId(g.id); g.name=String(g.name||'Group').slice(0,40);
+    if(!WALLET_ICON_DEFS[g.icon]) g.icon=LEGACY_ICON_MAP[g.icon]||'briefcase';
+    g.color=safeColor(g.color); return g;
+  });
+  var gids={}; state.groups.forEach(function(g){gids[g.id]=1;});
+  state.wallets = state.wallets.filter(function(w){return w && typeof w==='object';}).map(function(w){
+    w.id=safeId(w.id); w.name=String(w.name||'Wallet').slice(0,60); w.address=String(w.address||'').trim();
+    if(LEGACY_DEMO_ADDR[w.address]) w.address=LEGACY_DEMO_ADDR[w.address];
+    if(!NETWORKS[w.network]) w.network='other';
+    if(!PURPOSES[w.purpose]) w.purpose='unknown';
+    if(!STATUSES[w.status]) w.status='unknown';
+    if(!WALLET_ICON_DEFS[w.icon]) w.icon=LEGACY_ICON_MAP[w.icon]||'briefcase';
+    w.color=safeColor(w.color);
+    w.balance = w.balance==null ? '' : String(w.balance).slice(0,30);
+    w.notes = w.notes==null ? '' : String(w.notes).slice(0,2000);
+    w.lastUsed=safeDate(w.lastUsed); w.firstSeen=safeDate(w.firstSeen);
+    w.tags = Array.isArray(w.tags) ? w.tags.map(function(x){return String(x).slice(0,30);}).slice(0,30) : [];
+    w.usedWith = Array.isArray(w.usedWith) ? w.usedWith.filter(function(u){return u && u.service;}).map(function(u){return {service:String(u.service).slice(0,40), interactions:+u.interactions||0};}).slice(0,50) : [];
+    w.groupId = (w.groupId && gids[w.groupId]) ? w.groupId : null;
+    return w;
+  });
+}
+function load(){
+  try{
+    var p=localStorage.getItem(LS_PROFILE), w=localStorage.getItem(LS_WALLETS), g=localStorage.getItem(LS_GROUPS);
+    if(p) state.profile=JSON.parse(p);
+    if(w) state.wallets=JSON.parse(w);
+    if(g) state.groups=JSON.parse(g);
+    if(state.profile){ normalizeData(); state.lang=state.profile.lang; save(); }
+  }catch(e){}
+}
+
+/* ================= seed demo data ================= */
+function seedData(){
+  state.groups = [
+    {id:'g1', name:'Trading', icon:'chart', color:'#f5a524'}, {id:'g2', name:'Farming', icon:'sprout', color:'#a3e635'},
+    {id:'g3', name:'Storage', icon:'coins', color:'#34d399'}, {id:'g4', name:'Burners', icon:'flame', color:'#f5556c'}
+  ];
+  var today=new Date();
+  function ago(days){ var d=new Date(today); d.setDate(d.getDate()-days); return d.toISOString().slice(0,10); }
+  state.wallets = [
+    {id:uid(), name:'Main SOL', address:'MASi45ub7Qe4ZE36UT5G6cU4ud8Fhhe4deS4F3cw9KTA', network:'solana', purpose:'main', status:'active', icon:'home', color:'#5b7cff', balance:'$4,281', lastUsed:ago(2), firstSeen:'2023-11-02', tags:['main','solana'], groupId:null, usedWith:[{service:'Phantom',interactions:210},{service:'Jupiter',interactions:64}], notes:'Основной SOL-кошелёк.'},
+    {id:uid(), name:'Meme Trading #03', address:'b8dLcukC7edhDQ7cn5d4gEYkbUrMWeWQLGsCmrG6dLaY', network:'solana', purpose:'trading', status:'active', icon:'chart', color:'#f5a524', balance:'$1,284', lastUsed:ago(3), firstSeen:'2024-08-14', tags:['trading','solana','memes'], groupId:'g1', usedWith:[{service:'GMGN',interactions:37},{service:'Axiom',interactions:21},{service:'Jupiter',interactions:84},{service:'Raydium',interactions:56}], notes:'Основной кошелёк для мемов. Не использовать для долгосрочного хранения.'},
+    {id:uid(), name:'ZK Farm 2024', address:'0xdbc74254770f58904dba41ecccc3fc1626e53a13', network:'base', purpose:'farming', status:'review', icon:'sprout', color:'#a3e635', balance:'$3.42', lastUsed:ago(612), firstSeen:'2024-01-20', tags:['farming','base'], groupId:'g2', usedWith:[{service:'Aave',interactions:12},{service:'Aerodrome',interactions:8}], notes:'Farm wallet for 2024. Давно не трогал.'},
+    {id:uid(), name:'Burner 07', address:'yNoVKf58ZTBqNAYT3j5qcdsyuMNmPfYetW5v6JXmj54o', network:'solana', purpose:'burner', status:'archived', icon:'flame', color:'#f5556c', balance:'$0', lastUsed:ago(91), firstSeen:'2024-05-01', tags:['burner'], groupId:'g4', usedWith:[{service:'GMGN',interactions:4}], notes:''},
+    {id:uid(), name:'Old ETH Storage', address:'0x043b026c48bbf33feff9243a8f506b40928b5b7a', network:'ethereum', purpose:'storage', status:'review', icon:'coins', color:'#34d399', balance:'$12.80', lastUsed:ago(621), firstSeen:'2021-03-11', tags:['storage','ethereum'], groupId:'g3', usedWith:[{service:'Uniswap',interactions:6}], notes:'Старый ETH storage.'},
+    {id:uid(), name:'NFT Collection', address:'mLidkuVKnRyjP2WPBg8Y4ErK9pGSSxY6BVScJy9uUxcJ', network:'solana', purpose:'nft', status:'active', icon:'image', color:'#a78bfa', balance:'$245.60', lastUsed:ago(24), firstSeen:'2023-06-10', tags:['nft','solana'], groupId:null, usedWith:[{service:'Magic Eden',interactions:14},{service:'OKX',interactions:3}], notes:''},
+    {id:uid(), name:'Base Builder', address:'0x767c76fb008f86bebb2737f6a6f0fb23c6f5da2c', network:'base', purpose:'farming', status:'active', icon:'sprout', color:'#2dd4bf', balance:'$87.32', lastUsed:ago(18), firstSeen:'2024-02-04', tags:['base','farming'], groupId:'g2', usedWith:[{service:'Aerodrome',interactions:22},{service:'Moonwell',interactions:9}], notes:''},
+    {id:uid(), name:'CEX Deposit', address:'0xec255404e4fb440034d6608697a8d41bed440e50', network:'bnb', purpose:'storage', status:'active', icon:'coins', color:'#F0B90B', balance:'$320.18', lastUsed:ago(45), firstSeen:'2022-09-01', tags:['bnb','deposit'], groupId:'g3', usedWith:[{service:'Binance',interactions:5}], notes:''},
+    {id:uid(), name:'TON Gaming', address:'EQptUsGr7CmY-uCu3ZR1zTOlUcR64cXQLioDnkHIfxIq2HZt', network:'ton', purpose:'gaming', status:'review', icon:'gamepad', color:'#0098EA', balance:'$12.75', lastUsed:ago(133), firstSeen:'2024-03-15', tags:['ton','gaming'], groupId:null, usedWith:[{service:'TON App',interactions:11},{service:'Fragment',interactions:2}], notes:''},
+    {id:uid(), name:'Arb Bridge', address:'0x454f31af3176813e02ea68ef786e4d3cea27d269', network:'arbitrum', purpose:'bridge', status:'active', icon:'bridge', color:'#28A0F0', balance:'$56.23', lastUsed:ago(67), firstSeen:'2023-12-01', tags:['arbitrum','bridge'], groupId:null, usedWith:[{service:'Jumper',interactions:7},{service:'Orbiter',interactions:3}], notes:''}
+  ];
+}
+
+/* ================= computed helpers ================= */
+function forgottenWallets(){ return state.wallets.filter(function(w){ var d=daysAgo(w.lastUsed); return d===null || d>180; }); }
+function totalBalance(){
+  var sum=0;
+  state.wallets.forEach(function(w){ if(!w.balance) return; var n=parseFloat(String(w.balance).replace(/[^0-9.\-]/g,'')); if(!isNaN(n)) sum+=n; });
+  return sum;
+}
+function activeCount(){ return state.wallets.filter(function(w){var d=daysAgo(w.lastUsed); return d!==null && d<=90;}).length; }
+function networksUsedCount(){ var s={}; state.wallets.forEach(function(w){s[w.network]=1;}); return Object.keys(s).length; }
+function filteredWallets(){
+  var list=state.wallets.slice();
+  if(state.filterGroupId) list=list.filter(function(w){return w.groupId===state.filterGroupId;});
+  if(state.filterForgotten) list=list.filter(function(w){ var d=daysAgo(w.lastUsed); return d===null || d>180; });
+  if(state.search){
+    var q=state.search.toLowerCase();
+    list=list.filter(function(w){
+      return (w.name||'').toLowerCase().indexOf(q)>-1 || (w.address||'').toLowerCase().indexOf(q)>-1 ||
+        (w.tags||[]).join(' ').toLowerCase().indexOf(q)>-1 || (w.purpose||'').toLowerCase().indexOf(q)>-1 ||
+        (w.usedWith||[]).some(function(u){return u.service.toLowerCase().indexOf(q)>-1;});
+    });
+  }
+  if(state.filterNetwork) list=list.filter(function(w){return w.network===state.filterNetwork;});
+  if(state.filterStatus) list=list.filter(function(w){return w.status===state.filterStatus;});
+  list.sort(function(a,b){
+    var k=state.sort.key, dir=state.sort.dir==='asc'?1:-1, av=a[k], bv=b[k];
+    if(k==='lastUsed'||k==='firstSeen'){ av=av?new Date(av).getTime():0; bv=bv?new Date(bv).getTime():0; }
+    if(k==='name'||k==='purpose'||k==='network'||k==='status'){ av=(av||'').toString().toLowerCase(); bv=(bv||'').toString().toLowerCase(); }
+    if(k==='balance'){ av=parseFloat(String(a.balance||'').replace(/[^0-9.\-]/g,''))||0; bv=parseFloat(String(b.balance||'').replace(/[^0-9.\-]/g,''))||0; }
+    if(av<bv) return -1*dir; if(av>bv) return 1*dir; return 0;
+  });
+  return list;
+}
+
+/* ================= shell ================= */
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme', state.profile.theme||'dark');
+  $('#theme-toggle-btn').innerHTML = uiIcon(state.profile.theme==='light' ? 'sun' : 'moon', 17);
+  $all('.theme-opt[data-theme]').forEach(function(b){ b.classList.toggle('active', b.dataset.theme===(state.profile.theme||'dark')); });
+}
+function applyBalanceToggleUI(){
+  var hidden = !!state.profile.hideBalance;
+  $('#balance-toggle-btn').innerHTML = uiIcon(hidden ? 'eyeoff' : 'eye', 17);
+  $('#balance-toggle-btn').title = hidden ? t('balance_show_title') : t('balance_hide_title');
+  $('#balance-switch').classList.toggle('on', hidden);
+  $('#balance-toggle-label').textContent = hidden ? t('balance_hidden_label') : t('balance_visible_label');
+}
+function renderProfileChrome(){
+  $('#profile-avatar').innerHTML = avatarIcon(state.profile.avatar);
+  $('#profile-avatar').style.color = avatarColor(state.profile.avatar);
+  $('#profile-avatar').style.background = avatarColor(state.profile.avatar)+'22';
+  $('#profile-name').textContent = state.profile.nickname;
+  $('#profile-count').textContent = t('group_wallets_count',{n:state.wallets.length});
+  $('#set-nickname').value = state.profile.nickname;
+}
+function pageMeta(view){
+  var titles = {
+    overview:['My Wallet Universe', t('overview_sub',{n:state.wallets.length,k:networksUsedCount()})],
+    wallets:[t('nav_wallets'), t('wallets_sub')],
+    groups:[t('nav_groups'), t('groups_sub')],
+    activity:[t('nav_activity'), t('activity_sub')],
+    security:[t('nav_security'), t('security_sub')],
+    settings:[t('nav_settings'), t('settings_sub')]
+  };
+  return titles[view];
+}
+function switchView(view, keepSelection){
+  state.view=view; if(!keepSelection) state.selectedId=null;
+  if(view!=='wallets'){ state.filterGroupId=null; state.filterForgotten=false; }
+  $all('.navitem').forEach(function(b){ b.classList.toggle('active', b.dataset.view===view); });
+  $all('.mtab[data-view]').forEach(function(b){ b.classList.toggle('active', b.dataset.view===view); });
+  $('#mtab-more').classList.toggle('active', ['overview','wallets','groups'].indexOf(view)===-1);
+  ['overview','wallets','groups','activity','security','settings'].forEach(function(v){ $('#view-'+v).classList.toggle('hidden', v!==view); });
+  var m=pageMeta(view);
+  $('#page-title').textContent=m[0]; $('#page-sub').textContent=m[1];
+  $('#search-box').style.display = (view==='overview'||view==='wallets') ? '' : 'none';
+  $('#filter-btn').style.display = (view==='overview'||view==='wallets') ? '' : 'none';
+  if(view!=='overview' && view!=='wallets') $('#filter-bar').classList.add('hidden');
+  track('view_'+view);
+  renderCurrentView();
+  closeSidebarMobile();
+}
+function renderCurrentView(){
+  if(state.view==='overview') renderOverview();
+  else if(state.view==='wallets') renderWalletsView();
+  else if(state.view==='groups') renderGroups();
+  else if(state.view==='activity') renderActivity();
+  else if(state.view==='security') renderSecurity();
+  else if(state.view==='settings') renderSettings();
+  renderProfileChrome();
+}
+
+/* ================= stats + banner ================= */
+function renderStats(){
+  var forgotten=forgottenWallets();
+  $('#stats-row').innerHTML =
+    statCard('wallets','accent', state.wallets.length, t('stat_wallets')) +
+    statCard('balance','green', maskBal('$'+totalBalance().toLocaleString('en-US',{maximumFractionDigits:0})), t('stat_balance')) +
+    statCard('active','green', activeCount(), t('stat_active')) +
+    statCard('forgotten','amber', forgotten.length, t('stat_forgotten'));
+}
+function statIcon(key,size){
+  size=size||18;
+  switch(key){
+    case 'wallets': return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.8A2.6 2.6 0 0 1 5.6 5.2h9.8A2.6 2.6 0 0 1 18 7.8v.6H5.6A2.6 2.6 0 0 0 3 11v-3.2z"/><rect x="3" y="8.4" width="18" height="10.4" rx="2.3"/><circle cx="16.4" cy="13.6" r="1.15" fill="currentColor" stroke="none"/></svg>';
+    case 'balance': return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6.4" rx="7.3" ry="2.7"/><path d="M4.7 6.4v5.1c0 1.5 3.3 2.7 7.3 2.7s7.3-1.2 7.3-2.7V6.4"/><path d="M4.7 11.5v5.1c0 1.5 3.3 2.7 7.3 2.7s7.3-1.2 7.3-2.7v-5.1"/></svg>';
+    case 'active': return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12.6h3.3l1.9-5 3.4 9.8 2.3-6.7 1.5 2.9h5.3"/><circle cx="19.3" cy="6.4" r="1.5" fill="currentColor" stroke="none"/></svg>';
+    case 'forgotten': return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11.6" cy="12.4" r="7.9" stroke-dasharray="2.2 3.4"/><path d="M11.6 7.8v4.7l3.1 2.3"/></svg>';
+    default: return '';
+  }
+}
+function statCard(key,rgbVar,value,label){
+  var col='rgb('+ 'var(--'+rgbVar+'-rgb)' +')';
+  return '<div class="stat-card" data-stat="'+key+'" style="--glow:rgba(var(--'+rgbVar+'-rgb),.30);--glow-strong:rgba(var(--'+rgbVar+'-rgb),.4);--sc-border:rgba(var(--'+rgbVar+'-rgb),.28)">'+
+    '<div class="wm" style="color:'+col+'">'+statIcon(key,58)+'</div>'+
+    '<div class="top"><div class="stat-icon" style="background:rgba(var(--'+rgbVar+'-rgb),.18);color:'+col+'">'+statIcon(key,17)+'</div></div>'+
+    '<div class="value">'+value+'</div><div class="label">'+label+'</div></div>';
+}
+function renderForgottenBanner(target){
+  var forgotten=forgottenWallets();
+  if(forgotten.length===0){ target.innerHTML=''; return; }
+  var chips=forgotten.slice(0,3).map(function(w){ return '<div class="fchip"><b>'+esc(w.name)+'</b><span>'+fmtAgo(w.lastUsed)+'</span></div>'; }).join('');
+  target.innerHTML =
+    '<div class="forgotten-banner"><div class="ftext"><div class="ficon">'+uiIcon('alert',18)+'</div><div><div class="ftitle">'+t('forgotten_title')+'</div><div class="fdesc">'+t('forgotten_desc',{n:forgotten.length})+'</div></div></div>'+
+    '<div class="forgotten-chips">'+chips+'</div><button class="btn btn-primary" id="review-forgotten-btn">'+t('forgotten_btn')+'</button></div>';
+  $('#review-forgotten-btn').onclick=function(){ openForgotten(); };
+}
+
+/* ================= table ================= */
+function tableHeaderHtml(){
+  var cols=[t('col_wallet'),t('col_purpose'),t('col_network'),t('col_balance'),t('col_lastused'),t('col_usedwith'),t('col_status'),''];
+  return '<tr>'+cols.map(function(c){return '<th>'+c+'</th>';}).join('')+'</tr>';
+}
+function renderTable(tableEl, list, onRowClick){
+  var thead=tableEl.querySelector('thead'), tbody=tableEl.querySelector('tbody');
+  thead.innerHTML=tableHeaderHtml();
+  if(list.length===0){
+    tbody.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="em-icon">'+uiIcon('folder',36)+'</div><h3>'+t('empty_title')+'</h3><p>'+t('empty_desc')+'</p><button class="btn btn-primary" id="empty-add-btn">'+t('empty_add_btn')+'</button></div></td></tr>';
+    var eb=tbody.querySelector('#empty-add-btn'); if(eb) eb.onclick=openAddModal;
+    return;
+  }
+  tbody.innerHTML = list.map(function(w){
+    var net=NETWORKS[w.network]||NETWORKS.other, pur=PURPOSES[w.purpose]||PURPOSES.unknown, st=STATUSES[w.status]||STATUSES.unknown;
+    var uw=(w.usedWith||[]).slice(0,2).map(function(u){return '<span class="uw-chip">'+esc(u.service)+'</span>';}).join('');
+    var extra=(w.usedWith||[]).length>2 ? '<span class="uw-chip">+'+((w.usedWith||[]).length-2)+'</span>' : '';
+    return '<tr data-id="'+w.id+'" class="'+(state.selectedId===w.id?'selected':'')+'">'+
+      '<td><div class="wallet-cell"><div class="wallet-icon" style="background:'+w.color+'22;color:'+w.color+'">'+walletIcon(w.icon)+'</div><div><div class="wallet-name">'+esc(w.name)+'</div><div class="wallet-addr addr-copy" data-addr="'+esc(w.address)+'" title="'+t('copy_address_title')+'">'+esc(shortAddr(w.address))+' <span class="copy-ic">⧉</span></div></div></div></td>'+
+      '<td data-label="'+t('col_purpose')+'"><span class="badge" style="background:'+pur.color+'22;color:'+pur.color+'">'+pur.label+'</span></td>'+
+      '<td data-label="'+t('col_network')+'"><span class="net-badge">'+netIcon(w.network,15)+' '+net.label+'</span></td>'+
+      '<td data-label="'+t('col_balance')+'">'+esc(maskBal(w.balance||'—'))+'</td>'+
+      '<td data-label="'+t('col_lastused')+'">'+fmtAgo(w.lastUsed)+'</td>'+
+      '<td data-label="'+t('col_usedwith')+'"><div class="usedwith-chips">'+uw+extra+'</div></td>'+
+      '<td data-label="'+t('col_status')+'"><span class="badge" style="background:'+st.bg+';color:'+st.color+'">'+st.label+'</span></td>'+
+      '<td><div class="row-actions"><button class="dots-btn" data-menu="'+w.id+'">⋯</button></div></td>'+
+    '</tr>';
+  }).join('');
+  $all('tr[data-id]',tbody).forEach(function(tr){
+    tr.addEventListener('click', function(e){
+      if(e.target.closest('.row-actions') || e.target.closest('.addr-copy')) return;
+      if(onRowClick){ onRowClick(tr.dataset.id); } else { state.selectedId=tr.dataset.id; renderCurrentView(); }
+    });
+  });
+  $all('.addr-copy',tbody).forEach(function(el){
+    el.addEventListener('click', function(e){ e.stopPropagation(); copyToClipboard(el.dataset.addr, el); });
+  });
+  $all('.dots-btn',tbody).forEach(function(btn){
+    btn.addEventListener('click', function(e){ e.stopPropagation(); openRowMenu(btn.dataset.menu, btn); });
+  });
+}
+function openRowMenu(id, btnEl){
+  var w = state.wallets.find(function(x){return x.id===id;});
+  if(!w) return;
+  var net = NETWORKS[w.network]||NETWORKS.other;
+  var menu = $('#global-row-menu');
+  menu.innerHTML = '<button data-act="edit">'+uiIcon('edit',15)+t('menu_edit')+'</button>'+(net.explorer(w.address)?('<button data-act="explorer">'+netIcon(w.network,15)+net.explorerName+'</button>'):'')+'<button data-act="delete" class="danger">'+uiIcon('trash',15)+t('menu_delete')+'</button>';
+  var rect = btnEl.getBoundingClientRect();
+  var menuWidth = 170, menuHeight = menu.querySelectorAll('button').length*36+10;
+  var left = Math.min(rect.right-menuWidth, window.innerWidth-menuWidth-8); left = Math.max(8,left);
+  var top = rect.bottom+4;
+  if(top+menuHeight > window.innerHeight) top = Math.max(8, rect.top-4-menuHeight);
+  menu.style.left = left+'px'; menu.style.top = top+'px';
+  menu.classList.add('open');
+  $all('button[data-act]', menu).forEach(function(b){
+    b.onclick = function(e){
+      e.stopPropagation(); closeGlobalMenu();
+      if(b.dataset.act==='edit') openEditModal(w);
+      else if(b.dataset.act==='delete') deleteWallet(id);
+      else if(b.dataset.act==='explorer'){ var url=net.explorer(w.address); if(url) window.open(url,'_blank'); else toast(t('no_explorer_toast')); }
+    };
+  });
+}
+function closeGlobalMenu(){ var m=$('#global-row-menu'); if(m){ m.classList.remove('open'); m.innerHTML=''; } }
+
+/* ================= detail panel ================= */
+function renderDetail(target, list){
+  var w = state.wallets.find(function(x){return x.id===state.selectedId;});
+  if(!w){ target.innerHTML='<div class="detail-empty">'+t('detail_placeholder')+'</div>'; return; }
+  var net=NETWORKS[w.network]||NETWORKS.other, pur=PURPOSES[w.purpose]||PURPOSES.unknown, st=STATUSES[w.status]||STATUSES.unknown;
+  var url=net.explorer(w.address);
+  var tags=(w.tags||[]).map(function(tag){return '<span class="tag-chip">#'+esc(tag)+'</span>';}).join('');
+  var uwList=(w.usedWith||[]).map(function(u){ return '<div class="kv-row"><span class="k">'+esc(u.service)+'</span><span>'+t('uw_interactions',{n:u.interactions||0})+'</span></div>'; }).join('') || '<div class="detail-empty" style="padding:10px 0">'+t('detail_no_usedwith')+'</div>';
+  var tl = [];
+  if(w.firstSeen) tl.push({d:w.firstSeen,l:t('detail_firstseen')});
+  (w.usedWith||[]).slice(0,3).forEach(function(u){ tl.push({d:w.firstSeen,l:esc(u.service)}); });
+  if(w.lastUsed) tl.push({d:w.lastUsed,l:t('detail_lastused')});
+  var tlHtml = tl.length ? tl.map(function(tt){return '<div class="tl-item"><div class="tl-dot"></div><div><div class="tl-date">'+fmtDate(tt.d)+'</div><div class="tl-label">'+tt.l+'</div></div></div>';}).join('') : '<div class="detail-empty" style="padding:10px 0">'+t('detail_no_timeline')+'</div>';
+  var createdLine = w.firstSeen ? t('detail_created_known',{date:fmtDate(w.firstSeen)}) : t('detail_created_unknown');
+
+  target.innerHTML =
+    '<div class="detail-top">'+
+      '<div class="detail-icon" style="background:'+w.color+'22;color:'+w.color+'">'+walletIcon(w.icon)+'</div>'+
+      '<div style="flex:1"><div class="detail-name">'+esc(w.name)+'</div><div class="detail-sub">'+netIcon(w.network,13)+' '+net.label+' · <span class="addr-copy" data-addr="'+esc(w.address)+'" title="'+t('copy_address_title')+'">'+esc(shortAddr(w.address))+' <span class="copy-ic">⧉</span></span></div><div class="detail-sub2">'+createdLine+'</div></div>'+
+      '<span class="badge" style="background:'+st.bg+';color:'+st.color+'">'+st.label+'</span>'+
+    '</div>'+
+    '<div class="detail-body">'+
+      '<div><div class="detail-balance">'+esc(maskBal(w.balance||'—'))+'</div></div>'+
+      '<div><div class="dsec-label">'+t('detail_purpose')+'</div><span class="badge" style="background:'+pur.color+'22;color:'+pur.color+'">'+pur.label+'</span></div>'+
+      (tags?('<div><div class="dsec-label">'+t('detail_tags')+'</div><div class="tag-row">'+tags+'</div></div>'):'')+
+      '<div><div class="kv-row"><span class="k">'+t('detail_lastused')+'</span><span>'+fmtAgo(w.lastUsed)+'</span></div><div class="kv-row"><span class="k">'+t('detail_firstseen')+'</span><span>'+fmtDate(w.firstSeen)+'</span></div></div>'+
+      '<div><div class="dsec-label">'+t('detail_usedwith')+'</div>'+uwList+'</div>'+
+      (w.notes?('<div><div class="dsec-label">'+t('detail_notes')+'</div><div class="notes-box">'+esc(w.notes)+'</div></div>'):'')+
+      '<div><div class="dsec-label">'+t('detail_timeline')+'</div><div class="timeline">'+tlHtml+'</div></div>'+
+    '</div>'+
+    '<div class="detail-actions">'+
+      (url?('<button class="btn btn-primary det-explorer-btn" id="det-explorer" title="'+t('open_in')+' '+net.explorerName+'">'+netIcon(w.network,16)+'</button>'):'')+
+      '<button class="btn btn-soft" style="flex:1" id="det-edit">'+uiIcon('edit',15)+' '+t('detail_edit_btn')+'</button>'+
+    '</div>';
+  var eb=$('#det-explorer',target); if(eb) eb.onclick=function(){ window.open(url,'_blank'); };
+  $('#det-edit',target).onclick=function(){ openEditModal(w); };
+  $all('.addr-copy',target).forEach(function(el){ el.addEventListener('click', function(e){ e.stopPropagation(); copyToClipboard(el.dataset.addr, el); }); });
+}
+
+/* ================= view renderers ================= */
+function renderOverview(){
+  renderStats();
+  renderForgottenBanner($('#forgotten-banner-slot'));
+  renderBackupNudge($('#backup-nudge-slot'));
+  var list=filteredWallets().slice().sort(function(a,b){
+    var av=a.lastUsed?new Date(a.lastUsed).getTime():0, bv=b.lastUsed?new Date(b.lastUsed).getTime():0; return bv-av;
+  });
+  renderTable($('#wallets-table'), list.slice(0,8), function(id){ state.selectedId=id; switchView('wallets', true); });
+  $('#ov-show-all').onclick=function(){ switchView('wallets'); };
+  renderGroupsPreview();
+}
+function renderBackupNudge(target){
+  var p=state.profile, now=Date.now(), DAY=86400000;
+  var show = p && state.wallets.length>=3 && (now-(p.createdAt||now))>2*DAY && !(p.nudgeSnoozeUntil && now<p.nudgeSnoozeUntil) && !(p.lastExport && now-p.lastExport<14*DAY);
+  if(!show){ target.innerHTML=''; return; }
+  target.innerHTML='<div class="forgotten-banner nudge"><div class="ftext"><div class="ficon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7.5 11 12 15.5 16.5 11"/><path d="M5 19h14"/></svg></div><div><div class="ftitle">'+t('nudge_title')+'</div><div class="fdesc">'+t('nudge_text')+'</div></div></div>'+
+    '<div style="display:flex;gap:8px"><button class="btn btn-primary" id="nudge-export">'+t('nudge_export')+'</button><button class="btn btn-ghost" id="nudge-later">'+t('nudge_later')+'</button></div></div>';
+  $('#nudge-export').onclick=function(){ exportData(); renderBackupNudge(target); };
+  $('#nudge-later').onclick=function(){ state.profile.nudgeSnoozeUntil=Date.now()+7*DAY; save(); renderBackupNudge(target); };
+}
+function renderGroupsPreview(){
+  var target=$('#groups-preview');
+  target.innerHTML = '<div class="panel-head"><h2>'+t('nav_groups')+'</h2><span class="count">'+t('groups_count',{n:state.groups.length})+'</span></div>'+
+    '<div class="groups-grid">'+state.groups.map(function(g){
+      var count=state.wallets.filter(function(w){return w.groupId===g.id;}).length;
+      return '<div class="group-card" data-gid="'+g.id+'"><div class="group-top"><div class="group-icon" style="background:'+g.color+'22;color:'+g.color+'">'+walletIcon(g.icon)+'</div><div><div class="group-name">'+esc(g.name)+'</div><div class="group-count">'+t('group_wallets_count',{n:count})+'</div></div></div></div>';
+    }).join('')+'</div>';
+  $all('.group-card',target).forEach(function(c){ c.addEventListener('click', function(){ openGroup(c.dataset.gid); }); });
+}
+var SORT_OPTIONS=[['lastUsed:desc','sort_lastused_desc'],['lastUsed:asc','sort_lastused_asc'],['name:asc','sort_name'],['balance:desc','sort_balance'],['network:asc','sort_network'],['status:asc','sort_status']];
+function renderSortSelect(){
+  var s=$('#sort-select');
+  s.innerHTML=SORT_OPTIONS.map(function(o){return '<option value="'+o[0]+'">'+t(o[1])+'</option>';}).join('');
+  s.value=state.sort.key+':'+state.sort.dir;
+}
+function renderWalletsView(){
+  renderSortSelect();
+  var target=$('#group-filter-slot');
+  if(state.filterGroupId){
+    var g=state.groups.find(function(x){return x.id===state.filterGroupId;});
+    if(g){
+      target.innerHTML='<div class="group-filter-bar"><div class="gname">'+walletIcon(g.icon)+' '+t('group_view_title',{name:esc(g.name)})+'</div><div style="flex:1"></div><button class="icon-btn" id="clear-group-filter">'+t('group_clear_filter')+'</button></div>';
+      $('#clear-group-filter').onclick=function(){ state.filterGroupId=null; renderWalletsView(); };
+    } else { target.innerHTML=''; state.filterGroupId=null; }
+  } else if(state.filterForgotten){
+    target.innerHTML='<div class="group-filter-bar"><div class="gname">'+uiIcon('alert',16)+' '+t('forgotten_view_title')+'</div><div style="flex:1"></div><button class="icon-btn" id="clear-group-filter">'+t('group_clear_filter')+'</button></div>';
+    $('#clear-group-filter').onclick=function(){ state.filterForgotten=false; renderWalletsView(); };
+  } else { target.innerHTML=''; }
+  var list=filteredWallets();
+  $('#wallets-count-label-2').textContent = t('count_of',{n:list.length,total:state.wallets.length});
+  renderTable($('#wallets-table-2'), list);
+  renderDetail($('#detail-panel-2'), list);
+}
+function openGroup(gid){
+  state.filterGroupId=gid; state.filterForgotten=false; state.search=''; $('#search-input').value=''; state.filterNetwork=null; state.filterStatus=null;
+  switchView('wallets');
+}
+function openForgotten(){
+  track('forgotten_reviewed');
+  state.filterGroupId=null; state.filterForgotten=true; state.search=''; $('#search-input').value=''; state.filterNetwork=null; state.filterStatus=null;
+  state.sort={key:'lastUsed',dir:'asc'};
+  switchView('wallets');
+}
+function renderGroups(){
+  var target=$('#groups-grid');
+  if(state.groups.length===0){ target.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="em-icon">'+uiIcon('folder',36)+'</div><h3>'+t('groups_empty_title')+'</h3><p>'+t('groups_empty_desc')+'</p></div>'; return; }
+  target.innerHTML = state.groups.map(function(g){
+    var count=state.wallets.filter(function(w){return w.groupId===g.id;}).length;
+    return '<div class="group-card" data-gid="'+g.id+'"><div class="group-top"><div class="group-icon" style="background:'+g.color+'22;color:'+g.color+'">'+walletIcon(g.icon)+'</div><div><div class="group-name">'+esc(g.name)+'</div><div class="group-count">'+t('group_wallets_count',{n:count})+'</div></div></div></div>';
+  }).join('');
+  $all('.group-card',target).forEach(function(c){ c.addEventListener('click', function(){ openGroup(c.dataset.gid); }); });
+}
+function renderActivity(){
+  var months=[]; var now=new Date();
+  for(var i=11;i>=0;i--){ var d=new Date(now.getFullYear(), now.getMonth()-i, 1); months.push(d); }
+  var counts=months.map(function(m){
+    return state.wallets.filter(function(w){ if(!w.lastUsed) return false; var d=new Date(w.lastUsed); return d.getFullYear()===m.getFullYear() && d.getMonth()===m.getMonth(); }).length;
+  });
+  var max=Math.max.apply(null,counts.concat([1]));
+  var monthNames=STRINGS[state.lang].months;
+  $('#activity-bars').innerHTML = months.map(function(m,i){
+    var h=Math.round((counts[i]/max)*90)+4;
+    return '<div class="abar-col"><div class="abar" style="height:'+h+'px" title="'+counts[i]+'"></div><div class="abar-label">'+monthNames[m.getMonth()]+'</div></div>';
+  }).join('');
+  var peakIdx=-1, peakVal=0;
+  counts.forEach(function(c,i){ if(c>peakVal){ peakVal=c; peakIdx=i; } });
+  var insight = $('#activity-insight');
+  insight.textContent = peakVal>0 ? t('activity_insight_busiest',{month: monthNames[months[peakIdx].getMonth()]+' '+months[peakIdx].getFullYear()}) : t('activity_insight_none');
+}
+function renderSecurity(){
+  var list=state.wallets.filter(function(w){return w.status==='review'||w.status==='high-risk';});
+  var target=$('#security-list');
+  if(list.length===0){
+    target.innerHTML='<div class="empty-state"><div class="em-icon">'+uiIcon('checkcircle',36)+'</div><h3>'+t('security_empty_title')+'</h3><p>'+t('security_empty_desc')+'</p></div>';
+    return;
+  }
+  target.innerHTML = list.map(function(w){
+    var net=NETWORKS[w.network]||NETWORKS.other, st=STATUSES[w.status]||STATUSES.unknown;
+    return '<div class="sec-card" data-id="'+w.id+'">'+
+      '<div class="sec-main"><div class="wallet-icon" style="background:'+w.color+'22;color:'+w.color+'">'+walletIcon(w.icon)+'</div>'+
+      '<div><div class="wallet-name">'+esc(w.name)+'</div><div class="sec-meta">'+netIcon(w.network,12)+' '+net.label+' · '+fmtAgo(w.lastUsed)+' · <span class="badge" style="background:'+st.bg+';color:'+st.color+'">'+st.label+'</span></div></div></div>'+
+      '<div class="sec-actions">'+
+        '<button class="btn btn-soft" data-act="active" data-id="'+w.id+'">'+t('sec_mark_active')+'</button>'+
+        '<button class="btn btn-soft" data-act="archive" data-id="'+w.id+'">'+t('sec_archive')+'</button>'+
+        '<button class="btn btn-ghost" data-act="open" data-id="'+w.id+'">'+t('sec_edit')+'</button>'+
+      '</div></div>';
+  }).join('');
+  $all('button[data-act]',target).forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var w=state.wallets.find(function(x){return x.id===btn.dataset.id;});
+      if(!w) return;
+      if(btn.dataset.act==='active'){ w.status='active'; save(); toast(t('toast_wallet_updated')); track('security_action',{action:'active'}); renderSecurity(); }
+      else if(btn.dataset.act==='archive'){ w.status='archived'; save(); toast(t('toast_wallet_updated')); track('security_action',{action:'archive'}); renderSecurity(); }
+      else if(btn.dataset.act==='open'){ openEditModal(w); }
+    });
+  });
+}
+function renderSettings(){
+  var lb=$('#last-backup-label'); var le=state.profile.lastExport;
+  lb.textContent = le ? t('backup_last',{date:new Date(le).toLocaleDateString(state.lang==='ru'?'ru-RU':'en-GB')}) : t('backup_never');
+  buildAvatarPicker($('#set-avatars'), state.profile.avatar, function(a){ state.profile.avatar=a; save(); renderProfileChrome(); });
+  applyBalanceToggleUI();
+  $('#pin-switch').classList.toggle('on', !!state.profile.pinHash);
+  $('#pin-set-form').classList.toggle('hidden', !state.profile.pinHash);
+  $('#analytics-switch').classList.toggle('on', !state.profile.analyticsOptOut);
+}
+
+/* ================= pickers ================= */
+function buildAvatarPicker(container, selected, onPick){
+  container.innerHTML = AVATARS.map(function(a){return '<button type="button" class="avatar-opt'+(a===selected?' selected':'')+'" data-a="'+a+'" style="color:'+avatarColor(a)+';background:'+avatarColor(a)+'22">'+avatarIcon(a)+'</button>';}).join('');
+  $all('.avatar-opt',container).forEach(function(btn){
+    btn.addEventListener('click', function(){ $all('.avatar-opt',container).forEach(function(b){b.classList.remove('selected');}); btn.classList.add('selected'); onPick(btn.dataset.a); });
+  });
+}
+
+/* ================= onboarding ================= */
+function initOnboarding(){
+  applyI18n();
+  var chosenAvatar = AVATARS[Math.floor(Math.random()*AVATARS.length)];
+  buildAvatarPicker($('#ob-avatars'), chosenAvatar, function(a){ chosenAvatar=a; });
+  $('#ob-continue').addEventListener('click', function(){
+    var nickname = $('#ob-nickname').value.trim() || 'Anon';
+    var seed = $('#ob-seed').checked;
+    state.profile = {nickname:nickname, avatar:chosenAvatar, theme:'dark', lang:state.lang, hideBalance:false, createdAt:Date.now(), analyticsOptOut:false, pinHash:null};
+    if(seed){ seedData(); } else { state.wallets=[]; state.groups=[]; }
+    save(); track('onboarding_completed', {seeded:seed}); startApp();
+  });
+}
+
+/* ================= modal: wallet ================= */
+function fillSelect(sel, obj){
+  sel.innerHTML = Object.keys(obj).map(function(k){return '<option value="'+k+'">'+obj[k].label+'</option>';}).join('');
+}
+function initModalStatics(){
+  fillSelect($('#f-network'), NETWORKS); fillSelect($('#f-purpose'), PURPOSES); fillSelect($('#f-status'), STATUSES);
+  $('#f-icons').innerHTML = WALLET_ICONS.map(function(i){return '<button type="button" class="emoji-opt" data-i="'+i+'">'+walletIcon(i)+'</button>';}).join('');
+  $('#f-colors').innerHTML = COLORS.map(function(c){return '<button type="button" class="swatch" data-c="'+c+'" style="background:'+c+'"></button>';}).join('');
+  $all('.emoji-opt',$('#f-icons')).forEach(function(b){ b.addEventListener('click',function(){ state.formIcon=b.dataset.i; syncModalPickers(); }); });
+  $all('.swatch',$('#f-colors')).forEach(function(b){ b.addEventListener('click',function(){ state.formColor=b.dataset.c; syncModalPickers(); }); });
+  $('#g-icons').innerHTML = WALLET_ICONS.map(function(i){return '<button type="button" class="emoji-opt" data-i="'+i+'">'+walletIcon(i)+'</button>';}).join('');
+  $('#g-colors').innerHTML = COLORS.map(function(c){return '<button type="button" class="swatch" data-c="'+c+'" style="background:'+c+'"></button>';}).join('');
+  $all('.emoji-opt',$('#g-icons')).forEach(function(b){ b.addEventListener('click',function(){ state.groupIcon=b.dataset.i; syncGroupPickers(); }); });
+  $all('.swatch',$('#g-colors')).forEach(function(b){ b.addEventListener('click',function(){ state.groupColor=b.dataset.c; syncGroupPickers(); }); });
+}
+function syncModalPickers(){
+  $all('.emoji-opt',$('#f-icons')).forEach(function(b){ b.classList.toggle('selected', b.dataset.i===state.formIcon); });
+  $all('.swatch',$('#f-colors')).forEach(function(b){ b.classList.toggle('selected', b.dataset.c===state.formColor); });
+}
+function syncGroupPickers(){
+  $all('.emoji-opt',$('#g-icons')).forEach(function(b){ b.classList.toggle('selected', b.dataset.i===state.groupIcon); });
+  $all('.swatch',$('#g-colors')).forEach(function(b){ b.classList.toggle('selected', b.dataset.c===state.groupColor); });
+}
+function renderTagChips(){
+  var wrap=$('#f-tags-wrap'); var input=$('#f-tags-input');
+  $all('.tag-chip',wrap).forEach(function(c){c.remove();});
+  state.formTags.forEach(function(tg){
+    var chip=document.createElement('span'); chip.className='tag-chip'; chip.innerHTML='<span>#'+esc(tg)+'</span><button type="button">×</button>';
+    chip.querySelector('button').addEventListener('click', function(){ state.formTags=state.formTags.filter(function(x){return x!==tg;}); renderTagChips(); });
+    wrap.insertBefore(chip, input);
+  });
+}
+function renderUsedWithRows(){
+  var wrap=$('#f-usedwith');
+  wrap.innerHTML = state.formUsedWith.map(function(u,i){
+    return '<div class="uw-row"><input type="text" placeholder="'+t('f_uw_service_ph')+'" value="'+esc(u.service)+'" data-i="'+i+'" data-f="service"><input type="number" placeholder="'+t('f_uw_interactions_ph')+'" value="'+(u.interactions||'')+'" data-i="'+i+'" data-f="interactions"><button type="button" data-i="'+i+'">×</button></div>';
+  }).join('');
+  $all('input',wrap).forEach(function(inp){
+    inp.addEventListener('input', function(){ var i=+inp.dataset.i, f=inp.dataset.f; state.formUsedWith[i][f] = f==='interactions' ? (+inp.value||0) : inp.value; });
+  });
+  $all('button',wrap).forEach(function(btn){ btn.addEventListener('click', function(){ state.formUsedWith.splice(+btn.dataset.i,1); renderUsedWithRows(); }); });
+}
+var NET_FAMILY = {solana:'solana', ethereum:'evm', base:'evm', bnb:'evm', arbitrum:'evm', polygon:'evm', ton:'ton'};
+function detectAddrFamily(a){
+  a=(a||'').trim();
+  if(/^0x[a-fA-F0-9]{40}$/.test(a)) return 'evm';
+  if(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(a)) return 'solana';
+  if(/^(EQ|UQ|kQ|0Q)[A-Za-z0-9_-]{46}$/.test(a) || /^-?\d:[a-fA-F0-9]{64}$/.test(a)) return 'ton';
+  return null;
+}
+function updateAddrHint(){
+  var el=$('#f-addr-hint'); var a=$('#f-address').value.trim(); var net=$('#f-network').value;
+  el.className='addr-hint'; el.textContent='';
+  if(!a) return;
+  var fam=NET_FAMILY[net], det=detectAddrFamily(a);
+  var dup=state.wallets.find(function(w){ return w.id!==state.editingId && w.network===net && (w.address===a || (fam==='evm' && w.address.toLowerCase()===a.toLowerCase())); });
+  if(dup){ el.className='addr-hint warn'; el.textContent=t('addr_dup',{name:dup.name}); return; }
+  if(fam){
+    if(det===fam){ el.className='addr-hint ok'; el.textContent='✓ '+t('addr_ok'); }
+    else { el.className='addr-hint warn'; el.textContent=t('addr_bad',{net:NETWORKS[net].label}); }
+  }
+}
+function resetForm(){
+  state.formTags=[]; state.formUsedWith=[]; state.formIcon=WALLET_ICONS[0]; state.formColor=COLORS[0]; state.editingId=null; state.netTouched=false;
+  $('#f-name').value=''; $('#f-address').value=''; $('#f-balance').value=''; $('#f-lastused').value=''; $('#f-firstseen').value=''; $('#f-notes').value='';
+  $('#f-network').value='solana'; $('#f-purpose').value='trading'; $('#f-status').value='active';
+  fillGroupSelect(); $('#f-group').value=''; $('#f-tags-input').value='';
+  renderTagChips(); renderUsedWithRows(); syncModalPickers(); $('#f-delete').classList.add('hidden'); updateAddrHint();
+}
+function fillGroupSelect(){
+  $('#f-group').innerHTML = '<option value="">'+t('f_group_none')+'</option>'+state.groups.map(function(g){return '<option value="'+g.id+'">'+esc(g.name)+'</option>';}).join('');
+}
+function openAddModal(){ resetForm(); $('#modal-title').textContent=t('modal_add_title'); $('#wallet-modal').classList.add('open'); $('#f-name').focus(); }
+function openEditModal(w){
+  resetForm(); state.editingId=w.id; $('#modal-title').textContent=t('modal_edit_title');
+  $('#f-name').value=w.name; $('#f-address').value=w.address; $('#f-balance').value=w.balance||'';
+  $('#f-lastused').value=w.lastUsed||''; $('#f-firstseen').value=w.firstSeen||''; $('#f-notes').value=w.notes||'';
+  $('#f-network').value=w.network; $('#f-purpose').value=w.purpose; $('#f-status').value=w.status;
+  fillGroupSelect(); $('#f-group').value=w.groupId||'';
+  state.formTags=(w.tags||[]).slice(); state.formUsedWith=(w.usedWith||[]).map(function(u){return {service:u.service,interactions:u.interactions};});
+  state.formIcon=w.icon||WALLET_ICONS[0]; state.formColor=w.color||COLORS[0];
+  renderTagChips(); renderUsedWithRows(); syncModalPickers(); $('#f-delete').classList.remove('hidden');
+  state.netTouched=true; updateAddrHint();
+  $('#wallet-modal').classList.add('open');
+}
+function closeModal(){ $('#wallet-modal').classList.remove('open'); }
+function saveWalletForm(){
+  var name=$('#f-name').value.trim(), address=$('#f-address').value.trim();
+  if(!name || !address){ toast(t('toast_fill_required')); return; }
+  var data = {
+    name:name, address:address, network:$('#f-network').value, purpose:$('#f-purpose').value, status:$('#f-status').value,
+    icon:state.formIcon, color:state.formColor, balance:$('#f-balance').value.trim(),
+    lastUsed:$('#f-lastused').value, firstSeen:$('#f-firstseen').value, notes:$('#f-notes').value.trim(),
+    groupId:$('#f-group').value||null, tags:state.formTags.slice(), usedWith:state.formUsedWith.filter(function(u){return u.service;})
+  };
+  if(state.editingId){
+    var idx=state.wallets.findIndex(function(w){return w.id===state.editingId;});
+    state.wallets[idx]=Object.assign({id:state.editingId}, data); toast(t('toast_wallet_updated')); track('wallet_edited', {network:data.network, purpose:data.purpose});
+  }else{
+    data.id=uid(); state.wallets.unshift(data); state.selectedId=data.id; toast(t('toast_wallet_added')); track('wallet_added', {network:data.network, purpose:data.purpose});
+  }
+  save(); closeModal(); renderCurrentView();
+}
+function deleteWallet(id){
+  if(!confirm(t('confirm_delete_wallet'))) return;
+  state.wallets = state.wallets.filter(function(w){return w.id!==id;});
+  if(state.selectedId===id) state.selectedId=null;
+  save(); toast(t('toast_wallet_deleted')); track('wallet_deleted'); renderCurrentView();
+}
+
+/* ================= modal: group ================= */
+function openGroupModal(){ state.groupIcon=WALLET_ICONS[0]; state.groupColor=COLORS[0]; $('#g-name').value=''; syncGroupPickers(); $('#group-modal').classList.add('open'); }
+function saveGroup(){
+  var name=$('#g-name').value.trim();
+  if(!name){ toast(t('toast_group_required')); return; }
+  state.groups.push({id:uid(), name:name, icon:state.groupIcon, color:state.groupColor});
+  save(); $('#group-modal').classList.remove('open'); toast(t('toast_group_created')); track('group_created'); renderCurrentView();
+}
+
+/* ================= filter bar ================= */
+function renderFilterBar(){
+  var bar=$('#filter-bar');
+  var netOpts = Object.keys(NETWORKS).map(function(k){
+    return '<button class="net-filter-btn'+(state.filterNetwork===k?' active':'')+'" data-net="'+k+'" title="'+NETWORKS[k].label+'">'+netIcon(k,17)+'</button>';
+  }).join('');
+  var stOpts = Object.keys(STATUSES).map(function(k){
+    return '<button class="st-filter-btn'+(state.filterStatus===k?' active':'')+'" data-st="'+k+'">'+STATUSES[k].label+'</button>';
+  }).join('');
+  bar.innerHTML = '<span class="filter-label">'+t('col_network')+':</span>'+netOpts+
+    '<span style="width:1px;background:var(--border);margin:0 4px;align-self:stretch"></span>'+
+    '<span class="filter-label">'+t('col_status')+':</span>'+stOpts+
+    (state.filterNetwork||state.filterStatus ? '<button class="icon-btn" id="clear-filters">'+t('group_clear_filter')+'</button>' : '');
+  $all('[data-net]',bar).forEach(function(b){ b.addEventListener('click', function(){ state.filterNetwork = state.filterNetwork===b.dataset.net?null:b.dataset.net; renderFilterBar(); renderCurrentView(); updateFilterBadge(); }); });
+  $all('[data-st]',bar).forEach(function(b){ b.addEventListener('click', function(){ state.filterStatus = state.filterStatus===b.dataset.st?null:b.dataset.st; renderFilterBar(); renderCurrentView(); updateFilterBadge(); }); });
+  var cf=$('#clear-filters',bar); if(cf) cf.addEventListener('click', function(){ state.filterNetwork=null; state.filterStatus=null; renderFilterBar(); renderCurrentView(); updateFilterBadge(); });
+}
+function updateFilterBadge(){ var n=(state.filterNetwork?1:0)+(state.filterStatus?1:0); $('#filter-badge').textContent = n ? ' ('+n+')' : ''; }
+
+/* ================= export / import / wipe ================= */
+function exportData(){
+  var payload={profile:state.profile, wallets:state.wallets, groups:state.groups, exportedAt:new Date().toISOString()};
+  state.profile.lastExport=Date.now(); save();
+  var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download='wallet-atlas-backup.json'; a.click(); URL.revokeObjectURL(url);
+  toast(t('toast_export_done')); track('backup_exported');
+}
+function importData(file){
+  var reader=new FileReader();
+  reader.onload=function(){
+    try{
+      var data=JSON.parse(reader.result);
+      if(!data || typeof data!=='object' || !Array.isArray(data.wallets)) throw new Error('bad format');
+      state.wallets=data.wallets;
+      if(Array.isArray(data.groups)) state.groups=data.groups;
+      if(data.profile && typeof data.profile==='object') state.profile=Object.assign({}, state.profile||{}, data.profile);
+      normalizeData();
+      state.lang=state.profile.lang; state.selectedId=null; state.filterGroupId=null; state.filterForgotten=false;
+      save(); applyTheme(); applyI18n(); applyBalanceToggleUI(); fillGroupSelect(); renderProfileChrome(); renderCurrentView(); toast(t('toast_import_done')); track('backup_imported');
+    }catch(e){ toast(t('toast_import_fail')); }
+  };
+  reader.readAsText(file);
+}
+function wipeAll(){
+  if(!confirm(t('confirm_wipe'))) return;
+  localStorage.removeItem(LS_PROFILE); localStorage.removeItem(LS_WALLETS); localStorage.removeItem(LS_GROUPS);
+  location.reload();
+}
+
+function closeSidebarMobile(){ $('#sidebar').classList.remove('open'); $('#sidebar-scrim').classList.remove('open'); }
+
+function showSiteGate(onSuccess){
+  applyI18n();
+  $('#sitegate').classList.remove('hidden');
+  var inp=$('#gate-pass'); inp.value=''; inp.focus();
+  function tryEnter(){
+    hashPin(inp.value).then(function(h){
+      if(h===SITE_PASSWORD_HASH){
+        try{ localStorage.setItem(LS_GATE,'1'); }catch(e){}
+        $('#sitegate').classList.add('hidden'); $('#gate-error').textContent='';
+        onSuccess();
+      } else {
+        $('#gate-error').textContent = t('gate_error'); inp.value=''; inp.focus();
+      }
+    });
+  }
+  $('#gate-enter-btn').onclick = tryEnter;
+  inp.onkeydown = function(e){ if(e.key==='Enter') tryEnter(); };
+}
+function showLockScreen(){
+  applyI18n();
+  document.documentElement.setAttribute('data-theme', (state.profile && state.profile.theme==='light') ? 'light' : 'dark');
+  $('#lockscreen').classList.remove('hidden');
+  var pinInput = $('#lock-pin'); pinInput.value=''; pinInput.focus();
+  function tryUnlock(){
+    hashPin(pinInput.value).then(function(h){
+      if(h===state.profile.pinHash){
+        $('#lockscreen').classList.add('hidden'); $('#lock-error').textContent='';
+        startApp();
+      } else {
+        $('#lock-error').textContent = t('lock_error'); pinInput.value=''; pinInput.focus();
+      }
+    });
+  }
+  $('#lock-unlock-btn').onclick = tryUnlock;
+  pinInput.onkeydown = function(e){ if(e.key==='Enter') tryUnlock(); };
+  $('#lock-reset-btn').onclick = function(){
+    if(confirm(t('confirm_wipe'))){
+      localStorage.removeItem(LS_PROFILE); localStorage.removeItem(LS_WALLETS); localStorage.removeItem(LS_GROUPS);
+      location.reload();
+    }
+  };
+}
+document.addEventListener('click', closeGlobalMenu);
+window.addEventListener('scroll', closeGlobalMenu, true);
+window.addEventListener('resize', closeGlobalMenu);
+
+/* ================= init ================= */
+function startApp(){
+  $('#onboarding').style.display='none'; $('#app').classList.add('active');
+  applyI18n(); applyTheme(); applyBalanceToggleUI(); renderProfileChrome();
+  initModalStatics(); fillGroupSelect(); renderFilterBar();
+  $('#mobile-logo-btn').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 19 7v10l-7 3.8L5 17V7z"/><circle cx="12" cy="9.3" r="1.15" fill="currentColor" stroke="none"/><circle cx="9" cy="14.2" r="1.15" fill="currentColor" stroke="none"/><circle cx="15" cy="14.2" r="1.15" fill="currentColor" stroke="none"/><path d="M12 9.3 9 14.2M12 9.3l3 4.9M9 14.2h6"/></svg>';
+  $('#mobile-settings-btn').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3.6v2.6M12 17.8v2.6M4.4 12H7M17 12h2.6M6.4 6.4l1.8 1.8M15.8 15.8l1.8 1.8M17.6 6.4l-1.8 1.8M8.2 15.8l-1.8 1.8"/></svg>';
+  switchView('overview');
+}
+function wireEvents(){
+  $all('.navitem').forEach(function(b){ b.addEventListener('click', function(){ switchView(b.dataset.view); }); });
+  $all('.mtab[data-view]').forEach(function(b){ b.addEventListener('click', function(){ switchView(b.dataset.view); }); });
+  $('#mtab-add').addEventListener('click', openAddModal);
+  $('#mtab-more').addEventListener('click', function(){ $('#sidebar').classList.add('open'); $('#sidebar-scrim').classList.add('open'); });
+  $('#mobile-logo-btn').addEventListener('click', function(){ $('#sidebar').classList.add('open'); $('#sidebar-scrim').classList.add('open'); });
+  $('#mobile-settings-btn').addEventListener('click', function(){ switchView('settings'); });
+  $('#brand-toggle').addEventListener('click', function(){
+    if(window.innerWidth>860){ $('#app').classList.toggle('collapsed'); }
+    else { closeSidebarMobile(); }
+  });
+  $('#add-wallet-btn').addEventListener('click', openAddModal);
+  $('#modal-close').addEventListener('click', closeModal);
+  $('#f-cancel').addEventListener('click', closeModal);
+  $('#f-save').addEventListener('click', saveWalletForm);
+  $('#f-delete').addEventListener('click', function(){ if(state.editingId){ closeModal(); deleteWallet(state.editingId); } });
+  $('#wallet-modal').addEventListener('click', function(e){ if(e.target.id==='wallet-modal') closeModal(); });
+
+  $('#group-modal-close').addEventListener('click', function(){ $('#group-modal').classList.remove('open'); });
+  $('#g-cancel').addEventListener('click', function(){ $('#group-modal').classList.remove('open'); });
+  $('#g-save').addEventListener('click', saveGroup);
+  $('#add-group-btn').addEventListener('click', openGroupModal);
+  $('#group-modal').addEventListener('click', function(e){ if(e.target.id==='group-modal') $('#group-modal').classList.remove('open'); });
+
+  $('#f-tags-input').addEventListener('keydown', function(e){
+    if(e.key==='Enter' && this.value.trim()){ e.preventDefault(); var tg=this.value.trim().replace(/^#/,''); if(state.formTags.indexOf(tg)===-1) state.formTags.push(tg); this.value=''; renderTagChips(); }
+  });
+  $('#f-address').addEventListener('input', function(){
+    var det=detectAddrFamily(this.value);
+    if(det && !state.netTouched){
+      var cur=$('#f-network').value;
+      if(NET_FAMILY[cur]!==det) $('#f-network').value = det==='evm' ? 'ethereum' : det;
+    }
+    updateAddrHint();
+  });
+  $('#f-network').addEventListener('change', function(){ state.netTouched=true; updateAddrHint(); });
+  $('#f-uw-add').addEventListener('click', function(){ state.formUsedWith.push({service:'',interactions:0}); renderUsedWithRows(); });
+
+  $('#sort-select').addEventListener('change', function(){ var p=this.value.split(':'); state.sort={key:p[0],dir:p[1]}; renderWalletsView(); });
+  $('#search-input').addEventListener('input', function(){ state.search=this.value; renderCurrentView(); });
+  $('#filter-btn').addEventListener('click', function(){ $('#filter-bar').classList.toggle('hidden'); });
+
+  $('#theme-toggle-btn').addEventListener('click', function(){ state.profile.theme = state.profile.theme==='light' ? 'dark' : 'light'; applyTheme(); save(); track('theme_changed', {theme:state.profile.theme}); });
+  $all('.theme-opt[data-theme]').forEach(function(b){ b.addEventListener('click', function(){ state.profile.theme=b.dataset.theme; applyTheme(); save(); }); });
+
+  $('#lang-toggle-btn').addEventListener('click', function(){ toggleLang(); });
+  $all('.theme-opt[data-lang]').forEach(function(b){ b.addEventListener('click', function(){ if(state.lang!==b.dataset.lang){ toggleLang(); } }); });
+
+  $('#balance-toggle-btn').addEventListener('click', function(){ toggleBalance(); });
+  $('#balance-switch').addEventListener('click', function(){ toggleBalance(); });
+
+  $('#profile-btn').addEventListener('click', function(e){ e.stopPropagation(); $('#profile-menu').classList.toggle('open'); });
+  document.addEventListener('click', function(){ $('#profile-menu').classList.remove('open'); });
+  $('#menu-export').addEventListener('click', exportData);
+  $('#menu-import').addEventListener('click', function(){ $('#import-file').click(); });
+  $('#menu-reset').addEventListener('click', wipeAll);
+
+  $('#save-profile-btn').addEventListener('click', function(){ state.profile.nickname = $('#set-nickname').value.trim() || state.profile.nickname; save(); renderProfileChrome(); toast(t('toast_profile_saved')); });
+  $('#set-export-btn').addEventListener('click', exportData);
+  $('#set-import-btn').addEventListener('click', function(){ $('#import-file').click(); });
+  $('#import-file').addEventListener('change', function(){ if(this.files[0]) importData(this.files[0]); this.value=''; });
+  $('#wipe-btn').addEventListener('click', wipeAll);
+
+  $('#pin-switch').addEventListener('click', function(){
+    if(state.profile.pinHash){
+      state.profile.pinHash=null; save(); renderSettings(); toast(t('toast_pin_off')); track('pin_disabled');
+    } else {
+      $('#pin-set-form').classList.remove('hidden'); $('#pin-new').focus();
+    }
+  });
+  $('#pin-save-btn').addEventListener('click', function(){
+    var v=$('#pin-new').value.trim();
+    if(!/^\d{4,8}$/.test(v)){ toast(t('toast_pin_invalid')); return; }
+    hashPin(v).then(function(h){
+      state.profile.pinHash=h; save(); $('#pin-new').value=''; renderSettings(); toast(t('toast_pin_on')); track('pin_enabled');
+    });
+  });
+  $('#analytics-switch').addEventListener('click', function(){
+    state.profile.analyticsOptOut = !state.profile.analyticsOptOut; save(); renderSettings();
+  });
+
+  $('#sidebar-scrim').addEventListener('click', closeSidebarMobile);
+}
+function toggleLang(){
+  state.lang = state.lang==='ru' ? 'en' : 'ru';
+  if(state.profile){ state.profile.lang=state.lang; save(); }
+  applyI18n(); renderCurrentView(); track('language_changed', {lang:state.lang});
+}
+function toggleBalance(){
+  state.profile.hideBalance = !state.profile.hideBalance;
+  save(); applyBalanceToggleUI(); renderCurrentView(); track('balance_toggled', {hidden:state.profile.hideBalance});
+}
+
+/* ================= boot ================= */
+load();
+wireEvents();
+function proceedPastGate(){
+  if(state.profile){
+    if(state.profile.hideBalance===undefined) state.profile.hideBalance=false;
+    if(state.profile.pinHash){ showLockScreen(); } else { startApp(); }
+  }
+  else{ initOnboarding(); }
+}
+var gateActive = SITE_PASSWORD_HASH && SITE_PASSWORD_HASH!=='2cc4f3909512f97bded502d4867e35dcd026b34ce06df8818dbbfccb14866ac0';
+var gateUnlocked = false;
+try{ gateUnlocked = localStorage.getItem(LS_GATE)==='1'; }catch(e){}
+if(gateActive && !gateUnlocked){ showSiteGate(proceedPastGate); } else { proceedPastGate(); }
+
+})();
+</script>
+</body>
+</html>
