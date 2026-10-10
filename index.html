@@ -212,6 +212,8 @@ tbody tr:last-child td{border-bottom:none;}
 .detail-name{font-size:15px;font-weight:700;}
 .detail-sub{font-size:12px;color:var(--text-dim);font-family:var(--font-mono);margin-top:2px;display:flex;align-items:center;gap:5px;}
 .detail-sub2{font-size:11.5px;color:var(--text-faint);margin-top:3px;}
+.detail-sub2 b{color:var(--text-dim);font-weight:600;}
+.detail-sub2 .link-btn{font-size:11.5px;padding:0;}
 .detail-body{padding:16px 18px;display:flex;flex-direction:column;gap:16px;max-height:calc(100vh - 220px);overflow-y:auto;}
 .detail-balance{font-size:26px;font-weight:800;}
 .dsec-label{font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.04em;font-weight:600;margin-bottom:8px;}
@@ -345,7 +347,7 @@ tbody tr:last-child td{border-bottom:none;}
 }
 </style>
 <!-- Analytics: after deploying, replace REPLACE_WITH_YOUR_UMAMI_WEBSITE_ID with your own Umami website id (see DEPLOYMENT.md). Safe to leave as-is for local use or the Claude preview — it will just fail to load silently. -->
-<script defer src="https://cloud.umami.is/script.js" data-website-id="166d10a1-4ad1-4e1a-97d6-8654cf5d3344"></script>
+<script defer src="https://cloud.umami.is/script.js" data-website-id="REPLACE_WITH_YOUR_UMAMI_WEBSITE_ID"></script>
 </head>
 <body>
 
@@ -596,6 +598,10 @@ tbody tr:last-child td{border-bottom:none;}
         <div class="field"><label data-i18n="f_lastused_label">Последнее использование</label><input type="date" id="f-lastused"></div>
         <div class="field"><label data-i18n="f_firstseen_label">Первая активность</label><input type="date" id="f-firstseen"></div>
       </div>
+      <div class="form-row">
+        <div class="field"><label data-i18n="f_createdin_label">Создан в</label><input type="text" id="f-createdin" list="createdin-list" maxlength="40" autocomplete="off" data-i18n-ph="f_createdin_ph" placeholder="Phantom, MetaMask, Axiom…"><datalist id="createdin-list"><option value="Phantom"><option value="Solflare"><option value="Backpack"><option value="MetaMask"><option value="Rabby"><option value="Trust Wallet"><option value="Coinbase Wallet"><option value="Robinhood Wallet"><option value="Tonkeeper"><option value="Telegram Wallet"><option value="Axiom"><option value="GMGN"><option value="Photon"><option value="BullX"><option value="Trojan"><option value="Binance"><option value="OKX"><option value="Bybit"><option value="Ledger"><option value="Trezor"></datalist></div>
+        <div class="field"><label data-i18n="f_createdat_label">Когда создан (примерно)</label><input type="date" id="f-createdat"></div>
+      </div>
       <div class="field"><label data-i18n="f_tags_label">Теги (Enter чтобы добавить)</label>
         <div class="chip-input" id="f-tags-wrap"><input type="text" id="f-tags-input" data-i18n-ph="f_tags_ph" placeholder="trading, solana..."></div>
       </div>
@@ -701,6 +707,8 @@ security_empty_title:"Нечего проверять", security_empty_desc:"В�
 sec_mark_active:"Отметить Active", sec_archive:"Архивировать", sec_edit:"Открыть",
 forgotten_view_title:"Забытые кошельки",
 nav_more:"Ещё", add_wallet_short:"Добавить",
+detail_created_in:"Создан в {where}", detail_created_unset:"Укажи, где создан", detail_created_plain:"Создан",
+f_createdin_label:"Создан в", f_createdin_ph:"Phantom, MetaMask, Axiom…", f_createdat_label:"Когда создан (примерно)",
 refresh_title:"Обновить баланс с блокчейна", menu_refresh:"Обновить с блокчейна", refresh_loading:"Запрашиваю данные сети…",
 refresh_ok:"Баланс и дата активности обновлены", refresh_ok_nodate:"Баланс обновлён. Дату активности для этой сети впиши вручную",
 refresh_unsupported:"Для этой сети автообновление недоступно — впиши вручную", refresh_rate:"Сервис временно ограничил запросы — попробуй через минуту",
@@ -779,6 +787,8 @@ security_empty_title:"Nothing to review", security_empty_desc:"All wallets look 
 sec_mark_active:"Mark Active", sec_archive:"Archive", sec_edit:"Open",
 forgotten_view_title:"Forgotten wallets",
 nav_more:"More", add_wallet_short:"Add",
+detail_created_in:"Created in {where}", detail_created_unset:"Add where it was created", detail_created_plain:"Created",
+f_createdin_label:"Created in", f_createdin_ph:"Phantom, MetaMask, Axiom…", f_createdat_label:"Created (approx.)",
 refresh_title:"Refresh balance from the blockchain", menu_refresh:"Refresh from blockchain", refresh_loading:"Asking the network…",
 refresh_ok:"Balance and last activity updated", refresh_ok_nodate:"Balance updated. Enter the last-activity date manually for this network",
 refresh_unsupported:"Auto-refresh isn't available for this network — enter it manually", refresh_rate:"The service temporarily limited requests — try again in a minute",
@@ -981,7 +991,7 @@ function normalizeData(){
     w.color=safeColor(w.color);
     w.balance = w.balance==null ? '' : String(w.balance).slice(0,30);
     w.notes = w.notes==null ? '' : String(w.notes).slice(0,2000);
-    w.lastUsed=safeDate(w.lastUsed); w.firstSeen=safeDate(w.firstSeen);
+    w.lastUsed=safeDate(w.lastUsed); w.firstSeen=safeDate(w.firstSeen); w.createdAt=safeDate(w.createdAt); w.createdIn = w.createdIn==null ? '' : String(w.createdIn).slice(0,40);
     w.tags = Array.isArray(w.tags) ? w.tags.map(function(x){return String(x).slice(0,30);}).slice(0,30) : [];
     w.usedWith = Array.isArray(w.usedWith) ? w.usedWith.filter(function(u){return u && u.service;}).map(function(u){return {service:String(u.service).slice(0,40), interactions:+u.interactions||0};}).slice(0,50) : [];
     w.groupId = (w.groupId && gids[w.groupId]) ? w.groupId : null;
@@ -1018,6 +1028,8 @@ function seedData(){
     {id:uid(), name:'TON Gaming', address:'EQptUsGr7CmY-uCu3ZR1zTOlUcR64cXQLioDnkHIfxIq2HZt', network:'ton', purpose:'gaming', status:'review', icon:'gamepad', color:'#0098EA', balance:'$12.75', lastUsed:ago(133), firstSeen:'2024-03-15', tags:['ton','gaming'], groupId:null, usedWith:[{service:'TON App',interactions:11},{service:'Fragment',interactions:2}], notes:''},
     {id:uid(), name:'Arb Bridge', address:'0x454f31af3176813e02ea68ef786e4d3cea27d269', network:'arbitrum', purpose:'bridge', status:'active', icon:'bridge', color:'#28A0F0', balance:'$56.23', lastUsed:ago(67), firstSeen:'2023-12-01', tags:['arbitrum','bridge'], groupId:null, usedWith:[{service:'Jumper',interactions:7},{service:'Orbiter',interactions:3}], notes:''}
   ];
+  var CI = {'Main SOL':['Phantom','2023-11-01'], 'Meme Trading #03':['Axiom','2024-08-13'], 'ZK Farm 2024':['Rabby','2024-01-19'], 'Burner 07':['GMGN','2024-04-30'], 'Old ETH Storage':['MetaMask','2021-03-10'], 'NFT Collection':['Phantom','2023-06-09'], 'Base Builder':['Rabby','2024-02-03'], 'CEX Deposit':['Binance','2022-08-31'], 'TON Gaming':['Tonkeeper','2024-03-14'], 'Arb Bridge':['MetaMask','2023-11-30']};
+  state.wallets.forEach(function(w){ var c=CI[w.name]; if(c){ w.createdIn=c[0]; w.createdAt=c[1]; } });
 }
 
 /* ================= computed helpers ================= */
@@ -1036,7 +1048,7 @@ function filteredWallets(){
   if(state.search){
     var q=state.search.toLowerCase();
     list=list.filter(function(w){
-      return (w.name||'').toLowerCase().indexOf(q)>-1 || (w.address||'').toLowerCase().indexOf(q)>-1 ||
+      return (w.name||'').toLowerCase().indexOf(q)>-1 || (w.address||'').toLowerCase().indexOf(q)>-1 || (w.createdIn||'').toLowerCase().indexOf(q)>-1 ||
         (w.tags||[]).join(' ').toLowerCase().indexOf(q)>-1 || (w.purpose||'').toLowerCase().indexOf(q)>-1 ||
         (w.usedWith||[]).some(function(u){return u.service.toLowerCase().indexOf(q)>-1;});
     });
@@ -1303,11 +1315,13 @@ function renderDetail(target, list){
   var tags=(w.tags||[]).map(function(tag){return '<span class="tag-chip">#'+esc(tag)+'</span>';}).join('');
   var uwList=(w.usedWith||[]).map(function(u){ return '<div class="kv-row"><span class="k">'+esc(u.service)+'</span><span>'+t('uw_interactions',{n:u.interactions||0})+'</span></div>'; }).join('') || '<div class="detail-empty" style="padding:10px 0">'+t('detail_no_usedwith')+'</div>';
   var tl = [];
+  if(w.createdIn || w.createdAt) tl.push({d:w.createdAt, l: w.createdIn ? t('detail_created_in',{where:esc(w.createdIn)}) : t('detail_created_plain')});
   if(w.firstSeen) tl.push({d:w.firstSeen,l:t('detail_firstseen')});
-  (w.usedWith||[]).slice(0,3).forEach(function(u){ tl.push({d:w.firstSeen,l:esc(u.service)}); });
   if(w.lastUsed) tl.push({d:w.lastUsed,l:t('detail_lastused')});
   var tlHtml = tl.length ? tl.map(function(tt){return '<div class="tl-item"><div class="tl-dot"></div><div><div class="tl-date">'+fmtDate(tt.d)+'</div><div class="tl-label">'+tt.l+'</div></div></div>';}).join('') : '<div class="detail-empty" style="padding:10px 0">'+t('detail_no_timeline')+'</div>';
-  var createdLine = w.firstSeen ? t('detail_created_known',{date:fmtDate(w.firstSeen)}) : t('detail_created_unknown');
+  var createdLine = w.createdIn
+    ? t('detail_created_in',{where:'<b>'+esc(w.createdIn)+'</b>'}) + (w.createdAt ? ' · '+fmtDate(w.createdAt) : '')
+    : '<button type="button" class="link-btn" id="det-set-created">'+t('detail_created_unset')+'</button>';
 
   target.innerHTML =
     '<div class="detail-top">'+
@@ -1332,6 +1346,7 @@ function renderDetail(target, list){
   var eb=$('#det-explorer',target); if(eb) eb.onclick=function(){ window.open(url,'_blank'); };
   var rb=$('#det-refresh',target); if(rb) rb.onclick=function(){ refreshWalletFromChain(w.id); };
   $('#det-edit',target).onclick=function(){ openEditModal(w); };
+  var sc=$('#det-set-created',target); if(sc) sc.onclick=function(){ openEditModal(w); };
   $all('.addr-copy',target).forEach(function(el){ el.addEventListener('click', function(e){ e.stopPropagation(); copyToClipboard(el.dataset.addr, el); }); });
 }
 
@@ -1549,7 +1564,7 @@ function updateAddrHint(){
 }
 function resetForm(){
   state.formTags=[]; state.formUsedWith=[]; state.formIcon=WALLET_ICONS[0]; state.formColor=COLORS[0]; state.editingId=null; state.netTouched=false;
-  $('#f-name').value=''; $('#f-address').value=''; $('#f-balance').value=''; $('#f-lastused').value=''; $('#f-firstseen').value=''; $('#f-notes').value='';
+  $('#f-name').value=''; $('#f-address').value=''; $('#f-balance').value=''; $('#f-lastused').value=''; $('#f-firstseen').value=''; $('#f-createdin').value=''; $('#f-createdat').value=''; $('#f-notes').value='';
   $('#f-network').value='solana'; $('#f-purpose').value='trading'; $('#f-status').value='active';
   fillGroupSelect(); $('#f-group').value=''; $('#f-tags-input').value='';
   renderTagChips(); renderUsedWithRows(); syncModalPickers(); $('#f-delete').classList.add('hidden'); updateAddrHint();
@@ -1561,7 +1576,7 @@ function openAddModal(){ resetForm(); $('#modal-title').textContent=t('modal_add
 function openEditModal(w){
   resetForm(); state.editingId=w.id; $('#modal-title').textContent=t('modal_edit_title');
   $('#f-name').value=w.name; $('#f-address').value=w.address; $('#f-balance').value=w.balance||'';
-  $('#f-lastused').value=w.lastUsed||''; $('#f-firstseen').value=w.firstSeen||''; $('#f-notes').value=w.notes||'';
+  $('#f-lastused').value=w.lastUsed||''; $('#f-firstseen').value=w.firstSeen||''; $('#f-createdin').value=w.createdIn||''; $('#f-createdat').value=w.createdAt||''; $('#f-notes').value=w.notes||'';
   $('#f-network').value=w.network; $('#f-purpose').value=w.purpose; $('#f-status').value=w.status;
   fillGroupSelect(); $('#f-group').value=w.groupId||'';
   state.formTags=(w.tags||[]).slice(); state.formUsedWith=(w.usedWith||[]).map(function(u){return {service:u.service,interactions:u.interactions};});
@@ -1577,7 +1592,7 @@ function saveWalletForm(){
   var data = {
     name:name, address:address, network:$('#f-network').value, purpose:$('#f-purpose').value, status:$('#f-status').value,
     icon:state.formIcon, color:state.formColor, balance:$('#f-balance').value.trim(),
-    lastUsed:$('#f-lastused').value, firstSeen:$('#f-firstseen').value, notes:$('#f-notes').value.trim(),
+    lastUsed:$('#f-lastused').value, firstSeen:$('#f-firstseen').value, createdIn:$('#f-createdin').value.trim().slice(0,40), createdAt:$('#f-createdat').value, notes:$('#f-notes').value.trim(),
     groupId:$('#f-group').value||null, tags:state.formTags.slice(), usedWith:state.formUsedWith.filter(function(u){return u.service;})
   };
   if(state.editingId){
