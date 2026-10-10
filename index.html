@@ -234,6 +234,8 @@ tbody tr:last-child td{border-bottom:none;}
 .addr-copy:hover{color:var(--accent);}
 .addr-copy.copied{color:var(--green);}
 .copy-ic{font-size:10px;opacity:.7;}
+@keyframes wa-spin{to{transform:rotate(360deg)}}
+.det-explorer-btn.spin svg{animation:wa-spin .9s linear infinite;}
 .det-explorer-btn{width:44px;flex-shrink:0;padding:0;justify-content:center;}
 .sec-list{display:flex;flex-direction:column;gap:10px;padding:18px;}
 .sec-card{background:var(--bg3);border:1px solid var(--border);border-radius:11px;padding:14px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
@@ -343,7 +345,7 @@ tbody tr:last-child td{border-bottom:none;}
 }
 </style>
 <!-- Analytics: after deploying, replace REPLACE_WITH_YOUR_UMAMI_WEBSITE_ID with your own Umami website id (see DEPLOYMENT.md). Safe to leave as-is for local use or the Claude preview — it will just fail to load silently. -->
-<script defer src="https://cloud.umami.is/script.js" data-website-id="REPLACE_WITH_YOUR_UMAMI_WEBSITE_ID"></script>
+<script defer src="https://cloud.umami.is/script.js" data-website-id="166d10a1-4ad1-4e1a-97d6-8654cf5d3344"></script>
 </head>
 <body>
 
@@ -699,6 +701,10 @@ security_empty_title:"Нечего проверять", security_empty_desc:"В�
 sec_mark_active:"Отметить Active", sec_archive:"Архивировать", sec_edit:"Открыть",
 forgotten_view_title:"Забытые кошельки",
 nav_more:"Ещё", add_wallet_short:"Добавить",
+refresh_title:"Обновить баланс с блокчейна", menu_refresh:"Обновить с блокчейна", refresh_loading:"Запрашиваю данные сети…",
+refresh_ok:"Баланс и дата активности обновлены", refresh_ok_nodate:"Баланс обновлён. Дату активности для этой сети впиши вручную",
+refresh_unsupported:"Для этой сети автообновление недоступно — впиши вручную", refresh_rate:"Сервис временно ограничил запросы — попробуй через минуту",
+refresh_bad_addr:"Сеть не приняла адрес — проверь, что он верный и выбрана правильная сеть", refresh_net:"Не удалось связаться с сетью — попробуй позже",
 addr_ok:"Формат адреса корректен", addr_bad:"Адрес не похож на формат {net} — ссылка на эксплорер может не открыться.", addr_dup:"Такой адрес уже есть в базе: {name}",
 sort_lastused_desc:"Сначала недавние", sort_lastused_asc:"Сначала давно не использованные", sort_name:"По имени А→Я", sort_balance:"По балансу ↓", sort_network:"По сети", sort_status:"По статусу",
 nudge_title:"Сделай резервную копию", nudge_text:"Данные хранятся только в этом браузере, а свежей копии нет. Сохрани файл — это секунда.", nudge_export:"Экспорт", nudge_later:"Позже",
@@ -773,6 +779,10 @@ security_empty_title:"Nothing to review", security_empty_desc:"All wallets look 
 sec_mark_active:"Mark Active", sec_archive:"Archive", sec_edit:"Open",
 forgotten_view_title:"Forgotten wallets",
 nav_more:"More", add_wallet_short:"Add",
+refresh_title:"Refresh balance from the blockchain", menu_refresh:"Refresh from blockchain", refresh_loading:"Asking the network…",
+refresh_ok:"Balance and last activity updated", refresh_ok_nodate:"Balance updated. Enter the last-activity date manually for this network",
+refresh_unsupported:"Auto-refresh isn't available for this network — enter it manually", refresh_rate:"The service temporarily limited requests — try again in a minute",
+refresh_bad_addr:"The network rejected the address — check it and the selected network", refresh_net:"Couldn't reach the network — try again later",
 addr_ok:"Address format looks valid", addr_bad:"This doesn't look like a valid {net} address — the explorer link may not open.", addr_dup:"This address is already in your atlas: {name}",
 sort_lastused_desc:"Recently used first", sort_lastused_asc:"Least recently used first", sort_name:"Name A→Z", sort_balance:"Balance high→low", sort_network:"By network", sort_status:"By status",
 nudge_title:"Back up your data", nudge_text:"Your data lives only in this browser and there's no recent backup. Save a file — it takes a second.", nudge_export:"Export", nudge_later:"Later",
@@ -848,12 +858,12 @@ var STATUSES = {
 var AVATARS = ['husky','cat','raven','dragon','bear','rabbit','fox','shark','panda','owl','penguin','monkey','bull','frog','unicorn','turtle'];
 var WALLET_ICON_DEFS = {"briefcase": "<rect x=\"3\" y=\"8\" width=\"18\" height=\"11\" rx=\"2\"/><path d=\"M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\"/><path d=\"M3 13h18\"/>", "chart": "<path d=\"M4 16l5-6 4 3 6-8\"/><path d=\"M15 5h4v4\"/>", "sprout": "<path d=\"M12 20v-8.5\"/><path d=\"M12 11.5c0-3.3 2.2-5.8 5.4-5.8.2 3.3-2.2 5.8-5.4 5.8z\"/><path d=\"M12 14.2c0-2.6-1.8-4.6-4.4-4.6-.2 2.6 1.8 4.6 4.4 4.6z\"/>", "flame": "<path d=\"M12 3.2s4.2 4.4 4.2 8.7a4.2 4.2 0 1 1-8.4 0c0-1.3.5-2.4 1.2-3.3.1 1.4 1.1 2.1 1.1 2.1-.5-1.7.4-3.7 1.9-7.5z\"/>", "coins": "<ellipse cx=\"12\" cy=\"6.8\" rx=\"6\" ry=\"2.2\"/><path d=\"M6 6.8v5c0 1.2 2.7 2.2 6 2.2s6-1 6-2.2v-5\"/><path d=\"M6 11.8v5c0 1.2 2.7 2.2 6 2.2s6-1 6-2.2v-5\"/>", "image": "<rect x=\"3\" y=\"4.5\" width=\"18\" height=\"15\" rx=\"2\"/><circle cx=\"8.4\" cy=\"9.8\" r=\"1.5\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M4 16.5l5-5 4 4 3-3 4 4\"/>", "bot": "<rect x=\"5\" y=\"9\" width=\"14\" height=\"9.5\" rx=\"3\"/><path d=\"M12 9V6\"/><circle cx=\"12\" cy=\"4.7\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"9\" cy=\"13.2\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"15\" cy=\"13.2\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M3 12.5h2M19 12.5h2\"/>", "gamepad": "<rect x=\"3\" y=\"8.2\" width=\"18\" height=\"9\" rx=\"4\"/><path d=\"M8 10.7v4M6 12.7h4\"/><circle cx=\"15.8\" cy=\"11.2\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"17.8\" cy=\"13.7\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/>", "bridge": "<path d=\"M9.5 14.5l5-5\"/><path d=\"M8.2 12 6.4 13.8a2.7 2.7 0 0 0 3.8 3.8l1.8-1.8\"/><path d=\"M15.8 12l1.8-1.8a2.7 2.7 0 0 0-3.8-3.8l-1.8 1.8\"/>", "home": "<path d=\"M4 11.2 12 4.4l8 6.8\"/><path d=\"M6.2 10v9.2h11.6V10\"/>", "bolt": "<path d=\"M13.2 3.2 5.6 13.6h5l-1 7.2 8.8-10.8h-5.2z\"/>", "target": "<circle cx=\"12\" cy=\"12\" r=\"8\"/><circle cx=\"12\" cy=\"12\" r=\"4.4\"/><circle cx=\"12\" cy=\"12\" r=\"1.1\" fill=\"currentColor\" stroke=\"none\"/>", "flask": "<path d=\"M9.5 3.2h5\"/><path d=\"M10.3 3.2v6.2l-5 8.7a2 2 0 0 0 1.7 3h10a2 2 0 0 0 1.7-3l-5-8.7V3.2\"/><path d=\"M8.2 15.2h7.6\"/>", "wave": "<path d=\"M3.2 14.6c2-2 4-2 6 0s4 2 6 0 4-2 6 0\"/><path d=\"M3.2 18.8c2-2 4-2 6 0s4 2 6 0 4-2 6 0\"/>", "question": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M9.4 9.4a2.6 2.6 0 1 1 3.6 2.4c-.8.5-1 1-1 2\"/><circle cx=\"12\" cy=\"16.6\" r=\"0.9\" fill=\"currentColor\" stroke=\"none\"/>", "satellite": "<rect x=\"9.2\" y=\"9.2\" width=\"5.6\" height=\"5.6\" rx=\"1\" transform=\"rotate(45 12 12)\"/><path d=\"M6 6 4.2 4.2M18 6l1.8-1.8M6 18l-1.8 1.8M18 18l1.8 1.8\"/>"};
 function walletIcon(key){ var d=WALLET_ICON_DEFS[key]||WALLET_ICON_DEFS.question; return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>'; }
-var UI_ICONS = {"alert": "<path d=\"M12 4 3.4 19h17.2z\"/><path d=\"M12 10v4.2\"/><circle cx=\"12\" cy=\"16.8\" r=\".9\" fill=\"currentColor\" stroke=\"none\"/>", "folder": "<path d=\"M3.5 7.5A2 2 0 0 1 5.5 5.5h4l2 2.2h7a2 2 0 0 1 2 2v8.3a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z\"/>", "checkcircle": "<circle cx=\"12\" cy=\"12\" r=\"8.6\"/><path d=\"M8.4 12.3l2.4 2.4 4.8-5.2\"/>", "moon": "<path d=\"M19.5 14.6A7.8 7.8 0 0 1 9.4 4.5a7.8 7.8 0 1 0 10.1 10.1z\"/>", "sun": "<circle cx=\"12\" cy=\"12\" r=\"3.8\"/><path d=\"M12 3.4v2M12 18.6v2M3.4 12h2M18.6 12h2M5.9 5.9l1.4 1.4M16.7 16.7l1.4 1.4M18.1 5.9l-1.4 1.4M7.3 16.7l-1.4 1.4\"/>", "eye": "<path d=\"M2.8 12S6.2 5.8 12 5.8 21.2 12 21.2 12 17.8 18.2 12 18.2 2.8 12 2.8 12z\"/><circle cx=\"12\" cy=\"12\" r=\"2.8\"/>", "eyeoff": "<path d=\"M4.2 4.2 19.8 19.8\"/><path d=\"M9.9 6.1A9.6 9.6 0 0 1 12 5.8c5.8 0 9.2 6.2 9.2 6.2a15.6 15.6 0 0 1-2.6 3.3M6.3 7.9C4 9.6 2.8 12 2.8 12s3.4 6.2 9.2 6.2c1.3 0 2.5-.3 3.5-.8\"/><path d=\"M10 10.2a2.8 2.8 0 0 0 3.8 3.8\"/>", "edit": "<path d=\"M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17z\"/><path d=\"M13.6 7.4l3 3\"/>", "trash": "<path d=\"M4.5 7h15\"/><path d=\"M9.5 7V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v2\"/><path d=\"M6.5 7l.8 11.2a2 2 0 0 0 2 1.8h5.4a2 2 0 0 0 2-1.8L17.5 7\"/><path d=\"M10 11v5M14 11v5\"/>", "check": "<path d=\"M5 12.8l4.4 4.4L19 7.4\"/>", "lock": "<rect x=\"5\" y=\"10.5\" width=\"14\" height=\"9.5\" rx=\"2.2\"/><path d=\"M8.2 10.5V8a3.8 3.8 0 0 1 7.6 0v2.5\"/>"};
+var UI_ICONS = {"refresh": "<path d=\"M22.5 6v5h-5\"/><path d=\"M1.5 18v-5h5\"/><path d=\"M4 10.5a8.5 8.5 0 0 1 14.5-4.9L22.5 9\"/><path d=\"M20 13.5a8.5 8.5 0 0 1-14.5 4.9L1.5 15\"/>", "alert": "<path d=\"M12 4 3.4 19h17.2z\"/><path d=\"M12 10v4.2\"/><circle cx=\"12\" cy=\"16.8\" r=\".9\" fill=\"currentColor\" stroke=\"none\"/>", "folder": "<path d=\"M3.5 7.5A2 2 0 0 1 5.5 5.5h4l2 2.2h7a2 2 0 0 1 2 2v8.3a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z\"/>", "checkcircle": "<circle cx=\"12\" cy=\"12\" r=\"8.6\"/><path d=\"M8.4 12.3l2.4 2.4 4.8-5.2\"/>", "moon": "<path d=\"M19.5 14.6A7.8 7.8 0 0 1 9.4 4.5a7.8 7.8 0 1 0 10.1 10.1z\"/>", "sun": "<circle cx=\"12\" cy=\"12\" r=\"3.8\"/><path d=\"M12 3.4v2M12 18.6v2M3.4 12h2M18.6 12h2M5.9 5.9l1.4 1.4M16.7 16.7l1.4 1.4M18.1 5.9l-1.4 1.4M7.3 16.7l-1.4 1.4\"/>", "eye": "<path d=\"M2.8 12S6.2 5.8 12 5.8 21.2 12 21.2 12 17.8 18.2 12 18.2 2.8 12 2.8 12z\"/><circle cx=\"12\" cy=\"12\" r=\"2.8\"/>", "eyeoff": "<path d=\"M4.2 4.2 19.8 19.8\"/><path d=\"M9.9 6.1A9.6 9.6 0 0 1 12 5.8c5.8 0 9.2 6.2 9.2 6.2a15.6 15.6 0 0 1-2.6 3.3M6.3 7.9C4 9.6 2.8 12 2.8 12s3.4 6.2 9.2 6.2c1.3 0 2.5-.3 3.5-.8\"/><path d=\"M10 10.2a2.8 2.8 0 0 0 3.8 3.8\"/>", "edit": "<path d=\"M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17z\"/><path d=\"M13.6 7.4l3 3\"/>", "trash": "<path d=\"M4.5 7h15\"/><path d=\"M9.5 7V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v2\"/><path d=\"M6.5 7l.8 11.2a2 2 0 0 0 2 1.8h5.4a2 2 0 0 0 2-1.8L17.5 7\"/><path d=\"M10 11v5M14 11v5\"/>", "check": "<path d=\"M5 12.8l4.4 4.4L19 7.4\"/>", "lock": "<rect x=\"5\" y=\"10.5\" width=\"14\" height=\"9.5\" rx=\"2.2\"/><path d=\"M8.2 10.5V8a3.8 3.8 0 0 1 7.6 0v2.5\"/>"};
 function uiIcon(name,size){ var d=UI_ICONS[name]||''; size=size||16; return '<svg viewBox="0 0 24 24" width="'+size+'" height="'+size+'" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>'; }
 var WALLET_ICONS = ["briefcase", "chart", "sprout", "flame", "coins", "image", "bot", "gamepad", "bridge", "home", "bolt", "target", "flask", "wave", "question", "satellite"];
 var COLORS = ['#5b7cff','#34d399','#f5a524','#f5556c','#a78bfa','#38bdf8','#fb923c','#2dd4bf'];
 var LS_PROFILE='wa_profile', LS_WALLETS='wa_wallets', LS_GROUPS='wa_groups', LS_GATE='wa_site_unlocked';
-var SITE_PASSWORD_HASH = '2cc4f3909512f97bded502d4867e35dcd026b34ce06df8818dbbfccb14866ac0';
+var SITE_PASSWORD_HASH = 'REPLACE_WITH_SITE_PASSWORD_HASH';
 
 /* ================= state ================= */
 var state = {
@@ -1178,12 +1188,93 @@ function renderTable(tableEl, list, onRowClick){
     btn.addEventListener('click', function(e){ e.stopPropagation(); openRowMenu(btn.dataset.menu, btn); });
   });
 }
+var CHAIN_SRC = {
+  solana:{kind:'solana', url:'https://solana.publicnode.com', symbol:'SOL', host:'publicnode.com'},
+  ethereum:{kind:'evm', url:'https://rpc.nodeflare.app/eth/public', symbol:'ETH', host:'nodeflare.app'},
+  base:{kind:'evm', url:'https://rpc.nodeflare.app/base/public', symbol:'ETH', host:'nodeflare.app'},
+  bnb:{kind:'evm', url:'https://rpc.nodeflare.app/bnb/public', symbol:'BNB', host:'nodeflare.app'},
+  arbitrum:{kind:'evm', url:'https://rpc.nodeflare.app/arb/public', symbol:'ETH', host:'nodeflare.app'},
+  polygon:{kind:'evm', url:'https://rpc.nodeflare.app/polygon/public', symbol:'POL', host:'nodeflare.app'},
+  ton:{kind:'ton', url:'https://toncenter.com/api/v2', symbol:'TON', host:'toncenter.com'}
+};
+function chainFetch(url, opts){
+  var ctrl = (typeof AbortController!=='undefined') ? new AbortController() : null;
+  var timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, 9000) : null;
+  var o = Object.assign({}, opts||{}); if(ctrl) o.signal = ctrl.signal;
+  return fetch(url, o).then(function(r){
+    if(timer) clearTimeout(timer);
+    if(r.status===429) throw new Error('RATE');
+    if(r.status===403) throw new Error('RATE');
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.json();
+  }, function(){ if(timer) clearTimeout(timer); throw new Error('NET'); });
+}
+function rpcCall(url, method, params){
+  return chainFetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({jsonrpc:'2.0', id:1, method:method, params:params})})
+    .then(function(j){ if(j && j.error) throw new Error('RPC '+(j.error.message||'error')); return j.result; });
+}
+function fmtUnits(raw, decimals, symbol){
+  var big = (typeof raw==='bigint') ? raw : BigInt(raw);
+  var base = BigInt(10) ** BigInt(decimals);
+  var whole = big / base, frac = big % base;
+  var fs = frac.toString().padStart(decimals,'0').slice(0,4).replace(/0+$/,'');
+  return whole.toString().replace(/\B(?=(\d{3})+(?!\d))/g,',') + (fs?'.'+fs:'') + ' ' + symbol;
+}
+function dateFromUnix(sec){ return sec ? new Date(sec*1000).toISOString().slice(0,10) : ''; }
+function fetchChainData(w){
+  var src = CHAIN_SRC[w.network]; var a = w.address;
+  if(!src) return Promise.reject(new Error('UNSUPPORTED'));
+  if(src.kind==='evm'){
+    return rpcCall(src.url, 'eth_getBalance', [a, 'latest']).then(function(hex){
+      return {balance: fmtUnits(BigInt(hex), 18, src.symbol), lastUsed:'', hasDate:false};
+    });
+  }
+  if(src.kind==='solana'){
+    return rpcCall(src.url, 'getBalance', [a]).then(function(res){
+      var bal = fmtUnits(BigInt(res.value), 9, src.symbol);
+      return rpcCall(src.url, 'getSignaturesForAddress', [a, {limit:1}]).then(function(sigs){
+        var t0 = sigs && sigs[0] && sigs[0].blockTime;
+        return {balance:bal, lastUsed:dateFromUnix(t0), hasDate:!!t0};
+      }, function(){ return {balance:bal, lastUsed:'', hasDate:false}; });
+    });
+  }
+  if(src.kind==='ton'){
+    return chainFetch(src.url+'/getAddressBalance?address='+encodeURIComponent(a)).then(function(j){
+      if(!j || !j.ok) throw new Error('RPC bad address');
+      var bal = fmtUnits(BigInt(j.result), 9, src.symbol);
+      return chainFetch(src.url+'/getTransactions?address='+encodeURIComponent(a)+'&limit=1').then(function(tj){
+        var t0 = tj && tj.ok && tj.result && tj.result[0] && tj.result[0].utime;
+        return {balance:bal, lastUsed:dateFromUnix(t0), hasDate:!!t0};
+      }, function(){ return {balance:bal, lastUsed:'', hasDate:false}; });
+    });
+  }
+  return Promise.reject(new Error('UNSUPPORTED'));
+}
+var refreshing = {};
+function refreshWalletFromChain(id){
+  var w = state.wallets.find(function(x){return x.id===id;});
+  if(!w || refreshing[id]) return;
+  if(!CHAIN_SRC[w.network]){ toast(t('refresh_unsupported')); return; }
+  refreshing[id]=true; toast(t('refresh_loading'));
+  var btn=$('#det-refresh'); if(btn) btn.classList.add('spin');
+  fetchChainData(w).then(function(r){
+    w.balance = r.balance;
+    if(r.hasDate) w.lastUsed = r.lastUsed;
+    save(); renderCurrentView();
+    toast(r.hasDate ? t('refresh_ok') : t('refresh_ok_nodate'));
+    track('chain_refresh', {network:w.network, ok:true, date:r.hasDate});
+  }).catch(function(e){
+    var m = String(e && e.message || '');
+    toast(m==='RATE' ? t('refresh_rate') : (m.indexOf('RPC')===0 ? t('refresh_bad_addr') : t('refresh_net')));
+    track('chain_refresh', {network:w.network, ok:false, reason:m.slice(0,30)});
+  }).then(function(){ refreshing[id]=false; var b=$('#det-refresh'); if(b) b.classList.remove('spin'); });
+}
 function openRowMenu(id, btnEl){
   var w = state.wallets.find(function(x){return x.id===id;});
   if(!w) return;
   var net = NETWORKS[w.network]||NETWORKS.other;
   var menu = $('#global-row-menu');
-  menu.innerHTML = '<button data-act="edit">'+uiIcon('edit',15)+t('menu_edit')+'</button>'+(net.explorer(w.address)?('<button data-act="explorer">'+netIcon(w.network,15)+net.explorerName+'</button>'):'')+'<button data-act="delete" class="danger">'+uiIcon('trash',15)+t('menu_delete')+'</button>';
+  menu.innerHTML = '<button data-act="edit">'+uiIcon('edit',15)+t('menu_edit')+'</button>'+(CHAIN_SRC[w.network]?('<button data-act="refresh">'+uiIcon('refresh',15)+t('menu_refresh')+'</button>'):'')+(net.explorer(w.address)?('<button data-act="explorer">'+netIcon(w.network,15)+net.explorerName+'</button>'):'')+'<button data-act="delete" class="danger">'+uiIcon('trash',15)+t('menu_delete')+'</button>';
   var rect = btnEl.getBoundingClientRect();
   var menuWidth = 170, menuHeight = menu.querySelectorAll('button').length*36+10;
   var left = Math.min(rect.right-menuWidth, window.innerWidth-menuWidth-8); left = Math.max(8,left);
@@ -1195,6 +1286,7 @@ function openRowMenu(id, btnEl){
     b.onclick = function(e){
       e.stopPropagation(); closeGlobalMenu();
       if(b.dataset.act==='edit') openEditModal(w);
+      else if(b.dataset.act==='refresh') refreshWalletFromChain(id);
       else if(b.dataset.act==='delete') deleteWallet(id);
       else if(b.dataset.act==='explorer'){ var url=net.explorer(w.address); if(url) window.open(url,'_blank'); else toast(t('no_explorer_toast')); }
     };
@@ -1234,9 +1326,11 @@ function renderDetail(target, list){
     '</div>'+
     '<div class="detail-actions">'+
       (url?('<button class="btn btn-primary det-explorer-btn" id="det-explorer" title="'+t('open_in')+' '+net.explorerName+'">'+netIcon(w.network,16)+'</button>'):'')+
+      (CHAIN_SRC[w.network]?('<button class="btn btn-soft det-explorer-btn" id="det-refresh" title="'+t('refresh_title')+'">'+uiIcon('refresh',16)+'</button>'):'')+
       '<button class="btn btn-soft" style="flex:1" id="det-edit">'+uiIcon('edit',15)+' '+t('detail_edit_btn')+'</button>'+
     '</div>';
   var eb=$('#det-explorer',target); if(eb) eb.onclick=function(){ window.open(url,'_blank'); };
+  var rb=$('#det-refresh',target); if(rb) rb.onclick=function(){ refreshWalletFromChain(w.id); };
   $('#det-edit',target).onclick=function(){ openEditModal(w); };
   $all('.addr-copy',target).forEach(function(el){ el.addEventListener('click', function(e){ e.stopPropagation(); copyToClipboard(el.dataset.addr, el); }); });
 }
@@ -1719,7 +1813,7 @@ function proceedPastGate(){
   }
   else{ initOnboarding(); }
 }
-var gateActive = SITE_PASSWORD_HASH && SITE_PASSWORD_HASH!=='2cc4f3909512f97bded502d4867e35dcd026b34ce06df8818dbbfccb14866ac0';
+var gateActive = SITE_PASSWORD_HASH && SITE_PASSWORD_HASH!=='REPLACE_WITH_SITE_PASSWORD_HASH';
 var gateUnlocked = false;
 try{ gateUnlocked = localStorage.getItem(LS_GATE)==='1'; }catch(e){}
 if(gateActive && !gateUnlocked){ showSiteGate(proceedPastGate); } else { proceedPastGate(); }
