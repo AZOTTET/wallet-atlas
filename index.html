@@ -60,7 +60,7 @@ a{color:inherit;}
 .onboard-card p.sub{color:var(--text-dim);font-size:14px;line-height:1.55;margin-bottom:24px;}
 .field{margin-bottom:16px;}
 .field label{display:block;font-size:12.5px;color:var(--text-dim);margin-bottom:6px;font-weight:500;}
-.field input[type=text],.field input[type=date],.field input[type=number],.field select,.field textarea{
+.field input[type=text],.field input[type=password],.field input[type=date],.field input[type=number],.field select,.field textarea{
   width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;
   padding:11px 13px;font-size:14px;color:var(--text);outline:none;transition:border-color .15s;
 }
@@ -159,6 +159,13 @@ a{color:inherit;}
 .sort-select:focus{border-color:var(--accent);}
 .forgotten-banner.nudge{background:linear-gradient(180deg,rgba(var(--accent-rgb),.12),transparent),var(--bg2);border-color:rgba(var(--accent-rgb),.32);}
 .forgotten-banner.nudge .ficon{background:rgba(var(--accent-rgb),.16);color:var(--accent);}
+.desc-inline{font-size:12.5px;color:var(--text-dim);line-height:1.5;margin:0;}
+#bulk-text,#report-tech{font-family:var(--font-mono);font-size:12px;line-height:1.55;resize:vertical;}
+.bulk-preview{font-size:12.5px;line-height:1.6;min-height:18px;}
+.bulk-preview .ok{color:var(--green);}
+.bulk-preview .warn{color:var(--amber);}
+#bulk-confirm:disabled,#pw-confirm:disabled{opacity:.5;cursor:default;}
+.head-tools .icon-btn svg{width:15px;height:15px;}
 .forgotten-chips{display:flex;gap:8px;flex-wrap:wrap;}
 .fchip{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:6px 10px;font-size:12px;display:flex;flex-direction:column;gap:1px;}
 .fchip b{font-size:12px;}
@@ -347,7 +354,7 @@ tbody tr:last-child td{border-bottom:none;}
 }
 </style>
 <!-- Analytics: after deploying, replace REPLACE_WITH_YOUR_UMAMI_WEBSITE_ID with your own Umami website id (see DEPLOYMENT.md). Safe to leave as-is for local use or the Claude preview — it will just fail to load silently. -->
-<script defer src="https://cloud.umami.is/script.js" data-website-id="REPLACE_WITH_YOUR_UMAMI_WEBSITE_ID"></script>
+<script defer src="https://cloud.umami.is/script.js" data-website-id="166d10a1-4ad1-4e1a-97d6-8654cf5d3344"></script>
 </head>
 <body>
 
@@ -462,7 +469,7 @@ tbody tr:last-child td{border-bottom:none;}
       <div id="group-filter-slot"></div>
       <div class="content-grid">
         <div class="panel">
-          <div class="panel-head"><h2 data-i18n="wallets_panel_title">Все кошельки</h2><div class="head-tools"><select id="sort-select" class="sort-select"></select><span class="count" id="wallets-count-label-2"></span></div></div>
+          <div class="panel-head"><h2 data-i18n="wallets_panel_title">Все кошельки</h2><div class="head-tools"><button class="icon-btn" id="bulk-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1" fill="currentColor" stroke="none"/></svg><span data-i18n="bulk_btn">Списком</span></button><select id="sort-select" class="sort-select"></select><span class="count" id="wallets-count-label-2"></span></div></div>
           <div class="table-wrap"><table id="wallets-table-2"><thead></thead><tbody></tbody></table></div>
         </div>
         <div class="panel detail-panel" id="detail-panel-2"></div>
@@ -532,9 +539,11 @@ tbody tr:last-child td{border-bottom:none;}
           <div id="last-backup-label" class="desc" style="margin:-4px 0 10px"></div>
           <div style="display:flex;gap:10px;flex-wrap:wrap">
             <button class="btn btn-soft" id="set-export-btn" data-i18n="settings_export_btn">⤓ Экспортировать JSON</button>
+            <button class="btn btn-soft" id="set-export-enc-btn" data-i18n="settings_export_enc_btn">Экспорт с паролем</button>
             <button class="btn btn-soft" id="set-import-btn" data-i18n="settings_import_btn">⤒ Импортировать JSON</button>
             <input type="file" id="import-file" accept=".json" class="hidden">
           </div>
+          <p class="desc" style="margin:12px 0 0" data-i18n="settings_backup_note">Обычный файл содержит адреса и подписи в открытом виде.</p>
         </div>
         <div class="settings-section">
           <h3 data-i18n="settings_sync_title">Синхронизация между устройствами</h3>
@@ -564,6 +573,11 @@ tbody tr:last-child td{border-bottom:none;}
             <div data-i18n="analytics_enable">Отправлять анонимную статистику</div>
             <button class="switch" id="analytics-switch"><div class="dot"></div></button>
           </div>
+        </div>
+        <div class="settings-section">
+          <h3 data-i18n="about_title">О приложении</h3>
+          <p class="desc"><span data-i18n="about_version">Версия</span> <b id="app-version"></b>. <span data-i18n="about_desc">Если что-то сломалось — нажми «Сообщить о проблеме».</span></p>
+          <button class="btn btn-soft" id="report-btn" data-i18n="report_btn">Сообщить о проблеме</button>
         </div>
         <div class="settings-section">
           <h3 style="color:var(--red)" data-i18n="settings_danger_title">Опасная зона</h3>
@@ -636,14 +650,68 @@ tbody tr:last-child td{border-bottom:none;}
   </div>
 </div>
 
+<div class="modal-overlay" id="bulk-modal">
+  <div class="modal">
+    <div class="modal-head"><h2 data-i18n="bulk_title">Добавить списком</h2><button class="modal-close" id="bulk-close">×</button></div>
+    <div class="modal-body">
+      <p class="desc-inline" data-i18n="bulk_hint">Вставь адреса — по одному в строке.</p>
+      <div class="field"><textarea id="bulk-text" rows="7" spellcheck="false" data-i18n-ph="bulk_ph" placeholder=""></textarea></div>
+      <div class="form-row">
+        <div class="field"><label data-i18n="bulk_evm_net">Сеть для адресов 0x…</label><select id="bulk-evm-net"></select></div>
+        <div class="field"><label data-i18n="f_purpose_label">Назначение</label><select id="bulk-purpose"></select></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label data-i18n="f_group_label">Группа</label><select id="bulk-group"></select></div>
+        <div class="field"><label data-i18n="f_createdin_label">Создан в</label><input type="text" id="bulk-createdin" list="createdin-list" maxlength="40" autocomplete="off"></div>
+      </div>
+      <div id="bulk-preview" class="bulk-preview"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="bulk-cancel" data-i18n="f_cancel_btn">Отмена</button>
+      <button class="btn btn-primary" id="bulk-confirm" disabled></button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="pw-modal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head"><h2 id="pw-title"></h2><button class="modal-close" id="pw-close">×</button></div>
+    <div class="modal-body">
+      <p class="desc-inline" id="pw-desc"></p>
+      <div class="field"><label data-i18n="pw_label_1">Пароль</label><input type="password" id="pw-1" autocomplete="new-password"></div>
+      <div class="field" id="pw-2-field"><label data-i18n="pw_label_2">Повтори пароль</label><input type="password" id="pw-2" autocomplete="new-password"></div>
+      <div id="pw-error" class="lock-error"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="pw-cancel" data-i18n="f_cancel_btn">Отмена</button>
+      <button class="btn btn-primary" id="pw-confirm"></button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="report-modal">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-head"><h2 data-i18n="report_title">Сообщить о проблеме</h2><button class="modal-close" id="report-close">×</button></div>
+    <div class="modal-body">
+      <p class="desc-inline" data-i18n="report_hint">Скопируй отчёт и отправь тому, кто дал тебе ссылку.</p>
+      <div class="field"><label data-i18n="report_desc_label">Что случилось? (необязательно)</label><textarea id="report-desc" rows="3" data-i18n-ph="report_desc_ph" placeholder=""></textarea></div>
+      <div class="field"><label data-i18n="report_tech_label">Технические данные</label><textarea id="report-tech" rows="9" readonly spellcheck="false"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="report-cancel" data-i18n="report_close">Закрыть</button>
+      <button class="btn btn-primary" id="report-copy"><span data-i18n="report_copy">Скопировать отчёт</span></button>
+    </div>
+  </div>
+</div>
+
 <div class="row-menu" id="global-row-menu"></div>
 <div class="toast" id="toast"></div>
 
 <script>
 (function(){
 "use strict";
-window.addEventListener('error', function(e){ try{ track('js_error', {message:String(e.message||'').slice(0,200), file:String(e.filename||'').split('/').pop(), line:e.lineno||0}); }catch(x){} });
-window.addEventListener('unhandledrejection', function(e){ try{ track('js_error', {message:'unhandled: '+String(e.reason&&e.reason.message||e.reason||'').slice(0,200)}); }catch(x){} });
+window.addEventListener('error', function(e){ try{ logError(e.message, e.filename, e.lineno); track('js_error', {message:String(e.message||'').slice(0,200), file:String(e.filename||'').split('/').pop(), line:e.lineno||0}); }catch(x){} });
+window.addEventListener('unhandledrejection', function(e){ try{ logError('unhandled: '+String(e.reason&&e.reason.message||e.reason||''), '', 0); track('js_error', {message:'unhandled: '+String(e.reason&&e.reason.message||e.reason||'').slice(0,200)}); }catch(x){} });
 
 /* ================= i18n ================= */
 var STRINGS = {
@@ -707,6 +775,10 @@ security_empty_title:"Нечего проверять", security_empty_desc:"В�
 sec_mark_active:"Отметить Active", sec_archive:"Архивировать", sec_edit:"Открыть",
 forgotten_view_title:"Забытые кошельки",
 nav_more:"Ещё", add_wallet_short:"Добавить",
+bulk_btn:"Списком", bulk_title:"Добавить списком", bulk_hint:"Вставь адреса — по одному в строке. Название можно написать рядом с адресом (через пробел, запятую или Tab). Сеть определится сама, для адресов 0x… выбери сеть ниже.", bulk_ph:"Main SOL, 7xKQm2vD93Fn…\n0x9e7Ab21C4D8b… Старый ETH\nМем-кошелёк 3  9a1BcD82vFmQ…", bulk_evm_net:"Сеть для адресов 0x…", bulk_found:"Найдено адресов: {n}", bulk_dups:"Пропущено дубликатов: {n} (уже есть в базе или повтор в списке)", bulk_bad:"Не распознано строк: {n}", bulk_trunc:"Обработаны первые 200 строк", bulk_add_n:"Добавить: {n}", bulk_added:"Добавлено кошельков: {n}. Баланс и дату можно подтянуть кнопкой обновления в карточке.", bulk_empty_btn:"Добавить списком",
+settings_export_enc_btn:"Экспорт с паролем", settings_backup_note:"Обычный файл содержит адреса и подписи в открытом виде — не храни его в открытом облаке и не пересылай в чатах. Файл с паролем зашифрован (AES-256), его можно хранить где угодно. Пароль восстановить нельзя.",
+pw_title_export:"Экспорт с паролем", pw_desc_export:"Придумай пароль для файла (минимум 8 символов). Без него файл не открыть, а восстановить пароль нельзя — запиши его.", pw_title_import:"Зашифрованная копия", pw_desc_import:"Введи пароль, которым зашифрован этот файл.", pw_label_1:"Пароль", pw_label_2:"Повтори пароль", pw_do_export:"Зашифровать и скачать", pw_do_import:"Расшифровать и загрузить", pw_working:"Работаю…", pw_too_short:"Пароль должен быть не короче 8 символов", pw_mismatch:"Пароли не совпадают", pw_wrong:"Неверный пароль или файл повреждён", pw_no_crypto:"Шифрование недоступно в этом браузере или режиме — открой сайт по ссылке https://…", pw_crypto_fail:"Не удалось зашифровать — попробуй другой браузер", toast_export_enc_done:"Зашифрованный файл сохранён",
+about_title:"О приложении", about_version:"Версия", about_desc:"Если что-то сломалось или неудобно — нажми «Сообщить о проблеме». Приложение соберёт технические данные (без адресов, названий и заметок), и ты увидишь их до отправки.", report_btn:"Сообщить о проблеме", report_title:"Сообщить о проблеме", report_hint:"Скопируй отчёт и отправь тому, кто дал тебе ссылку. Внутри только версия, браузер, количество кошельков и тексты ошибок — без адресов, названий и заметок.", report_desc_label:"Что случилось? (необязательно)", report_desc_ph:"Что ты нажимал и что пошло не так", report_tech_label:"Технические данные", report_copy:"Скопировать отчёт", report_close:"Закрыть",
 detail_created_in:"Создан в {where}", detail_created_unset:"Укажи, где создан", detail_created_plain:"Создан",
 f_createdin_label:"Создан в", f_createdin_ph:"Phantom, MetaMask, Axiom…", f_createdat_label:"Когда создан (примерно)",
 refresh_title:"Обновить баланс с блокчейна", menu_refresh:"Обновить с блокчейна", refresh_loading:"Запрашиваю данные сети…",
@@ -787,6 +859,10 @@ security_empty_title:"Nothing to review", security_empty_desc:"All wallets look 
 sec_mark_active:"Mark Active", sec_archive:"Archive", sec_edit:"Open",
 forgotten_view_title:"Forgotten wallets",
 nav_more:"More", add_wallet_short:"Add",
+bulk_btn:"Bulk add", bulk_title:"Add from a list", bulk_hint:"Paste addresses, one per line. You can write a name next to an address (separated by space, comma or Tab). The network is detected automatically; for 0x… addresses pick the network below.", bulk_ph:"Main SOL, 7xKQm2vD93Fn…\n0x9e7Ab21C4D8b… Old ETH\nMeme wallet 3  9a1BcD82vFmQ…", bulk_evm_net:"Network for 0x… addresses", bulk_found:"Addresses found: {n}", bulk_dups:"Duplicates skipped: {n} (already in your atlas or repeated in the list)", bulk_bad:"Lines not recognized: {n}", bulk_trunc:"Only the first 200 lines were processed", bulk_add_n:"Add {n}", bulk_added:"Wallets added: {n}. Use the refresh button in a wallet card to fetch balance and date.", bulk_empty_btn:"Add from a list",
+settings_export_enc_btn:"Export with password", settings_backup_note:"A plain file contains addresses and labels in the open — don't keep it in public cloud storage or send it through chats. A password-protected file is encrypted (AES-256) and safe to store anywhere. The password can't be recovered.",
+pw_title_export:"Export with password", pw_desc_export:"Choose a password for the file (8 characters minimum). Without it the file can't be opened, and the password can't be recovered — write it down.", pw_title_import:"Encrypted backup", pw_desc_import:"Enter the password this file was encrypted with.", pw_label_1:"Password", pw_label_2:"Repeat password", pw_do_export:"Encrypt and download", pw_do_import:"Decrypt and load", pw_working:"Working…", pw_too_short:"Password must be at least 8 characters", pw_mismatch:"Passwords don't match", pw_wrong:"Wrong password or damaged file", pw_no_crypto:"Encryption isn't available in this browser or mode — open the site via https://…", pw_crypto_fail:"Couldn't encrypt — try another browser", toast_export_enc_done:"Encrypted file saved",
+about_title:"About", about_version:"Version", about_desc:"If something broke or feels awkward, press «Report a problem». The app collects technical details (no addresses, names or notes) and you can review them before sending.", report_btn:"Report a problem", report_title:"Report a problem", report_hint:"Copy the report and send it to whoever gave you the link. It contains only the version, browser, number of wallets and error texts — no addresses, names or notes.", report_desc_label:"What happened? (optional)", report_desc_ph:"What you clicked and what went wrong", report_tech_label:"Technical details", report_copy:"Copy report", report_close:"Close",
 detail_created_in:"Created in {where}", detail_created_unset:"Add where it was created", detail_created_plain:"Created",
 f_createdin_label:"Created in", f_createdin_ph:"Phantom, MetaMask, Axiom…", f_createdat_label:"Created (approx.)",
 refresh_title:"Refresh balance from the blockchain", menu_refresh:"Refresh from blockchain", refresh_loading:"Asking the network…",
@@ -874,6 +950,7 @@ var WALLET_ICONS = ["briefcase", "chart", "sprout", "flame", "coins", "image", "
 var COLORS = ['#5b7cff','#34d399','#f5a524','#f5556c','#a78bfa','#38bdf8','#fb923c','#2dd4bf'];
 var LS_PROFILE='wa_profile', LS_WALLETS='wa_wallets', LS_GROUPS='wa_groups', LS_GATE='wa_site_unlocked';
 var SITE_PASSWORD_HASH = 'REPLACE_WITH_SITE_PASSWORD_HASH';
+var APP_VERSION = '0.9.0';
 
 /* ================= state ================= */
 var state = {
@@ -906,7 +983,7 @@ function toast(msg){ var el=$('#toast'); el.textContent=msg; el.classList.add('s
 function track(event, data){
   try{
     if(state.profile && state.profile.analyticsOptOut) return;
-    if(w_umami() && typeof w_umami().track==='function'){ w_umami().track(event, data||{}); }
+    if(w_umami() && typeof w_umami().track==='function'){ w_umami().track(event, Object.assign({v:APP_VERSION}, data||{})); }
   }catch(e){}
 }
 function w_umami(){ return (typeof window!=='undefined') ? window.umami : null; }
@@ -1168,8 +1245,9 @@ function renderTable(tableEl, list, onRowClick){
   var thead=tableEl.querySelector('thead'), tbody=tableEl.querySelector('tbody');
   thead.innerHTML=tableHeaderHtml();
   if(list.length===0){
-    tbody.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="em-icon">'+uiIcon('folder',36)+'</div><h3>'+t('empty_title')+'</h3><p>'+t('empty_desc')+'</p><button class="btn btn-primary" id="empty-add-btn">'+t('empty_add_btn')+'</button></div></td></tr>';
+    tbody.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="em-icon">'+uiIcon('folder',36)+'</div><h3>'+t('empty_title')+'</h3><p>'+t('empty_desc')+'</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="btn btn-primary" id="empty-add-btn">'+t('empty_add_btn')+'</button><button class="btn btn-ghost" id="empty-bulk-btn">'+t('bulk_empty_btn')+'</button></div></div></td></tr>';
     var eb=tbody.querySelector('#empty-add-btn'); if(eb) eb.onclick=openAddModal;
+    var eb2=tbody.querySelector('#empty-bulk-btn'); if(eb2) eb2.onclick=openBulkModal;
     return;
   }
   tbody.innerHTML = list.map(function(w){
@@ -1473,6 +1551,7 @@ function renderSettings(){
   lb.textContent = le ? t('backup_last',{date:new Date(le).toLocaleDateString(state.lang==='ru'?'ru-RU':'en-GB')}) : t('backup_never');
   buildAvatarPicker($('#set-avatars'), state.profile.avatar, function(a){ state.profile.avatar=a; save(); renderProfileChrome(); });
   applyBalanceToggleUI();
+  $('#app-version').textContent='v'+APP_VERSION;
   $('#pin-switch').classList.toggle('on', !!state.profile.pinHash);
   $('#pin-set-form').classList.toggle('hidden', !state.profile.pinHash);
   $('#analytics-switch').classList.toggle('on', !state.profile.analyticsOptOut);
@@ -1639,29 +1718,236 @@ function renderFilterBar(){
 function updateFilterBadge(){ var n=(state.filterNetwork?1:0)+(state.filterStatus?1:0); $('#filter-badge').textContent = n ? ' ('+n+')' : ''; }
 
 /* ================= export / import / wipe ================= */
+/* ================= error log + report ================= */
+function redact(s){
+  return String(s==null?'':s)
+    .replace(/0x[a-fA-F0-9]{40}/g,'[addr]')
+    .replace(/\b(?:EQ|UQ|kQ|0Q)[A-Za-z0-9_-]{46}\b/g,'[addr]')
+    .replace(/\b[1-9A-HJ-NP-Za-km-z]{32,44}\b/g,'[addr]');
+}
+function logError(msg, file, line){
+  try{
+    var arr=JSON.parse(localStorage.getItem('wa_errlog')||'[]'); if(!Array.isArray(arr)) arr=[];
+    arr.push({t:Date.now(), v:APP_VERSION, m:redact(msg).slice(0,200), f:String(file||'').split('/').pop().slice(0,40), l:line||0});
+    localStorage.setItem('wa_errlog', JSON.stringify(arr.slice(-10)));
+  }catch(e){}
+}
+function buildReport(){
+  var p=state.profile||{}, nets={}, errs=[];
+  state.wallets.forEach(function(w){ nets[w.network]=(nets[w.network]||0)+1; });
+  try{ errs=JSON.parse(localStorage.getItem('wa_errlog')||'[]'); if(!Array.isArray(errs)) errs=[]; }catch(e){ errs=[]; }
+  var L=[];
+  L.push('Wallet Atlas v'+APP_VERSION);
+  L.push('Time: '+new Date().toISOString());
+  L.push('Browser: '+String(navigator.userAgent||'').slice(0,160));
+  L.push('Screen: '+window.innerWidth+'x'+window.innerHeight+', lang: '+state.lang+', theme: '+(p.theme||'dark'));
+  L.push('Wallets: '+state.wallets.length+', groups: '+state.groups.length+' (networks: '+(Object.keys(nets).map(function(k){return k+'='+nets[k];}).join(', ')||'-')+')');
+  L.push('PIN: '+(p.pinHash?'on':'off')+', analytics: '+(p.analyticsOptOut?'off':'on')+', last export: '+(p.lastExport?new Date(p.lastExport).toISOString().slice(0,10):'never'));
+  L.push('Errors ('+errs.length+'):');
+  errs.forEach(function(e){ L.push('  '+new Date(e.t).toISOString().slice(0,19)+' v'+e.v+' '+e.m+' ('+(e.f||'?')+':'+(e.l||0)+')'); });
+  return L.join('\n');
+}
+function openReportModal(){
+  $('#report-desc').value=''; $('#report-tech').value=buildReport(); $('#report-modal').classList.add('open');
+}
+function copyReport(btn){
+  var d=$('#report-desc').value.trim();
+  copyToClipboard((d?('Description: '+d+'\n\n'):'')+$('#report-tech').value, btn);
+  track('report_copied');
+}
+
+/* ================= backup: plain + encrypted ================= */
+function backupPayload(){ return {profile:state.profile, wallets:state.wallets, groups:state.groups, exportedAt:new Date().toISOString()}; }
+function downloadText(name, text){
+  var blob=new Blob([text],{type:'application/json'});
+  var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download=name; a.click(); URL.revokeObjectURL(url);
+}
 function exportData(){
-  var payload={profile:state.profile, wallets:state.wallets, groups:state.groups, exportedAt:new Date().toISOString()};
   state.profile.lastExport=Date.now(); save();
-  var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-  var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download='wallet-atlas-backup.json'; a.click(); URL.revokeObjectURL(url);
-  toast(t('toast_export_done')); track('backup_exported');
+  downloadText('wallet-atlas-backup.json', JSON.stringify(backupPayload(),null,2));
+  toast(t('toast_export_done')); track('backup_exported',{encrypted:false});
+}
+var KDF_ITER=600000;
+function cryptoOK(){ return !!(window.crypto && window.crypto.subtle && window.TextEncoder && window.TextDecoder); }
+function b64e(buf){ var bytes=new Uint8Array(buf), s='', CH=0x8000; for(var i=0;i<bytes.length;i+=CH){ s+=String.fromCharCode.apply(null, bytes.subarray(i,i+CH)); } return btoa(s); }
+function b64d(str){ var s=atob(str), b=new Uint8Array(s.length); for(var i=0;i<s.length;i++) b[i]=s.charCodeAt(i); return b; }
+function deriveKey(pw, salt, iter){
+  var enc=new TextEncoder();
+  return window.crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveKey']).then(function(base){
+    return window.crypto.subtle.deriveKey({name:'PBKDF2', salt:salt, iterations:iter, hash:'SHA-256'}, base, {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']);
+  });
+}
+function encryptBackup(plain, pw){
+  var salt=window.crypto.getRandomValues(new Uint8Array(16)), iv=window.crypto.getRandomValues(new Uint8Array(12));
+  return Promise.resolve().then(function(){ return deriveKey(pw, salt, KDF_ITER); }).then(function(key){
+    return window.crypto.subtle.encrypt({name:'AES-GCM', iv:iv}, key, new TextEncoder().encode(plain));
+  }).then(function(ct){
+    return JSON.stringify({format:'wallet-atlas-encrypted', v:1, kdf:'PBKDF2-SHA256', iter:KDF_ITER, cipher:'AES-256-GCM', salt:b64e(salt), iv:b64e(iv), data:b64e(ct)});
+  });
+}
+function decryptBackup(obj, pw){
+  var iter=Math.min(Math.max(parseInt(obj.iter,10)||0, 1000), 2000000);
+  return Promise.resolve().then(function(){ return deriveKey(pw, b64d(obj.salt), iter); }).then(function(key){
+    return window.crypto.subtle.decrypt({name:'AES-GCM', iv:b64d(obj.iv)}, key, b64d(obj.data));
+  }).then(function(pt){ return new TextDecoder().decode(pt); });
+}
+function exportEncrypted(pw){
+  state.profile.lastExport=Date.now(); save();
+  return encryptBackup(JSON.stringify(backupPayload()), pw).then(function(text){
+    downloadText('wallet-atlas-backup.enc.json', text);
+    toast(t('toast_export_enc_done')); track('backup_exported',{encrypted:true});
+  });
+}
+function applyImport(data){
+  if(!data || typeof data!=='object' || !Array.isArray(data.wallets)) throw new Error('bad format');
+  state.wallets=data.wallets;
+  if(Array.isArray(data.groups)) state.groups=data.groups;
+  if(data.profile && typeof data.profile==='object') state.profile=Object.assign({}, state.profile||{}, data.profile);
+  normalizeData();
+  state.lang=state.profile.lang; state.selectedId=null; state.filterGroupId=null; state.filterForgotten=false;
+  save(); applyTheme(); applyI18n(); applyBalanceToggleUI(); fillGroupSelect(); renderProfileChrome(); renderCurrentView(); toast(t('toast_import_done')); track('backup_imported');
 }
 function importData(file){
   var reader=new FileReader();
   reader.onload=function(){
     try{
       var data=JSON.parse(reader.result);
-      if(!data || typeof data!=='object' || !Array.isArray(data.wallets)) throw new Error('bad format');
-      state.wallets=data.wallets;
-      if(Array.isArray(data.groups)) state.groups=data.groups;
-      if(data.profile && typeof data.profile==='object') state.profile=Object.assign({}, state.profile||{}, data.profile);
-      normalizeData();
-      state.lang=state.profile.lang; state.selectedId=null; state.filterGroupId=null; state.filterForgotten=false;
-      save(); applyTheme(); applyI18n(); applyBalanceToggleUI(); fillGroupSelect(); renderProfileChrome(); renderCurrentView(); toast(t('toast_import_done')); track('backup_imported');
+      if(data && data.format==='wallet-atlas-encrypted'){
+        if(!cryptoOK()){ toast(t('pw_no_crypto')); return; }
+        if(!data.salt || !data.iv || !data.data) throw new Error('bad format');
+        openPwModal('import', data); return;
+      }
+      applyImport(data);
     }catch(e){ toast(t('toast_import_fail')); }
   };
   reader.readAsText(file);
 }
+
+/* ---- password modal (export / import of encrypted file) ---- */
+var pwCtx=null;
+function openPwModal(mode, obj){
+  pwCtx={mode:mode, obj:obj};
+  $('#pw-title').textContent=t(mode==='export'?'pw_title_export':'pw_title_import');
+  $('#pw-desc').textContent=t(mode==='export'?'pw_desc_export':'pw_desc_import');
+  $('#pw-1').value=''; $('#pw-2').value=''; $('#pw-error').textContent='';
+  $('#pw-2-field').classList.toggle('hidden', mode!=='export');
+  var b=$('#pw-confirm'); b.disabled=false; b.textContent=t(mode==='export'?'pw_do_export':'pw_do_import');
+  $('#pw-modal').classList.add('open'); $('#pw-1').focus();
+}
+function closePw(){ $('#pw-modal').classList.remove('open'); $('#pw-1').value=''; $('#pw-2').value=''; pwCtx=null; }
+function pwBusy(on, mode){
+  var b=$('#pw-confirm'); b.disabled=on;
+  b.textContent = on ? t('pw_working') : t(mode==='export'?'pw_do_export':'pw_do_import');
+}
+function submitPw(){
+  if(!pwCtx) return;
+  var mode=pwCtx.mode, obj=pwCtx.obj, p1=$('#pw-1').value;
+  if(mode==='export'){
+    if(p1.length<8){ $('#pw-error').textContent=t('pw_too_short'); return; }
+    if(p1!==$('#pw-2').value){ $('#pw-error').textContent=t('pw_mismatch'); return; }
+    $('#pw-error').textContent=''; pwBusy(true, mode);
+    exportEncrypted(p1).then(function(){ closePw(); }, function(){ $('#pw-error').textContent=t('pw_crypto_fail'); }).then(function(){ pwBusy(false, mode); });
+  } else {
+    if(!p1) return;
+    $('#pw-error').textContent=''; pwBusy(true, mode);
+    decryptBackup(obj, p1).then(function(text){
+      try{ applyImport(JSON.parse(text)); closePw(); }catch(e){ $('#pw-error').textContent=t('toast_import_fail'); }
+    }, function(){ $('#pw-error').textContent=t('pw_wrong'); }).then(function(){ pwBusy(false, mode); });
+  }
+}
+
+/* ================= bulk add ================= */
+var PURPOSE_ICON={main:'home',storage:'coins',trading:'chart',farming:'sprout',burner:'flame',nft:'image',bots:'bot',gaming:'gamepad',bridge:'bridge',unknown:'briefcase'};
+var BULK_EVM_NETS=['ethereum','base','bnb','arbitrum','polygon'];
+function parseBulk(text, evmNet){
+  var all=String(text||'').split(/\r?\n/).map(function(s){return s.trim();}).filter(Boolean);
+  var lines=all.slice(0,200);
+  var res={items:[], bad:[], dups:0, truncated:all.length>200};
+  var seen={};
+  lines.forEach(function(line){
+    var toks=line.split(/[\t,;|]+|\s+/).filter(Boolean);
+    var addr=null, fam=null;
+    for(var i=0;i<toks.length;i++){
+      var c=toks[i].replace(/^[("'\[<]+|[)"'\]>.:]+$/g,'');
+      var f=detectAddrFamily(c);
+      if(f){ addr=c; fam=f; toks.splice(i,1); break; }
+    }
+    if(!addr){ res.bad.push(line); return; }
+    var net = fam==='evm' ? evmNet : fam;
+    var key = net+':'+(fam==='evm' ? addr.toLowerCase() : addr);
+    var exists = state.wallets.some(function(w){ return w.network===net && (w.address===addr || (fam==='evm' && String(w.address).toLowerCase()===addr.toLowerCase())); });
+    if(seen[key] || exists){ res.dups++; return; }
+    seen[key]=1;
+    var name=toks.join(' ').replace(/^[\s\-\u2013\u2014:=>]+|[\s\-\u2013\u2014:=>]+$/g,'').slice(0,60);
+    res.items.push({name:name, address:addr, network:net});
+  });
+  return res;
+}
+function openBulkModal(){
+  var evm={}; BULK_EVM_NETS.forEach(function(k){ evm[k]=NETWORKS[k]; });
+  fillSelect($('#bulk-evm-net'), evm); $('#bulk-evm-net').value='ethereum';
+  fillSelect($('#bulk-purpose'), PURPOSES); $('#bulk-purpose').value='unknown';
+  $('#bulk-group').innerHTML='<option value="">'+t('f_group_none')+'</option>'+state.groups.map(function(g){return '<option value="'+g.id+'">'+esc(g.name)+'</option>';}).join('');
+  $('#bulk-text').value=''; $('#bulk-createdin').value='';
+  updateBulkPreview(); $('#bulk-modal').classList.add('open'); $('#bulk-text').focus();
+}
+function updateBulkPreview(){
+  var txt=$('#bulk-text').value, box=$('#bulk-preview'), btn=$('#bulk-confirm');
+  if(!txt.trim()){ box.innerHTML=''; btn.disabled=true; btn.textContent=t('bulk_add_n',{n:0}); return; }
+  var r=parseBulk(txt, $('#bulk-evm-net').value);
+  var nets={}; r.items.forEach(function(it){ nets[it.network]=(nets[it.network]||0)+1; });
+  var netStr=Object.keys(nets).map(function(k){ return NETWORKS[k].label+' '+nets[k]; }).join(' · ');
+  var html='<div class="'+(r.items.length?'ok':'warn')+'">'+t('bulk_found',{n:r.items.length})+(netStr?' ('+esc(netStr)+')':'')+'</div>';
+  if(r.dups) html+='<div class="warn">'+t('bulk_dups',{n:r.dups})+'</div>';
+  if(r.bad.length) html+='<div class="warn">'+t('bulk_bad',{n:r.bad.length})+': '+r.bad.slice(0,3).map(function(s){return esc(s.slice(0,40));}).join(' · ')+'</div>';
+  if(r.truncated) html+='<div class="warn">'+t('bulk_trunc')+'</div>';
+  box.innerHTML=html; btn.disabled=(r.items.length===0); btn.textContent=t('bulk_add_n',{n:r.items.length});
+}
+function confirmBulk(){
+  var r=parseBulk($('#bulk-text').value, $('#bulk-evm-net').value);
+  if(!r.items.length) return;
+  var purpose=$('#bulk-purpose').value||'unknown', group=$('#bulk-group').value||null, createdIn=$('#bulk-createdin').value.trim().slice(0,40);
+  var icon=PURPOSE_ICON[purpose]||'briefcase';
+  var made=r.items.map(function(it,i){
+    var net=NETWORKS[it.network]||NETWORKS.other;
+    return {id:uid(), name:it.name||(net.label+' '+shortAddr(it.address)), address:it.address, network:it.network, purpose:purpose, status:'unknown', icon:icon, color:COLORS[i%COLORS.length], balance:'', lastUsed:'', firstSeen:'', createdIn:createdIn, createdAt:'', tags:[], groupId:group, usedWith:[], notes:''};
+  });
+  state.wallets=made.concat(state.wallets);
+  save();
+  $('#bulk-modal').classList.remove('open');
+  state.filterGroupId=null; state.filterForgotten=false; state.filterNetwork=null; state.filterStatus=null; state.search=''; $('#search-input').value='';
+  state.sort={key:'lastUsed',dir:'asc'}; state.selectedId=made[0].id;
+  renderFilterBar(); updateFilterBadge();
+  switchView('wallets', true);
+  toast(t('bulk_added',{n:made.length})); track('bulk_import',{count:made.length});
+}
+
+/* ================= wiring for the new features ================= */
+function wireExtraEvents(){
+  $('#set-export-enc-btn').addEventListener('click', function(){ if(!cryptoOK()){ toast(t('pw_no_crypto')); return; } openPwModal('export'); });
+  $('#report-btn').addEventListener('click', openReportModal);
+  function closeReport(){ $('#report-modal').classList.remove('open'); }
+  $('#report-close').addEventListener('click', closeReport);
+  $('#report-cancel').addEventListener('click', closeReport);
+  $('#report-copy').addEventListener('click', function(){ copyReport(this); });
+  $('#report-modal').addEventListener('click', function(e){ if(e.target.id==='report-modal') closeReport(); });
+
+  $('#pw-close').addEventListener('click', closePw);
+  $('#pw-cancel').addEventListener('click', closePw);
+  $('#pw-confirm').addEventListener('click', submitPw);
+  $('#pw-modal').addEventListener('click', function(e){ if(e.target.id==='pw-modal') closePw(); });
+  ['#pw-1','#pw-2'].forEach(function(s){ $(s).addEventListener('keydown', function(e){ if(e.key==='Enter') submitPw(); }); });
+
+  $('#bulk-btn').addEventListener('click', openBulkModal);
+  function closeBulk(){ $('#bulk-modal').classList.remove('open'); }
+  $('#bulk-close').addEventListener('click', closeBulk);
+  $('#bulk-cancel').addEventListener('click', closeBulk);
+  $('#bulk-modal').addEventListener('click', function(e){ if(e.target.id==='bulk-modal') closeBulk(); });
+  $('#bulk-text').addEventListener('input', updateBulkPreview);
+  $('#bulk-evm-net').addEventListener('change', updateBulkPreview);
+  $('#bulk-confirm').addEventListener('click', confirmBulk);
+}
+
 function wipeAll(){
   if(!confirm(t('confirm_wipe'))) return;
   localStorage.removeItem(LS_PROFILE); localStorage.removeItem(LS_WALLETS); localStorage.removeItem(LS_GROUPS);
@@ -1787,6 +2073,7 @@ function wireEvents(){
   $('#set-import-btn').addEventListener('click', function(){ $('#import-file').click(); });
   $('#import-file').addEventListener('change', function(){ if(this.files[0]) importData(this.files[0]); this.value=''; });
   $('#wipe-btn').addEventListener('click', wipeAll);
+  wireExtraEvents();
 
   $('#pin-switch').addEventListener('click', function(){
     if(state.profile.pinHash){
