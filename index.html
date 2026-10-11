@@ -46,6 +46,8 @@ a{color:inherit;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
 ::-webkit-scrollbar-track{background:transparent;}
 
+#emergency{position:fixed;inset:0;z-index:400;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;overflow:auto;}
+.snapshot-row{margin-top:14px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13px;}
 #lockscreen{position:fixed;inset:0;z-index:260;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;}
 #sitegate{position:fixed;inset:0;z-index:270;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;}
 .lock-error{color:var(--red);font-size:12.5px;min-height:16px;margin:-4px 0 10px;}
@@ -180,6 +182,22 @@ a{color:inherit;}
 .content-grid{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start;}
 @media(max-width:980px){.content-grid{grid-template-columns:1fr;} .detail-panel{position:static;top:auto;}}
 
+.sheet-overlay{position:fixed;inset:0;z-index:140;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;opacity:0;visibility:hidden;transition:opacity .22s ease,visibility .22s ease;}
+.sheet-overlay.open{opacity:1;visibility:visible;}
+.sheet{width:100%;max-width:560px;max-height:88vh;max-height:88dvh;background:var(--bg2);border:1px solid var(--border);border-bottom:none;border-radius:18px 18px 0 0;display:flex;flex-direction:column;overflow:hidden;transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.8,.2,1);box-shadow:0 -10px 40px rgba(0,0,0,.35);}
+.sheet-overlay.open .sheet{transform:translateY(0);}
+.sheet-head{position:relative;flex-shrink:0;height:34px;display:flex;align-items:center;justify-content:center;}
+.sheet-handle{flex:1;height:100%;display:flex;align-items:center;justify-content:center;touch-action:none;cursor:grab;}
+.sheet-handle span{width:40px;height:4px;border-radius:4px;background:var(--border);}
+.sheet-close{position:absolute;right:8px;top:3px;width:28px;height:28px;border-radius:8px;background:none;border:none;color:var(--text-faint);font-size:22px;line-height:1;}
+.sheet-close:hover{background:var(--bg-hover);color:var(--text);}
+.sheet-body{display:flex;flex-direction:column;min-height:0;flex:1;border:none;border-radius:0;background:transparent;}
+.sheet .detail-body{max-height:none;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
+.sheet .detail-top,.sheet .detail-actions{flex-shrink:0;}
+.sheet .detail-actions{padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));}
+body.sheet-lock{overflow:hidden;}
+@media(min-width:981px){.sheet-overlay{display:none;}}
+@media(max-width:980px){.detail-panel{display:none;}}
 .table-wrap{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;min-width:720px;}
 thead th{text-align:left;font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.04em;font-weight:600;padding:10px 14px;border-bottom:1px solid var(--border-soft);white-space:nowrap;}
@@ -357,6 +375,20 @@ tbody tr:last-child td{border-bottom:none;}
 <script defer src="https://cloud.umami.is/script.js" data-website-id="166d10a1-4ad1-4e1a-97d6-8654cf5d3344"></script>
 </head>
 <body>
+
+<div id="emergency" class="hidden">
+  <div class="onboard-card">
+    <div class="onboard-logo"><div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 3.4 19h17.2z"/><path d="M12 10v4.2"/><circle cx="12" cy="16.8" r=".9" fill="currentColor" stroke="none"/></svg></div><b>WALLET ATLAS</b></div>
+    <h1 data-i18n="em_title">Приложение не смогло запуститься</h1>
+    <p class="sub" data-i18n="em_text">Твои данные не удалены.</p>
+    <button class="btn btn-primary btn-block" id="em-download" data-i18n="em_download">Скачать мои данные</button>
+    <div style="height:10px"></div>
+    <button class="btn btn-soft btn-block" id="em-copy"><span data-i18n="report_copy">Скопировать отчёт</span></button>
+    <div style="height:10px"></div>
+    <button class="btn btn-ghost btn-block" id="em-retry" data-i18n="em_retry">Попробовать снова</button>
+    <p class="desc-inline" id="em-err" style="margin-top:14px;word-break:break-word"></p>
+  </div>
+</div>
 
 <div id="sitegate" class="hidden">
   <div class="onboard-card">
@@ -544,6 +576,10 @@ tbody tr:last-child td{border-bottom:none;}
             <input type="file" id="import-file" accept=".json" class="hidden">
           </div>
           <p class="desc" style="margin:12px 0 0" data-i18n="settings_backup_note">Обычный файл содержит адреса и подписи в открытом виде.</p>
+          <div id="snapshot-row" class="snapshot-row hidden">
+            <div><b data-i18n="snapshot_title">Копия до обновления</b><div class="desc" id="snapshot-info" style="margin:2px 0 0"></div></div>
+            <button class="btn btn-soft" id="snapshot-restore-btn" data-i18n="snapshot_restore">Вернуть данные до обновления</button>
+          </div>
         </div>
         <div class="settings-section">
           <h3 data-i18n="settings_sync_title">Синхронизация между устройствами</h3>
@@ -647,6 +683,13 @@ tbody tr:last-child td{border-bottom:none;}
       <button class="btn btn-ghost" id="g-cancel" data-i18n="g_cancel_btn">Отмена</button>
       <button class="btn btn-primary" id="g-save" data-i18n="g_save_btn">Создать</button>
     </div>
+  </div>
+</div>
+
+<div id="detail-sheet" class="sheet-overlay" aria-hidden="true">
+  <div class="sheet" id="sheet-panel" role="dialog" aria-modal="true">
+    <div class="sheet-head"><div class="sheet-handle" id="sheet-handle"><span></span></div><button class="sheet-close" id="sheet-close" aria-label="Close">×</button></div>
+    <div class="sheet-body panel" id="sheet-body"></div>
   </div>
 </div>
 
@@ -775,6 +818,8 @@ security_empty_title:"Нечего проверять", security_empty_desc:"В�
 sec_mark_active:"Отметить Active", sec_archive:"Архивировать", sec_edit:"Открыть",
 forgotten_view_title:"Забытые кошельки",
 nav_more:"Ещё", add_wallet_short:"Добавить",
+snapshot_title:"Копия до обновления", snapshot_info:"Сохранена {date}, версия {v}. Создаётся автоматически при первом запуске новой версии.", snapshot_restore:"Вернуть данные до обновления", snapshot_confirm:"Вернуть данные на момент до обновления? Всё, что ты изменил после обновления, будет потеряно.",
+em_title:"Приложение не смогло запуститься", em_text:"Твои данные не удалены — они лежат в этом браузере. Сначала скачай копию, чтобы ничего не потерять, затем скопируй отчёт и отправь тому, кто дал тебе ссылку.", em_download:"Скачать мои данные", em_retry:"Попробовать снова",
 bulk_btn:"Списком", bulk_title:"Добавить списком", bulk_hint:"Вставь адреса — по одному в строке. Название можно написать рядом с адресом (через пробел, запятую или Tab). Сеть определится сама, для адресов 0x… выбери сеть ниже.", bulk_ph:"Main SOL, 7xKQm2vD93Fn…\n0x9e7Ab21C4D8b… Старый ETH\nМем-кошелёк 3  9a1BcD82vFmQ…", bulk_evm_net:"Сеть для адресов 0x…", bulk_found:"Найдено адресов: {n}", bulk_dups:"Пропущено дубликатов: {n} (уже есть в базе или повтор в списке)", bulk_bad:"Не распознано строк: {n}", bulk_trunc:"Обработаны первые 200 строк", bulk_add_n:"Добавить: {n}", bulk_added:"Добавлено кошельков: {n}. Баланс и дату можно подтянуть кнопкой обновления в карточке.", bulk_empty_btn:"Добавить списком",
 settings_export_enc_btn:"Экспорт с паролем", settings_backup_note:"Обычный файл содержит адреса и подписи в открытом виде — не храни его в открытом облаке и не пересылай в чатах. Файл с паролем зашифрован (AES-256), его можно хранить где угодно. Пароль восстановить нельзя.",
 pw_title_export:"Экспорт с паролем", pw_desc_export:"Придумай пароль для файла (минимум 8 символов). Без него файл не открыть, а восстановить пароль нельзя — запиши его.", pw_title_import:"Зашифрованная копия", pw_desc_import:"Введи пароль, которым зашифрован этот файл.", pw_label_1:"Пароль", pw_label_2:"Повтори пароль", pw_do_export:"Зашифровать и скачать", pw_do_import:"Расшифровать и загрузить", pw_working:"Работаю…", pw_too_short:"Пароль должен быть не короче 8 символов", pw_mismatch:"Пароли не совпадают", pw_wrong:"Неверный пароль или файл повреждён", pw_no_crypto:"Шифрование недоступно в этом браузере или режиме — открой сайт по ссылке https://…", pw_crypto_fail:"Не удалось зашифровать — попробуй другой браузер", toast_export_enc_done:"Зашифрованный файл сохранён",
@@ -859,6 +904,8 @@ security_empty_title:"Nothing to review", security_empty_desc:"All wallets look 
 sec_mark_active:"Mark Active", sec_archive:"Archive", sec_edit:"Open",
 forgotten_view_title:"Forgotten wallets",
 nav_more:"More", add_wallet_short:"Add",
+snapshot_title:"Pre-update copy", snapshot_info:"Saved {date}, version {v}. Created automatically the first time a new version starts.", snapshot_restore:"Restore data from before the update", snapshot_confirm:"Restore your data as it was before the update? Anything you changed after the update will be lost.",
+em_title:"The app couldn't start", em_text:"Your data hasn't been deleted — it's stored in this browser. First download a copy so nothing gets lost, then copy the report and send it to whoever gave you the link.", em_download:"Download my data", em_retry:"Try again",
 bulk_btn:"Bulk add", bulk_title:"Add from a list", bulk_hint:"Paste addresses, one per line. You can write a name next to an address (separated by space, comma or Tab). The network is detected automatically; for 0x… addresses pick the network below.", bulk_ph:"Main SOL, 7xKQm2vD93Fn…\n0x9e7Ab21C4D8b… Old ETH\nMeme wallet 3  9a1BcD82vFmQ…", bulk_evm_net:"Network for 0x… addresses", bulk_found:"Addresses found: {n}", bulk_dups:"Duplicates skipped: {n} (already in your atlas or repeated in the list)", bulk_bad:"Lines not recognized: {n}", bulk_trunc:"Only the first 200 lines were processed", bulk_add_n:"Add {n}", bulk_added:"Wallets added: {n}. Use the refresh button in a wallet card to fetch balance and date.", bulk_empty_btn:"Add from a list",
 settings_export_enc_btn:"Export with password", settings_backup_note:"A plain file contains addresses and labels in the open — don't keep it in public cloud storage or send it through chats. A password-protected file is encrypted (AES-256) and safe to store anywhere. The password can't be recovered.",
 pw_title_export:"Export with password", pw_desc_export:"Choose a password for the file (8 characters minimum). Without it the file can't be opened, and the password can't be recovered — write it down.", pw_title_import:"Encrypted backup", pw_desc_import:"Enter the password this file was encrypted with.", pw_label_1:"Password", pw_label_2:"Repeat password", pw_do_export:"Encrypt and download", pw_do_import:"Decrypt and load", pw_working:"Working…", pw_too_short:"Password must be at least 8 characters", pw_mismatch:"Passwords don't match", pw_wrong:"Wrong password or damaged file", pw_no_crypto:"Encryption isn't available in this browser or mode — open the site via https://…", pw_crypto_fail:"Couldn't encrypt — try another browser", toast_export_enc_done:"Encrypted file saved",
@@ -950,7 +997,7 @@ var WALLET_ICONS = ["briefcase", "chart", "sprout", "flame", "coins", "image", "
 var COLORS = ['#5b7cff','#34d399','#f5a524','#f5556c','#a78bfa','#38bdf8','#fb923c','#2dd4bf'];
 var LS_PROFILE='wa_profile', LS_WALLETS='wa_wallets', LS_GROUPS='wa_groups', LS_GATE='wa_site_unlocked';
 var SITE_PASSWORD_HASH = 'REPLACE_WITH_SITE_PASSWORD_HASH';
-var APP_VERSION = '0.9.0';
+var APP_VERSION = '0.9.2';
 
 /* ================= state ================= */
 var state = {
@@ -1075,14 +1122,22 @@ function normalizeData(){
     return w;
   });
 }
+var bootRaw={p:null,w:null,g:null}, bootError=null;
 function load(){
   try{
     var p=localStorage.getItem(LS_PROFILE), w=localStorage.getItem(LS_WALLETS), g=localStorage.getItem(LS_GROUPS);
+    bootRaw={p:p,w:w,g:g};
     if(p) state.profile=JSON.parse(p);
     if(w) state.wallets=JSON.parse(w);
     if(g) state.groups=JSON.parse(g);
-    if(state.profile){ normalizeData(); state.lang=state.profile.lang; save(); }
-  }catch(e){}
+    if(state.profile && typeof state.profile!=='object') throw new Error('profile is not an object');
+    if(state.profile){
+      if(state.profile.appVersion!==APP_VERSION){
+        try{ localStorage.setItem('wa_prev_snapshot', JSON.stringify({from:state.profile.appVersion||'older', t:Date.now(), p:p, w:w, g:g})); }catch(e){}
+      }
+      normalizeData(); state.lang=state.profile.lang; state.profile.appVersion=APP_VERSION; save();
+    }
+  }catch(e){ bootError=e; state.profile=null; state.wallets=[]; state.groups=[]; }
 }
 
 /* ================= seed demo data ================= */
@@ -1198,6 +1253,7 @@ function renderCurrentView(){
   else if(state.view==='security') renderSecurity();
   else if(state.view==='settings') renderSettings();
   renderProfileChrome();
+  if(sheetOpen) renderSheet();
 }
 
 /* ================= stats + banner ================= */
@@ -1268,7 +1324,7 @@ function renderTable(tableEl, list, onRowClick){
   $all('tr[data-id]',tbody).forEach(function(tr){
     tr.addEventListener('click', function(e){
       if(e.target.closest('.row-actions') || e.target.closest('.addr-copy')) return;
-      if(onRowClick){ onRowClick(tr.dataset.id); } else { state.selectedId=tr.dataset.id; renderCurrentView(); }
+      if(onRowClick){ onRowClick(tr.dataset.id); } else { selectWallet(tr.dataset.id); }
     });
   });
   $all('.addr-copy',tbody).forEach(function(el){
@@ -1436,7 +1492,7 @@ function renderOverview(){
   var list=filteredWallets().slice().sort(function(a,b){
     var av=a.lastUsed?new Date(a.lastUsed).getTime():0, bv=b.lastUsed?new Date(b.lastUsed).getTime():0; return bv-av;
   });
-  renderTable($('#wallets-table'), list.slice(0,8), function(id){ state.selectedId=id; switchView('wallets', true); });
+  renderTable($('#wallets-table'), list.slice(0,8), function(id){ if(isNarrow()){ openSheet(id); } else { state.selectedId=id; switchView('wallets', true); } });
   $('#ov-show-all').onclick=function(){ switchView('wallets'); };
   renderGroupsPreview();
 }
@@ -1480,7 +1536,7 @@ function renderWalletsView(){
   var list=filteredWallets();
   $('#wallets-count-label-2').textContent = t('count_of',{n:list.length,total:state.wallets.length});
   renderTable($('#wallets-table-2'), list);
-  renderDetail($('#detail-panel-2'), list);
+  if(isNarrow()){ $('#detail-panel-2').innerHTML=''; } else { renderDetail($('#detail-panel-2'), list); }
 }
 function openGroup(gid){
   state.filterGroupId=gid; state.filterForgotten=false; state.search=''; $('#search-input').value=''; state.filterNetwork=null; state.filterStatus=null;
@@ -1552,6 +1608,8 @@ function renderSettings(){
   buildAvatarPicker($('#set-avatars'), state.profile.avatar, function(a){ state.profile.avatar=a; save(); renderProfileChrome(); });
   applyBalanceToggleUI();
   $('#app-version').textContent='v'+APP_VERSION;
+  var sn=getSnapshot(); $('#snapshot-row').classList.toggle('hidden', !sn);
+  if(sn) $('#snapshot-info').textContent=t('snapshot_info',{date:new Date(sn.t).toLocaleDateString(state.lang==='ru'?'ru-RU':'en-GB'), v:sn.from});
   $('#pin-switch').classList.toggle('on', !!state.profile.pinHash);
   $('#pin-set-form').classList.toggle('hidden', !state.profile.pinHash);
   $('#analytics-switch').classList.toggle('on', !state.profile.analyticsOptOut);
@@ -1573,7 +1631,7 @@ function initOnboarding(){
   $('#ob-continue').addEventListener('click', function(){
     var nickname = $('#ob-nickname').value.trim() || 'Anon';
     var seed = $('#ob-seed').checked;
-    state.profile = {nickname:nickname, avatar:chosenAvatar, theme:'dark', lang:state.lang, hideBalance:false, createdAt:Date.now(), analyticsOptOut:false, pinHash:null};
+    state.profile = {nickname:nickname, avatar:chosenAvatar, theme:'dark', lang:state.lang, hideBalance:false, createdAt:Date.now(), analyticsOptOut:false, pinHash:null, appVersion:APP_VERSION};
     if(seed){ seedData(); } else { state.wallets=[]; state.groups=[]; }
     save(); track('onboarding_completed', {seeded:seed}); startApp();
   });
@@ -1803,7 +1861,7 @@ function applyImport(data){
   state.wallets=data.wallets;
   if(Array.isArray(data.groups)) state.groups=data.groups;
   if(data.profile && typeof data.profile==='object') state.profile=Object.assign({}, state.profile||{}, data.profile);
-  normalizeData();
+  normalizeData(); state.profile.appVersion=APP_VERSION;
   state.lang=state.profile.lang; state.selectedId=null; state.filterGroupId=null; state.filterForgotten=false;
   save(); applyTheme(); applyI18n(); applyBalanceToggleUI(); fillGroupSelect(); renderProfileChrome(); renderCurrentView(); toast(t('toast_import_done')); track('backup_imported');
 }
@@ -1946,11 +2004,104 @@ function wireExtraEvents(){
   $('#bulk-text').addEventListener('input', updateBulkPreview);
   $('#bulk-evm-net').addEventListener('change', updateBulkPreview);
   $('#bulk-confirm').addEventListener('click', confirmBulk);
+  $('#snapshot-restore-btn').addEventListener('click', restoreSnapshot);
+  wireSheetEvents();
 }
 
+/* ================= mobile bottom sheet for wallet details ================= */
+var sheetOpen=false, sheetPushed=false, lastNarrow=false;
+function isNarrow(){ return window.innerWidth<=980; }
+function selectWallet(id){
+  if(isNarrow()){ openSheet(id); }
+  else { state.selectedId=id; renderCurrentView(); }
+}
+function renderSheet(){
+  var w=state.wallets.find(function(x){return x.id===state.selectedId;});
+  if(!w){ closeSheet(); return; }
+  renderDetail($('#sheet-body'), null);
+  $('#sheet-body').scrollTop=0;
+}
+function openSheet(id){
+  state.selectedId=id; sheetOpen=true;
+  $all('#view-overview tr.selected, #view-wallets tr.selected').forEach(function(r){ r.classList.remove('selected'); });
+  $all('tr[data-id="'+id+'"]').forEach(function(r){ r.classList.add('selected'); });
+  renderSheet();
+  $('#detail-sheet').classList.add('open'); $('#detail-sheet').setAttribute('aria-hidden','false');
+  document.body.classList.add('sheet-lock');
+  try{ history.pushState({waSheet:1}, ''); sheetPushed=true; }catch(e){ sheetPushed=false; }
+}
+function closeSheet(fromPop){
+  if(!sheetOpen) return;
+  sheetOpen=false;
+  var sh=$('#detail-sheet'); sh.classList.remove('open'); sh.setAttribute('aria-hidden','true');
+  $('#sheet-panel').style.transform='';
+  document.body.classList.remove('sheet-lock');
+  state.selectedId=null;
+  $all('tr.selected').forEach(function(r){ r.classList.remove('selected'); });
+  if(sheetPushed && !fromPop){ sheetPushed=false; try{ history.back(); }catch(e){} } else { sheetPushed=false; }
+}
+function wireSheetEvents(){
+  lastNarrow=isNarrow();
+  $('#sheet-close').addEventListener('click', function(){ closeSheet(); });
+  $('#detail-sheet').addEventListener('click', function(e){ if(e.target.id==='detail-sheet') closeSheet(); });
+  window.addEventListener('popstate', function(){ if(sheetOpen) closeSheet(true); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && sheetOpen && !document.querySelector('.modal-overlay.open')) closeSheet(); });
+  window.addEventListener('resize', function(){
+    var n=isNarrow(); if(n===lastNarrow) return; lastNarrow=n;
+    if(sheetOpen) closeSheet();
+    if(state.profile && $('#app').classList.contains('active')) renderCurrentView();
+  });
+  // swipe down on the handle to dismiss
+  var h=$('#sheet-handle'), panel=$('#sheet-panel'), y0=null, dy=0;
+  function ty(e){ var t=(e.touches&&e.touches[0])||(e.changedTouches&&e.changedTouches[0]); return t?t.clientY:null; }
+  h.addEventListener('touchstart', function(e){ y0=ty(e); dy=0; panel.style.transition='none'; }, {passive:true});
+  h.addEventListener('touchmove', function(e){ if(y0===null) return; var y=ty(e); if(y===null) return; dy=Math.max(0, y-y0); panel.style.transform='translateY('+dy+'px)'; }, {passive:true});
+  h.addEventListener('touchend', function(){
+    if(y0===null) return; y0=null; panel.style.transition='';
+    if(dy>80){ closeSheet(); } else { panel.style.transform=''; }
+    dy=0;
+  });
+}
+
+/* ================= update safety net ================= */
+function wipeStorage(){
+  ['wa_profile','wa_wallets','wa_groups','wa_prev_snapshot','wa_errlog'].forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
+}
+function downloadRawData(){
+  var out={exportedAt:new Date().toISOString(), note:'rescue copy of raw browser data'};
+  [['profile',LS_PROFILE],['wallets',LS_WALLETS],['groups',LS_GROUPS]].forEach(function(k){
+    var raw=null; try{ raw=localStorage.getItem(k[1]); }catch(e){}
+    try{ out[k[0]] = raw ? JSON.parse(raw) : (k[0]==='profile' ? {} : []); }
+    catch(e){ out[k[0]] = (k[0]==='profile' ? {} : []); out.rawText = out.rawText||{}; out.rawText[k[0]] = raw; }
+  });
+  downloadText('wallet-atlas-rescue.json', JSON.stringify(out,null,2));
+}
+function showEmergency(err){
+  var msg=redact(String(err && err.message || err || 'unknown')).slice(0,200);
+  try{ logError('crash: '+msg, '', 0); track('app_crash', {m:msg.slice(0,100)}); }catch(e){}
+  try{ document.documentElement.setAttribute('data-theme', (state.profile && state.profile.theme==='light') ? 'light' : 'dark'); applyI18n(); }catch(e){}
+  try{ $('#onboarding').style.display='none'; $('#app').classList.remove('active'); $('#sitegate').classList.add('hidden'); $('#lockscreen').classList.add('hidden'); }catch(e){}
+  $('#emergency').classList.remove('hidden');
+  $('#em-err').textContent=msg;
+  $('#em-download').onclick=downloadRawData;
+  $('#em-copy').onclick=function(){ copyToClipboard(buildReport()+'\nCrash: '+msg, this); };
+  $('#em-retry').onclick=function(){ location.reload(); };
+}
+function getSnapshot(){ try{ return JSON.parse(localStorage.getItem('wa_prev_snapshot')||'null'); }catch(e){ return null; } }
+function restoreSnapshot(){
+  var s=getSnapshot(); if(!s) return;
+  if(!confirm(t('snapshot_confirm'))) return;
+  try{
+    if(s.p) localStorage.setItem(LS_PROFILE, s.p);
+    if(s.w) localStorage.setItem(LS_WALLETS, s.w);
+    if(s.g) localStorage.setItem(LS_GROUPS, s.g);
+  }catch(e){ toast(t('toast_save_fail')); return; }
+  track('snapshot_restored');
+  location.reload();
+}
 function wipeAll(){
   if(!confirm(t('confirm_wipe'))) return;
-  localStorage.removeItem(LS_PROFILE); localStorage.removeItem(LS_WALLETS); localStorage.removeItem(LS_GROUPS);
+  wipeStorage();
   location.reload();
 }
 
@@ -1993,7 +2144,7 @@ function showLockScreen(){
   pinInput.onkeydown = function(e){ if(e.key==='Enter') tryUnlock(); };
   $('#lock-reset-btn').onclick = function(){
     if(confirm(t('confirm_wipe'))){
-      localStorage.removeItem(LS_PROFILE); localStorage.removeItem(LS_WALLETS); localStorage.removeItem(LS_GROUPS);
+      wipeStorage();
       location.reload();
     }
   };
@@ -2003,7 +2154,8 @@ window.addEventListener('scroll', closeGlobalMenu, true);
 window.addEventListener('resize', closeGlobalMenu);
 
 /* ================= init ================= */
-function startApp(){
+function startApp(){ try{ startAppInner(); }catch(e){ showEmergency(e); } }
+function startAppInner(){
   $('#onboarding').style.display='none'; $('#app').classList.add('active');
   applyI18n(); applyTheme(); applyBalanceToggleUI(); renderProfileChrome();
   initModalStatics(); fillGroupSelect(); renderFilterBar();
@@ -2107,7 +2259,7 @@ function toggleBalance(){
 
 /* ================= boot ================= */
 load();
-wireEvents();
+try{ wireEvents(); }catch(e){ bootError=bootError||e; }
 function proceedPastGate(){
   if(state.profile){
     if(state.profile.hideBalance===undefined) state.profile.hideBalance=false;
@@ -2118,7 +2270,8 @@ function proceedPastGate(){
 var gateActive = SITE_PASSWORD_HASH && SITE_PASSWORD_HASH!=='REPLACE_WITH_SITE_PASSWORD_HASH';
 var gateUnlocked = false;
 try{ gateUnlocked = localStorage.getItem(LS_GATE)==='1'; }catch(e){}
-if(gateActive && !gateUnlocked){ showSiteGate(proceedPastGate); } else { proceedPastGate(); }
+if(bootError){ showEmergency(bootError); }
+else if(gateActive && !gateUnlocked){ showSiteGate(proceedPastGate); } else { proceedPastGate(); }
 
 })();
 </script>
