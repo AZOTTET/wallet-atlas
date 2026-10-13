@@ -168,6 +168,28 @@ a{color:inherit;}
 .bulk-preview .warn{color:var(--amber);}
 #bulk-confirm:disabled,#pw-confirm:disabled{opacity:.5;cursor:default;}
 .head-tools .icon-btn svg{width:15px;height:15px;}
+.tok-sec{border-top:1px solid var(--border-soft);padding-top:14px;}
+.tok-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;}
+.tok-th-l{font-size:11.5px;color:var(--text-faint);display:flex;align-items:center;gap:6px;}
+.tok-th{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:3px 6px;font-size:11.5px;color:var(--text);}
+.tok-age{font-size:11px;color:var(--text-faint);margin-bottom:8px;}
+.tok-total{display:flex;justify-content:space-between;font-size:13px;padding:6px 0 8px;}
+.tok-row,.tok-det>summary{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--border-soft);}
+.tok-sym{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:5px;}
+.tok-sym svg{color:var(--amber);flex-shrink:0;}
+.tok-amt{color:var(--text-dim);font-family:var(--font-mono);font-size:11.5px;}
+.tok-val{min-width:70px;text-align:right;font-weight:600;}
+.tok-det{border:none;}
+.tok-det>summary{cursor:pointer;list-style:none;color:var(--text-dim);}
+.tok-det>summary::-webkit-details-marker{display:none;}
+.tok-det>summary>span:first-child{flex:1;}
+.tok-det>summary::after{content:'▾';font-size:10px;color:var(--text-faint);}
+.tok-det[open]>summary::after{content:'▴';}
+.tok-det .tok-row{padding-left:10px;}
+.tok-note{font-size:11.5px;color:var(--text-faint);line-height:1.5;padding:6px 0;}
+.tok-search{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;display:flex;flex-direction:column;gap:4px;}
+.chk-note{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--amber);background:var(--amber-soft);border-radius:9px;padding:9px 11px;line-height:1.45;}
+.chk-note svg{flex-shrink:0;margin-top:1px;}
 .forgotten-chips{display:flex;gap:8px;flex-wrap:wrap;}
 .fchip{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:6px 10px;font-size:12px;display:flex;flex-direction:column;gap:1px;}
 .fchip b{font-size:12px;}
@@ -499,6 +521,7 @@ tbody tr:last-child td{border-bottom:none;}
 
     <div id="view-wallets" class="hidden">
       <div id="group-filter-slot"></div>
+      <div id="token-search-slot"></div>
       <div class="content-grid">
         <div class="panel">
           <div class="panel-head"><h2 data-i18n="wallets_panel_title">Все кошельки</h2><div class="head-tools"><button class="icon-btn" id="bulk-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1" fill="currentColor" stroke="none"/></svg><span data-i18n="bulk_btn">Списком</span></button><select id="sort-select" class="sort-select"></select><span class="count" id="wallets-count-label-2"></span></div></div>
@@ -742,6 +765,7 @@ tbody tr:last-child td{border-bottom:none;}
     </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" id="report-cancel" data-i18n="report_close">Закрыть</button>
+      <button class="btn btn-soft" id="report-netcheck" data-i18n="report_netcheck">Проверить сеть</button>
       <button class="btn btn-primary" id="report-copy"><span data-i18n="report_copy">Скопировать отчёт</span></button>
     </div>
   </div>
@@ -818,6 +842,8 @@ security_empty_title:"Нечего проверять", security_empty_desc:"В�
 sec_mark_active:"Отметить Active", sec_archive:"Архивировать", sec_edit:"Открыть",
 forgotten_view_title:"Забытые кошельки",
 nav_more:"Ещё", add_wallet_short:"Добавить",
+refresh_net_detail:"Запрос к сети не прошёл: браузер его заблокировал или нет интернета. Нажми «Сообщить о проблеме» → «Проверить сеть» и пришли отчёт.", refresh_file_hint:"Страница открыта как файл с компьютера — часть сервисов не принимает такие запросы. Открой сайт по https-ссылке (GitHub Pages).", refresh_tok_prefix:"Токены:", report_netcheck:"Проверить сеть", netcheck_running:"Проверяю…",
+tok_title:"Токены", tok_updated:"обновлено: {ago}", tok_threshold:"Показывать от", tok_total:"Всего по токенам", tok_other_n:"Другие · {n}", tok_noprice:"Без цены", tok_noprice_hint:"Рыночной цены нет — это может быть мусорный airdrop или совсем новый токен. В сумму не входят; ссылки и кнопки из таких токенов лучше не открывать.", tok_more_big:"Ещё {n} токенов от {th}", tok_empty:"Нажми «Обновить с блокчейна» (кнопка со стрелками), чтобы увидеть токены этого кошелька.", tok_lowliq:"Тонкая ликвидность: продать по этой цене будет трудно", tok_skipped:"Ещё {n} токенов не проверено (их слишком много)", tok_search_line:"{w} кошельк. · {amt} · {usd}", refresh_ok_tokens:"Обновлено: баланс, дата и токены ({n})", refresh_tokens_fail:"Баланс обновлён, а токены получить не удалось — попробуй позже",
 snapshot_title:"Копия до обновления", snapshot_info:"Сохранена {date}, версия {v}. Создаётся автоматически при первом запуске новой версии.", snapshot_restore:"Вернуть данные до обновления", snapshot_confirm:"Вернуть данные на момент до обновления? Всё, что ты изменил после обновления, будет потеряно.",
 em_title:"Приложение не смогло запуститься", em_text:"Твои данные не удалены — они лежат в этом браузере. Сначала скачай копию, чтобы ничего не потерять, затем скопируй отчёт и отправь тому, кто дал тебе ссылку.", em_download:"Скачать мои данные", em_retry:"Попробовать снова",
 bulk_btn:"Списком", bulk_title:"Добавить списком", bulk_hint:"Вставь адреса — по одному в строке. Название можно написать рядом с адресом (через пробел, запятую или Tab). Сеть определится сама, для адресов 0x… выбери сеть ниже.", bulk_ph:"Main SOL, 7xKQm2vD93Fn…\n0x9e7Ab21C4D8b… Старый ETH\nМем-кошелёк 3  9a1BcD82vFmQ…", bulk_evm_net:"Сеть для адресов 0x…", bulk_found:"Найдено адресов: {n}", bulk_dups:"Пропущено дубликатов: {n} (уже есть в базе или повтор в списке)", bulk_bad:"Не распознано строк: {n}", bulk_trunc:"Обработаны первые 200 строк", bulk_add_n:"Добавить: {n}", bulk_added:"Добавлено кошельков: {n}. Баланс и дату можно подтянуть кнопкой обновления в карточке.", bulk_empty_btn:"Добавить списком",
@@ -904,6 +930,8 @@ security_empty_title:"Nothing to review", security_empty_desc:"All wallets look 
 sec_mark_active:"Mark Active", sec_archive:"Archive", sec_edit:"Open",
 forgotten_view_title:"Forgotten wallets",
 nav_more:"More", add_wallet_short:"Add",
+refresh_net_detail:"The network request failed: the browser blocked it or you're offline. Press «Report a problem» → «Check network» and send the report.", refresh_file_hint:"The page is opened as a local file — some services reject such requests. Open the site via its https link (GitHub Pages).", refresh_tok_prefix:"Tokens:", report_netcheck:"Check network", netcheck_running:"Checking…",
+tok_title:"Tokens", tok_updated:"updated: {ago}", tok_threshold:"Show from", tok_total:"Total in tokens", tok_other_n:"Other · {n}", tok_noprice:"No price", tok_noprice_hint:"No market price — could be a junk airdrop or a very new token. Not included in the total; avoid opening links or buttons tied to such tokens.", tok_more_big:"{n} more tokens from {th}", tok_empty:"Press «Refresh from blockchain» (the arrows button) to see this wallet's tokens.", tok_lowliq:"Thin liquidity: selling at this price would be hard", tok_skipped:"{n} more tokens weren't checked (too many)", tok_search_line:"{w} wallets · {amt} · {usd}", refresh_ok_tokens:"Updated: balance, date and tokens ({n})", refresh_tokens_fail:"Balance updated, but tokens couldn't be fetched — try again later",
 snapshot_title:"Pre-update copy", snapshot_info:"Saved {date}, version {v}. Created automatically the first time a new version starts.", snapshot_restore:"Restore data from before the update", snapshot_confirm:"Restore your data as it was before the update? Anything you changed after the update will be lost.",
 em_title:"The app couldn't start", em_text:"Your data hasn't been deleted — it's stored in this browser. First download a copy so nothing gets lost, then copy the report and send it to whoever gave you the link.", em_download:"Download my data", em_retry:"Try again",
 bulk_btn:"Bulk add", bulk_title:"Add from a list", bulk_hint:"Paste addresses, one per line. You can write a name next to an address (separated by space, comma or Tab). The network is detected automatically; for 0x… addresses pick the network below.", bulk_ph:"Main SOL, 7xKQm2vD93Fn…\n0x9e7Ab21C4D8b… Old ETH\nMeme wallet 3  9a1BcD82vFmQ…", bulk_evm_net:"Network for 0x… addresses", bulk_found:"Addresses found: {n}", bulk_dups:"Duplicates skipped: {n} (already in your atlas or repeated in the list)", bulk_bad:"Lines not recognized: {n}", bulk_trunc:"Only the first 200 lines were processed", bulk_add_n:"Add {n}", bulk_added:"Wallets added: {n}. Use the refresh button in a wallet card to fetch balance and date.", bulk_empty_btn:"Add from a list",
@@ -997,7 +1025,7 @@ var WALLET_ICONS = ["briefcase", "chart", "sprout", "flame", "coins", "image", "
 var COLORS = ['#5b7cff','#34d399','#f5a524','#f5556c','#a78bfa','#38bdf8','#fb923c','#2dd4bf'];
 var LS_PROFILE='wa_profile', LS_WALLETS='wa_wallets', LS_GROUPS='wa_groups', LS_GATE='wa_site_unlocked';
 var SITE_PASSWORD_HASH = 'REPLACE_WITH_SITE_PASSWORD_HASH';
-var APP_VERSION = '0.9.2';
+var APP_VERSION = '0.10.1';
 
 /* ================= state ================= */
 var state = {
@@ -1026,7 +1054,7 @@ function fmtDate(dateStr){
   return months[d.getMonth()]+' '+d.getFullYear();
 }
 function maskBal(val){ return state.profile.hideBalance ? '••••' : val; }
-function toast(msg){ var el=$('#toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(function(){el.classList.remove('show');},2200); }
+function toast(msg){ var el=$('#toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(function(){el.classList.remove('show');}, String(msg).length>50?5000:2200); }
 function track(event, data){
   try{
     if(state.profile && state.profile.analyticsOptOut) return;
@@ -1093,7 +1121,7 @@ function normalizeData(){
     p.nickname = String(p.nickname||'Anon').slice(0,24);
     if(!AVATAR_DEFS[p.avatar]) p.avatar='fox';
     if(!p.createdAt) p.createdAt=Date.now();
-    p.hideBalance = !!p.hideBalance; p.analyticsOptOut = !!p.analyticsOptOut; if(p.pinHash===undefined) p.pinHash=null;
+    p.hideBalance = !!p.hideBalance; p.tokThreshold = [1,10,50,100].indexOf(+p.tokThreshold)>-1 ? +p.tokThreshold : 10; p.analyticsOptOut = !!p.analyticsOptOut; if(p.pinHash===undefined) p.pinHash=null;
     p.theme = p.theme==='light' ? 'light' : 'dark';
     p.lang = p.lang==='en' ? 'en' : 'ru';
   }
@@ -1115,6 +1143,16 @@ function normalizeData(){
     w.color=safeColor(w.color);
     w.balance = w.balance==null ? '' : String(w.balance).slice(0,30);
     w.notes = w.notes==null ? '' : String(w.notes).slice(0,2000);
+    if(typeof w.usd==='number' && isFinite(w.usd) && w.usd>=0){} else { delete w.usd; }
+    if(w.tok && typeof w.tok==='object' && Array.isArray(w.tok.items)){
+      var tkItems=w.tok.items.slice(0,400).map(function(i){
+        if(!i||typeof i!=='object') return null;
+        var a=+i.a; if(!(a>=0)||!isFinite(a)) return null;
+        var num=function(x){ return (x==null||x===''||!isFinite(+x)||+x<0) ? null : +x; };
+        return {m:String(i.m||'').slice(0,64), s:String(i.s||'').slice(0,16), n:String(i.n||'').slice(0,40), a:a, p:num(i.p), v:num(i.v), l:(i.l==null||!isFinite(+i.l))?null:+i.l};
+      }).filter(Boolean);
+      w.tok={t:(isFinite(+w.tok.t)?+w.tok.t:0), items:tkItems, unpricedN:Math.max(0,parseInt(w.tok.unpricedN,10)||0), skipped:Math.max(0,parseInt(w.tok.skipped,10)||0), total:(isFinite(+w.tok.total)&&+w.tok.total>=0)?+w.tok.total:0};
+    } else { delete w.tok; }
     w.lastUsed=safeDate(w.lastUsed); w.firstSeen=safeDate(w.firstSeen); w.createdAt=safeDate(w.createdAt); w.createdIn = w.createdIn==null ? '' : String(w.createdIn).slice(0,40);
     w.tags = Array.isArray(w.tags) ? w.tags.map(function(x){return String(x).slice(0,30);}).slice(0,30) : [];
     w.usedWith = Array.isArray(w.usedWith) ? w.usedWith.filter(function(u){return u && u.service;}).map(function(u){return {service:String(u.service).slice(0,40), interactions:+u.interactions||0};}).slice(0,50) : [];
@@ -1168,7 +1206,12 @@ function seedData(){
 function forgottenWallets(){ return state.wallets.filter(function(w){ var d=daysAgo(w.lastUsed); return d===null || d>180; }); }
 function totalBalance(){
   var sum=0;
-  state.wallets.forEach(function(w){ if(!w.balance) return; var n=parseFloat(String(w.balance).replace(/[^0-9.\-]/g,'')); if(!isNaN(n)) sum+=n; });
+  state.wallets.forEach(function(w){
+    if(typeof w.usd==='number'){ sum+=w.usd; return; }
+    var b=String(w.balance||'');
+    if(!/^\s*\$?\s*[\d.,]+\s*$/.test(b)) return;
+    var n=parseFloat(b.replace(/[^0-9.\-]/g,'')); if(!isNaN(n)) sum+=n;
+  });
   return sum;
 }
 function activeCount(){ return state.wallets.filter(function(w){var d=daysAgo(w.lastUsed); return d!==null && d<=90;}).length; }
@@ -1182,7 +1225,7 @@ function filteredWallets(){
     list=list.filter(function(w){
       return (w.name||'').toLowerCase().indexOf(q)>-1 || (w.address||'').toLowerCase().indexOf(q)>-1 || (w.createdIn||'').toLowerCase().indexOf(q)>-1 ||
         (w.tags||[]).join(' ').toLowerCase().indexOf(q)>-1 || (w.purpose||'').toLowerCase().indexOf(q)>-1 ||
-        (w.usedWith||[]).some(function(u){return u.service.toLowerCase().indexOf(q)>-1;});
+        (w.usedWith||[]).some(function(u){return u.service.toLowerCase().indexOf(q)>-1;}) || tokMatch(w,q);
     });
   }
   if(state.filterNetwork) list=list.filter(function(w){return w.network===state.filterNetwork;});
@@ -1314,7 +1357,7 @@ function renderTable(tableEl, list, onRowClick){
       '<td><div class="wallet-cell"><div class="wallet-icon" style="background:'+w.color+'22;color:'+w.color+'">'+walletIcon(w.icon)+'</div><div><div class="wallet-name">'+esc(w.name)+'</div><div class="wallet-addr addr-copy" data-addr="'+esc(w.address)+'" title="'+t('copy_address_title')+'">'+esc(shortAddr(w.address))+' <span class="copy-ic">⧉</span></div></div></div></td>'+
       '<td data-label="'+t('col_purpose')+'"><span class="badge" style="background:'+pur.color+'22;color:'+pur.color+'">'+pur.label+'</span></td>'+
       '<td data-label="'+t('col_network')+'"><span class="net-badge">'+netIcon(w.network,15)+' '+net.label+'</span></td>'+
-      '<td data-label="'+t('col_balance')+'">'+esc(maskBal(w.balance||'—'))+'</td>'+
+      '<td data-label="'+t('col_balance')+'">'+esc(maskBal(balText(w)))+'</td>'+
       '<td data-label="'+t('col_lastused')+'">'+fmtAgo(w.lastUsed)+'</td>'+
       '<td data-label="'+t('col_usedwith')+'"><div class="usedwith-chips">'+uw+extra+'</div></td>'+
       '<td data-label="'+t('col_status')+'"><span class="badge" style="background:'+st.bg+';color:'+st.color+'">'+st.label+'</span></td>'+
@@ -1336,11 +1379,11 @@ function renderTable(tableEl, list, onRowClick){
 }
 var CHAIN_SRC = {
   solana:{kind:'solana', url:'https://solana.publicnode.com', symbol:'SOL', host:'publicnode.com'},
-  ethereum:{kind:'evm', url:'https://rpc.nodeflare.app/eth/public', symbol:'ETH', host:'nodeflare.app'},
-  base:{kind:'evm', url:'https://rpc.nodeflare.app/base/public', symbol:'ETH', host:'nodeflare.app'},
-  bnb:{kind:'evm', url:'https://rpc.nodeflare.app/bnb/public', symbol:'BNB', host:'nodeflare.app'},
-  arbitrum:{kind:'evm', url:'https://rpc.nodeflare.app/arb/public', symbol:'ETH', host:'nodeflare.app'},
-  polygon:{kind:'evm', url:'https://rpc.nodeflare.app/polygon/public', symbol:'POL', host:'nodeflare.app'},
+  ethereum:{kind:'evm', url:'https://rpc.nodeflare.app/eth/public', symbol:'ETH', host:'nodeflare.app', dex:'ethereum', wrapped:'0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'},
+  base:{kind:'evm', url:'https://rpc.nodeflare.app/base/public', symbol:'ETH', host:'nodeflare.app', dex:'base', wrapped:'0x4200000000000000000000000000000000000006'},
+  bnb:{kind:'evm', url:'https://rpc.nodeflare.app/bnb/public', symbol:'BNB', host:'nodeflare.app', dex:'bsc', wrapped:'0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c'},
+  arbitrum:{kind:'evm', url:'https://rpc.nodeflare.app/arb/public', symbol:'ETH', host:'nodeflare.app', dex:'arbitrum', wrapped:'0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'},
+  polygon:{kind:'evm', url:'https://rpc.nodeflare.app/polygon/public', symbol:'POL', host:'nodeflare.app', dex:'polygon', wrapped:'0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270'},
   ton:{kind:'ton', url:'https://toncenter.com/api/v2', symbol:'TON', host:'toncenter.com'}
 };
 function chainFetch(url, opts){
@@ -1372,16 +1415,24 @@ function fetchChainData(w){
   if(!src) return Promise.reject(new Error('UNSUPPORTED'));
   if(src.kind==='evm'){
     return rpcCall(src.url, 'eth_getBalance', [a, 'latest']).then(function(hex){
-      return {balance: fmtUnits(BigInt(hex), 18, src.symbol), lastUsed:'', hasDate:false};
+      var wei = BigInt(hex), out = {balance: fmtUnits(wei, 18, src.symbol), lastUsed:'', hasDate:false, usd:null};
+      var amt = Number(wei)/1e18;
+      if(!(amt>0)){ out.usd = 0; return out; }
+      return dexPrices([src.wrapped], src.dex).then(function(map){
+        var pr = map[src.wrapped.toLowerCase()]; out.usd = pr ? amt*pr.price : null; return out;
+      }, function(){ return out; });
     });
   }
   if(src.kind==='solana'){
-    return rpcCall(src.url, 'getBalance', [a]).then(function(res){
-      var bal = fmtUnits(BigInt(res.value), 9, src.symbol);
-      return rpcCall(src.url, 'getSignaturesForAddress', [a, {limit:1}]).then(function(sigs){
+    return solRpc('getBalance', [a]).then(function(res){
+      var native = BigInt(res.value);
+      var out = {balance:fmtUnits(native, 9, src.symbol), lastUsed:'', hasDate:false, tokens:null};
+      return solRpc('getSignaturesForAddress', [a, {limit:1}]).then(function(sigs){
         var t0 = sigs && sigs[0] && sigs[0].blockTime;
-        return {balance:bal, lastUsed:dateFromUnix(t0), hasDate:!!t0};
-      }, function(){ return {balance:bal, lastUsed:'', hasDate:false}; });
+        out.lastUsed = dateFromUnix(t0); out.hasDate = !!t0;
+      }, function(){})
+      .then(function(){ return fetchSolanaTokens(a, native).then(function(tok){ out.tokens = tok; }, function(e){ out.tokErr = String(e && e.message || 'NET'); }); })
+      .then(function(){ return out; });
     });
   }
   if(src.kind==='ton'){
@@ -1406,14 +1457,222 @@ function refreshWalletFromChain(id){
   fetchChainData(w).then(function(r){
     w.balance = r.balance;
     if(r.hasDate) w.lastUsed = r.lastUsed;
+    if(r.tokens){ w.tok = r.tokens; w.usd = r.tokens.total; }
+    else if(r.tokens===undefined){ if(typeof r.usd==='number') w.usd = r.usd; else delete w.usd; }
+    delete lastErr[id];
+    if(r.tokens!==undefined && !r.tokens) lastTokErr[id]=r.tokErr||'NET'; else delete lastTokErr[id];
     save(); renderCurrentView();
-    toast(r.hasDate ? t('refresh_ok') : t('refresh_ok_nodate'));
-    track('chain_refresh', {network:w.network, ok:true, date:r.hasDate});
+    var msg;
+    if(r.tokens!==undefined) msg = r.tokens ? t('refresh_ok_tokens',{n:r.tokens.items.length}) : t('refresh_tokens_fail');
+    else msg = r.hasDate ? t('refresh_ok') : t('refresh_ok_nodate');
+    toast(msg);
+    track('chain_refresh', {network:w.network, ok:true, date:r.hasDate, tokens:(r.tokens===undefined?null:!!r.tokens), n:(r.tokens?r.tokens.items.length:0)});
   }).catch(function(e){
-    var m = String(e && e.message || '');
+    var m = String(e && e.message || 'NET');
+    lastErr[id]=m; renderCurrentView();
     toast(m==='RATE' ? t('refresh_rate') : (m.indexOf('RPC')===0 ? t('refresh_bad_addr') : t('refresh_net')));
-    track('chain_refresh', {network:w.network, ok:false, reason:m.slice(0,30)});
+    track('chain_refresh', {network:w.network, ok:false, reason:m.slice(0,30), file:(location.protocol==='file:')});
   }).then(function(){ refreshing[id]=false; var b=$('#det-refresh'); if(b) b.classList.remove('spin'); });
+}
+/* ================= network resilience + diagnostics ================= */
+var SOL_RPCS=['https://solana.publicnode.com','https://solana-rpc.publicnode.com','https://api.mainnet-beta.solana.com'], solRpcIdx=0;
+var lastErr={}, lastTokErr={}, lastNetCheck='';
+function solRpc(method, params){
+  var lastE=null;
+  function attempt(k){
+    if(k>=SOL_RPCS.length) return Promise.reject(lastE||new Error('NET'));
+    var idx=(solRpcIdx+k)%SOL_RPCS.length;
+    return Promise.resolve().then(function(){ return rpcCall(SOL_RPCS[idx], method, params); })
+      .then(function(r){ solRpcIdx=idx; return r; }, function(e){ lastE=e; return attempt(k+1); });
+  }
+  return attempt(0);
+}
+function jupPrices(mints){
+  var chunks=[]; for(var i=0;i<mints.length;i+=50) chunks.push(mints.slice(i,i+50));
+  var map={}, okN=0;
+  return Promise.all(chunks.map(function(ch){
+    return Promise.resolve().then(function(){ return chainFetch('https://lite-api.jup.ag/price/v3?ids='+ch.join(',')); }).then(function(res){
+      okN++;
+      var d=(res && res.data) ? res.data : res;
+      ch.forEach(function(m){
+        var o=d&&d[m]; var p=parseFloat(o && (o.usdPrice!=null ? o.usdPrice : o.price));
+        if(p>0) map[m]={price:p, liq:null, sym:'', name:''};
+      });
+    }, function(){});
+  })).then(function(){ if(okN===0) throw new Error('NET'); return map; });
+}
+function refreshNoteHtml(w){
+  var e=lastErr[w.id], te=lastTokErr[w.id]; if(!e && !te) return '';
+  var m=String(e||te), key=(m==='RATE')?'refresh_rate':(m.indexOf('RPC')===0?'refresh_bad_addr':'refresh_net_detail');
+  var txt=t(key); if(key==='refresh_net_detail' && location.protocol==='file:') txt+=' '+t('refresh_file_hint');
+  return '<div class="chk-note">'+uiIcon('alert',14)+'<span>'+(!e && te ? esc(t('refresh_tok_prefix'))+' ' : '')+esc(txt)+'</span></div>';
+}
+function rpcInit(method, params){ return {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({jsonrpc:'2.0', id:1, method:method, params:params})}; }
+function diagFetch(label, url, opts, check){
+  var t0=Date.now(), ctrl=(typeof AbortController!=='undefined')?new AbortController():null;
+  var timer=ctrl?setTimeout(function(){ ctrl.abort(); }, 8000):null;
+  var o=Object.assign({}, opts||{}); if(ctrl) o.signal=ctrl.signal;
+  return Promise.resolve().then(function(){ return fetch(url, o); }).then(function(r){
+    if(timer) clearTimeout(timer);
+    if(!r.ok) return label+': FAIL HTTP '+r.status;
+    return r.json().then(function(j){ var m=check(j); return label+': '+(m===true?'OK':'FAIL '+m)+' ('+(Date.now()-t0)+' ms)'; }, function(){ return label+': FAIL bad JSON'; });
+  }, function(e){
+    if(timer) clearTimeout(timer);
+    return label+': FAIL '+((e && e.name==='AbortError') ? 'timeout' : 'blocked or offline (CORS/network)');
+  });
+}
+function runNetDiag(){
+  var sys='11111111111111111111111111111111', tests=[];
+  SOL_RPCS.forEach(function(u){
+    tests.push(diagFetch('Solana RPC '+u.replace('https://',''), u, rpcInit('getBalance',[sys]), function(j){ return (j&&j.result&&typeof j.result.value==='number') ? true : (j&&j.error ? ('error '+String(j.error.message||'')).slice(0,60) : 'unexpected reply'); }));
+  });
+  tests.push(diagFetch('Solana token list method', SOL_RPCS[0], rpcInit('getTokenAccountsByOwner',[sys,{programId:TOK_PROGRAMS[0]},{encoding:'jsonParsed'}]), function(j){ return (j&&j.result&&Array.isArray(j.result.value)) ? true : (j&&j.error ? ('error '+String(j.error.message||'')).slice(0,60) : 'unexpected reply'); }));
+  tests.push(diagFetch('DexScreener prices', 'https://api.dexscreener.com/tokens/v1/solana/'+WSOL, null, function(j){ return (Array.isArray(j)&&j.length) ? true : 'empty reply'; }));
+  tests.push(diagFetch('Jupiter prices (fallback)', 'https://lite-api.jup.ag/price/v3?ids='+WSOL, null, function(j){ var d=(j&&j.data)?j.data:j; return (d&&d[WSOL]) ? true : 'empty reply'; }));
+  tests.push(diagFetch('EVM RPC (Ethereum)', CHAIN_SRC.ethereum.url, rpcInit('eth_getBalance',['0x0000000000000000000000000000000000000000','latest']), function(j){ return (j&&j.result) ? true : 'unexpected reply'; }));
+  tests.push(diagFetch('TON API', 'https://toncenter.com/api/v2/getAddressBalance?address=Ef8zMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzM0vF', null, function(j){ return (j&&j.ok) ? true : 'unexpected reply'; }));
+  return Promise.all(tests).then(function(lines){ return 'Network check (page: '+location.protocol+'//'+(location.host||'-')+'):\n'+lines.join('\n'); });
+}
+function runNetCheckInReport(btn){
+  var label=btn.textContent; btn.disabled=true; btn.textContent=t('netcheck_running');
+  runNetDiag().then(function(txt){
+    lastNetCheck=txt; var ta=$('#report-tech'); ta.value=buildReport(); ta.scrollTop=ta.scrollHeight;
+  }).then(function(){ btn.disabled=false; btn.textContent=label; });
+}
+/* ================= Solana token holdings ================= */
+var TOK_PROGRAMS=['TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA','TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb'];
+var WSOL='So11111111111111111111111111111111111111112';
+var STABLE_USD={'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v':'USDC','Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB':'USDT'};
+var DEX_URL='https://api.dexscreener.com/tokens/v1/solana/';
+var TOK_MAX_MINTS=240, TOK_UNPRICED_KEEP=40, TOK_THRESHOLDS=[1,10,50,100];
+function dexPrices(mints, chain){
+  chain=chain||'solana'; var ci=(chain!=='solana');
+  var chunks=[]; for(var i=0;i<mints.length;i+=30) chunks.push(mints.slice(i,i+30));
+  var map={}, okN=0;
+  return Promise.all(chunks.map(function(ch){
+    var want={}; ch.forEach(function(m){ want[ci?m.toLowerCase():m]=1; });
+    return Promise.resolve().then(function(){ return chainFetch('https://api.dexscreener.com/tokens/v1/'+chain+'/'+ch.join(',')); }).then(function(res){
+      okN++;
+      var pairs=Array.isArray(res)?res:((res&&res.pairs)||[]);
+      pairs.forEach(function(p){
+        if(!p||!p.baseToken||!p.quoteToken) return;
+        var pu=parseFloat(p.priceUsd), pn=parseFloat(p.priceNative), liq=(p.liquidity&&parseFloat(p.liquidity.usd))||0;
+        if(!(pu>0)) return;
+        var take=function(tok, price){
+          var m=ci?String(tok.address).toLowerCase():tok.address; if(!want[m]||!(price>0)) return;
+          var cur=map[m]; if(!cur||liq>cur.liq) map[m]={price:price, liq:liq, sym:String(tok.symbol||''), name:String(tok.name||'')};
+        };
+        take(p.baseToken, pu);
+        if(pn>0) take(p.quoteToken, pu/pn);
+      });
+    }, function(){ /* this chunk failed: its tokens stay unpriced */ });
+  })).then(function(){
+    if(chain==='solana' && mints.length && (okN===0 || !Object.keys(map).length)){
+      return jupPrices(mints).then(function(jm){ return jm; }, function(e){ if(okN===0) throw e; return map; });
+    }
+    if(okN===0) throw new Error('NET');
+    return map;
+  });
+}
+function fetchSolanaTokens(a, native){
+  var terr=null;
+  return Promise.all(TOK_PROGRAMS.map(function(pid){
+    return Promise.resolve().then(function(){ return solRpc('getTokenAccountsByOwner',[a,{programId:pid},{encoding:'jsonParsed'}]); }).then(function(r){ return (r&&r.value)||[]; }, function(e){ if(!terr) terr=e; return null; });
+  })).then(function(lists){
+    if(lists[0]===null) throw (terr||new Error('NET'));
+    var amounts={}, order=[];
+    lists.forEach(function(list){ (list||[]).forEach(function(acc){
+      try{
+        var info=acc.account.data.parsed.info, amt=parseFloat(info.tokenAmount.uiAmountString), m=info.mint;
+        if(!m||!(amt>0)) return;
+        if(!(m in amounts)){ amounts[m]=0; order.push(m); }
+        amounts[m]+=amt;
+      }catch(e){}
+    }); });
+    var nat=Number(native)/1e9;
+    if(nat>0){ if(!(WSOL in amounts)){ amounts[WSOL]=0; order.unshift(WSOL); } amounts[WSOL]+=nat; }
+    var skipped=Math.max(0, order.length-TOK_MAX_MINTS), mints=order.slice(0,TOK_MAX_MINTS);
+    return dexPrices(mints).then(function(map){
+      var items=mints.map(function(m){
+        var pr=map[m], price=pr?pr.price:null, sym=pr?pr.sym:'', name=pr?pr.name:'', liq=pr?pr.liq:null;
+        if(price===null && STABLE_USD[m]){ price=1; sym=STABLE_USD[m]; liq=null; }
+        if(m===WSOL){ sym='SOL'; name='Solana'; }
+        return {m:m, s:sym, n:name, a:amounts[m], p:price, v:(price!==null?amounts[m]*price:null), l:liq};
+      });
+      var priced=items.filter(function(i){return i.v!==null;}).sort(function(x,y){return y.v-x.v;});
+      var unpriced=items.filter(function(i){return i.v===null;}).sort(function(x,y){return y.a-x.a;});
+      var total=priced.reduce(function(s,i){return s+i.v;},0);
+      return {t:Date.now(), items:priced.concat(unpriced.slice(0,TOK_UNPRICED_KEEP)), unpricedN:unpriced.length, skipped:skipped, total:total};
+    });
+  });
+}
+
+/* ---- formatting + rendering ---- */
+function fmtUsd(n){
+  if(!isFinite(n)) return '—';
+  if(n>0 && n<0.01) return '<$0.01';
+  var d=n>=1000?0:2;
+  return '$'+n.toLocaleString('en-US',{minimumFractionDigits:d, maximumFractionDigits:d});
+}
+function trimZ(s){ return s.indexOf('.')>-1 ? s.replace(/0+$/,'').replace(/\.$/,'') : s; }
+function fmtAmt(a){
+  if(!(a>=0)) return '—';
+  if(a>=1e9) return trimZ((a/1e9).toFixed(2))+'B';
+  if(a>=1e6) return trimZ((a/1e6).toFixed(2))+'M';
+  if(a>=1e4) return trimZ((a/1e3).toFixed(1))+'K';
+  if(a>=1) return trimZ(a.toFixed(2));
+  if(a===0) return '0';
+  var s=a.toPrecision(2); return s.indexOf('e')>-1 ? '<0.00001' : trimZ(s);
+}
+function balText(w){ return (typeof w.usd==='number') ? fmtUsd(w.usd) : (w.balance||'—'); }
+function tokRow(i, hide){
+  var warn=(i.l!=null && i.l<1000 && i.m!==WSOL && !STABLE_USD[i.m]) ? ' <span class="tok-warn" title="'+esc(t('tok_lowliq'))+'">'+uiIcon('alert',12)+'</span>' : '';
+  return '<div class="tok-row" title="'+esc(i.n||i.m)+'"><span class="tok-sym">'+esc(i.s||shortAddr(i.m))+warn+'</span><span class="tok-amt">'+(hide?'••':esc(fmtAmt(i.a)))+'</span><span class="tok-val">'+(i.v==null?'—':esc(maskBal(fmtUsd(i.v))))+'</span></div>';
+}
+function tokGroup(label, valueHtml, rowsHtml, note){
+  return '<details class="tok-det"><summary><span>'+label+'</span><span class="tok-val">'+valueHtml+'</span></summary>'+(note?'<div class="tok-note">'+note+'</div>':'')+rowsHtml+'</details>';
+}
+function renderTokensHtml(w){
+  if(w.network!=='solana') return '';
+  var tk=w.tok;
+  if(!tk || !Array.isArray(tk.items)) return '<div class="tok-sec"><div class="dsec-label">'+t('tok_title')+'</div><div class="tok-note">'+t('tok_empty')+'</div></div>';
+  var th=(state.profile&&state.profile.tokThreshold)||10, hide=!!(state.profile&&state.profile.hideBalance);
+  var priced=tk.items.filter(function(i){return i.v!=null;}), unpriced=tk.items.filter(function(i){return i.v==null;});
+  var big=priced.filter(function(i){return i.v>=th || i.m===WSOL;}), small=priced.filter(function(i){return !(i.v>=th || i.m===WSOL);});
+  var sum=function(arr){ return arr.reduce(function(s,i){return s+i.v;},0); };
+  var shown=big.slice(0,8), more=big.slice(8);
+  var rows=function(arr){ return arr.map(function(i){return tokRow(i,hide);}).join(''); };
+  var opts=TOK_THRESHOLDS.map(function(v){ return '<option value="'+v+'"'+(v===th?' selected':'')+'>$'+v+'</option>'; }).join('');
+  var h='<div class="tok-sec"><div class="tok-head"><div class="dsec-label" style="margin:0">'+t('tok_title')+'</div><label class="tok-th-l">'+t('tok_threshold')+' <select id="tok-th" class="tok-th">'+opts+'</select></label></div>';
+  h+='<div class="tok-age">'+t('tok_updated',{ago:fmtAgo(new Date(tk.t).toISOString().slice(0,10))})+'</div>';
+  h+='<div class="tok-total"><span>'+t('tok_total')+'</span><b>'+esc(maskBal(fmtUsd(tk.total||0)))+'</b></div>';
+  h+=rows(shown);
+  if(more.length) h+=tokGroup(t('tok_more_big',{n:more.length, th:'$'+th}), esc(maskBal(fmtUsd(sum(more)))), rows(more));
+  if(small.length) h+=tokGroup(t('tok_other_n',{n:small.length}), esc(maskBal(fmtUsd(sum(small)))), rows(small));
+  if(unpriced.length||tk.unpricedN) h+=tokGroup(t('tok_noprice')+' · '+(tk.unpricedN||unpriced.length), '—', rows(unpriced), esc(t('tok_noprice_hint')));
+  if(tk.skipped>0) h+='<div class="tok-note">'+t('tok_skipped',{n:tk.skipped})+'</div>';
+  return h+'</div>';
+}
+function tokMatch(w, q){
+  var items=(w.tok&&w.tok.items)||[];
+  return items.some(function(i){ return (i.s||'').toLowerCase().indexOf(q)>-1 || (i.n||'').toLowerCase().indexOf(q)>-1 || (i.m||'').toLowerCase()===q; });
+}
+function renderTokenSearch(list){
+  var slot=$('#token-search-slot'); if(!slot) return;
+  var q=(state.search||'').trim().toLowerCase();
+  if(q.length<2){ slot.innerHTML=''; return; }
+  var agg={}, hide=!!(state.profile&&state.profile.hideBalance);
+  list.forEach(function(w){ ((w.tok&&w.tok.items)||[]).forEach(function(i){
+    if((i.s||'').toLowerCase().indexOf(q)>-1 || (i.n||'').toLowerCase().indexOf(q)>-1 || (i.m||'').toLowerCase()===q){
+      var key=i.s||shortAddr(i.m), a=agg[key]=agg[key]||{sym:key, w:{}, amt:0, val:0};
+      a.w[w.id]=1; a.amt+=i.a; a.val+=(i.v||0);
+    }
+  }); });
+  var keys=Object.keys(agg).sort(function(x,y){return agg[y].val-agg[x].val;}).slice(0,3);
+  slot.innerHTML = keys.length ? '<div class="tok-search">'+keys.map(function(k){
+    var a=agg[k];
+    return '<div><b>'+esc(a.sym)+'</b> · '+esc(t('tok_search_line',{w:Object.keys(a.w).length, amt:(hide?'••':fmtAmt(a.amt)), usd:maskBal(fmtUsd(a.val))}))+'</div>';
+  }).join('')+'</div>' : '';
 }
 function openRowMenu(id, btnEl){
   var w = state.wallets.find(function(x){return x.id===id;});
@@ -1464,7 +1723,8 @@ function renderDetail(target, list){
       '<span class="badge" style="background:'+st.bg+';color:'+st.color+'">'+st.label+'</span>'+
     '</div>'+
     '<div class="detail-body">'+
-      '<div><div class="detail-balance">'+esc(maskBal(w.balance||'—'))+'</div></div>'+
+      '<div><div class="detail-balance">'+esc(maskBal(balText(w)))+'</div></div>'+
+      refreshNoteHtml(w)+renderTokensHtml(w)+
       '<div><div class="dsec-label">'+t('detail_purpose')+'</div><span class="badge" style="background:'+pur.color+'22;color:'+pur.color+'">'+pur.label+'</span></div>'+
       (tags?('<div><div class="dsec-label">'+t('detail_tags')+'</div><div class="tag-row">'+tags+'</div></div>'):'')+
       '<div><div class="kv-row"><span class="k">'+t('detail_lastused')+'</span><span>'+fmtAgo(w.lastUsed)+'</span></div><div class="kv-row"><span class="k">'+t('detail_firstseen')+'</span><span>'+fmtDate(w.firstSeen)+'</span></div></div>'+
@@ -1479,6 +1739,7 @@ function renderDetail(target, list){
     '</div>';
   var eb=$('#det-explorer',target); if(eb) eb.onclick=function(){ window.open(url,'_blank'); };
   var rb=$('#det-refresh',target); if(rb) rb.onclick=function(){ refreshWalletFromChain(w.id); };
+  var tsel=$('#tok-th',target); if(tsel) tsel.onchange=function(){ state.profile.tokThreshold=+this.value; save(); renderCurrentView(); };
   $('#det-edit',target).onclick=function(){ openEditModal(w); };
   var sc=$('#det-set-created',target); if(sc) sc.onclick=function(){ openEditModal(w); };
   $all('.addr-copy',target).forEach(function(el){ el.addEventListener('click', function(e){ e.stopPropagation(); copyToClipboard(el.dataset.addr, el); }); });
@@ -1536,6 +1797,7 @@ function renderWalletsView(){
   var list=filteredWallets();
   $('#wallets-count-label-2').textContent = t('count_of',{n:list.length,total:state.wallets.length});
   renderTable($('#wallets-table-2'), list);
+  renderTokenSearch(list);
   if(isNarrow()){ $('#detail-panel-2').innerHTML=''; } else { renderDetail($('#detail-panel-2'), list); }
 }
 function openGroup(gid){
@@ -1734,7 +1996,10 @@ function saveWalletForm(){
   };
   if(state.editingId){
     var idx=state.wallets.findIndex(function(w){return w.id===state.editingId;});
-    state.wallets[idx]=Object.assign({id:state.editingId}, data); toast(t('toast_wallet_updated')); track('wallet_edited', {network:data.network, purpose:data.purpose});
+    var prev=state.wallets[idx], merged=Object.assign({}, prev, data, {id:state.editingId});
+    if(String(data.balance||'')!==String(prev.balance||'')) delete merged.usd;
+    if(data.address!==prev.address || data.network!==prev.network){ delete merged.tok; delete merged.usd; }
+    state.wallets[idx]=merged; toast(t('toast_wallet_updated')); track('wallet_edited', {network:data.network, purpose:data.purpose});
   }else{
     data.id=uid(); state.wallets.unshift(data); state.selectedId=data.id; toast(t('toast_wallet_added')); track('wallet_added', {network:data.network, purpose:data.purpose});
   }
@@ -1801,6 +2066,11 @@ function buildReport(){
   L.push('Screen: '+window.innerWidth+'x'+window.innerHeight+', lang: '+state.lang+', theme: '+(p.theme||'dark'));
   L.push('Wallets: '+state.wallets.length+', groups: '+state.groups.length+' (networks: '+(Object.keys(nets).map(function(k){return k+'='+nets[k];}).join(', ')||'-')+')');
   L.push('PIN: '+(p.pinHash?'on':'off')+', analytics: '+(p.analyticsOptOut?'off':'on')+', last export: '+(p.lastExport?new Date(p.lastExport).toISOString().slice(0,10):'never'));
+  L.push('Page: '+location.protocol+'//'+(location.host||'(local file)'));
+  var issues=[]; Object.keys(lastErr).forEach(function(id){ var x=state.wallets.find(function(w){return w.id===id;}); if(x) issues.push(x.network+':'+lastErr[id]); });
+  Object.keys(lastTokErr).forEach(function(id){ var x=state.wallets.find(function(w){return w.id===id;}); if(x) issues.push(x.network+' tokens:'+lastTokErr[id]); });
+  L.push('Refresh issues: '+(issues.join(', ')||'none'));
+  if(lastNetCheck) L.push(lastNetCheck);
   L.push('Errors ('+errs.length+'):');
   errs.forEach(function(e){ L.push('  '+new Date(e.t).toISOString().slice(0,19)+' v'+e.v+' '+e.m+' ('+(e.f||'?')+':'+(e.l||0)+')'); });
   return L.join('\n');
@@ -1988,6 +2258,7 @@ function wireExtraEvents(){
   $('#report-close').addEventListener('click', closeReport);
   $('#report-cancel').addEventListener('click', closeReport);
   $('#report-copy').addEventListener('click', function(){ copyReport(this); });
+  $('#report-netcheck').addEventListener('click', function(){ runNetCheckInReport(this); });
   $('#report-modal').addEventListener('click', function(e){ if(e.target.id==='report-modal') closeReport(); });
 
   $('#pw-close').addEventListener('click', closePw);
