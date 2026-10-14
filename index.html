@@ -188,6 +188,11 @@ a{color:inherit;}
 .tok-det .tok-row{padding-left:10px;}
 .tok-note{font-size:11.5px;color:var(--text-faint);line-height:1.5;padding:6px 0;}
 .tok-search{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;display:flex;flex-direction:column;gap:4px;}
+.bal-cell{line-height:1.25;}
+.bal-native{font-size:11px;color:var(--text-faint);margin-top:2px;}
+.detail-native{font-size:12.5px;color:var(--text-dim);margin-top:3px;}
+.tok-tick{flex-shrink:0;}
+.tok-name{font-weight:400;color:var(--text-faint);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
 .chk-note{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--amber);background:var(--amber-soft);border-radius:9px;padding:9px 11px;line-height:1.45;}
 .chk-note svg{flex-shrink:0;margin-top:1px;}
 .forgotten-chips{display:flex;gap:8px;flex-wrap:wrap;}
@@ -842,6 +847,7 @@ security_empty_title:"Нечего проверять", security_empty_desc:"В�
 sec_mark_active:"Отметить Active", sec_archive:"Архивировать", sec_edit:"Открыть",
 forgotten_view_title:"Забытые кошельки",
 nav_more:"Ещё", add_wallet_short:"Добавить",
+refresh_forbidden:"Бесплатные публичные узлы не отдают эти данные браузеру (доступ запрещён). Нужен свой бесплатный Solana RPC-ключ — напиши тому, кто дал ссылку.",
 refresh_net_detail:"Запрос к сети не прошёл: браузер его заблокировал или нет интернета. Нажми «Сообщить о проблеме» → «Проверить сеть» и пришли отчёт.", refresh_file_hint:"Страница открыта как файл с компьютера — часть сервисов не принимает такие запросы. Открой сайт по https-ссылке (GitHub Pages).", refresh_tok_prefix:"Токены:", report_netcheck:"Проверить сеть", netcheck_running:"Проверяю…",
 tok_title:"Токены", tok_updated:"обновлено: {ago}", tok_threshold:"Показывать от", tok_total:"Всего по токенам", tok_other_n:"Другие · {n}", tok_noprice:"Без цены", tok_noprice_hint:"Рыночной цены нет — это может быть мусорный airdrop или совсем новый токен. В сумму не входят; ссылки и кнопки из таких токенов лучше не открывать.", tok_more_big:"Ещё {n} токенов от {th}", tok_empty:"Нажми «Обновить с блокчейна» (кнопка со стрелками), чтобы увидеть токены этого кошелька.", tok_lowliq:"Тонкая ликвидность: продать по этой цене будет трудно", tok_skipped:"Ещё {n} токенов не проверено (их слишком много)", tok_search_line:"{w} кошельк. · {amt} · {usd}", refresh_ok_tokens:"Обновлено: баланс, дата и токены ({n})", refresh_tokens_fail:"Баланс обновлён, а токены получить не удалось — попробуй позже",
 snapshot_title:"Копия до обновления", snapshot_info:"Сохранена {date}, версия {v}. Создаётся автоматически при первом запуске новой версии.", snapshot_restore:"Вернуть данные до обновления", snapshot_confirm:"Вернуть данные на момент до обновления? Всё, что ты изменил после обновления, будет потеряно.",
@@ -930,6 +936,7 @@ security_empty_title:"Nothing to review", security_empty_desc:"All wallets look 
 sec_mark_active:"Mark Active", sec_archive:"Archive", sec_edit:"Open",
 forgotten_view_title:"Forgotten wallets",
 nav_more:"More", add_wallet_short:"Add",
+refresh_forbidden:"Free public nodes refuse to give this data to a browser (access denied). A free Solana RPC key of your own is needed — tell whoever gave you the link.",
 refresh_net_detail:"The network request failed: the browser blocked it or you're offline. Press «Report a problem» → «Check network» and send the report.", refresh_file_hint:"The page is opened as a local file — some services reject such requests. Open the site via its https link (GitHub Pages).", refresh_tok_prefix:"Tokens:", report_netcheck:"Check network", netcheck_running:"Checking…",
 tok_title:"Tokens", tok_updated:"updated: {ago}", tok_threshold:"Show from", tok_total:"Total in tokens", tok_other_n:"Other · {n}", tok_noprice:"No price", tok_noprice_hint:"No market price — could be a junk airdrop or a very new token. Not included in the total; avoid opening links or buttons tied to such tokens.", tok_more_big:"{n} more tokens from {th}", tok_empty:"Press «Refresh from blockchain» (the arrows button) to see this wallet's tokens.", tok_lowliq:"Thin liquidity: selling at this price would be hard", tok_skipped:"{n} more tokens weren't checked (too many)", tok_search_line:"{w} wallets · {amt} · {usd}", refresh_ok_tokens:"Updated: balance, date and tokens ({n})", refresh_tokens_fail:"Balance updated, but tokens couldn't be fetched — try again later",
 snapshot_title:"Pre-update copy", snapshot_info:"Saved {date}, version {v}. Created automatically the first time a new version starts.", snapshot_restore:"Restore data from before the update", snapshot_confirm:"Restore your data as it was before the update? Anything you changed after the update will be lost.",
@@ -1025,7 +1032,8 @@ var WALLET_ICONS = ["briefcase", "chart", "sprout", "flame", "coins", "image", "
 var COLORS = ['#5b7cff','#34d399','#f5a524','#f5556c','#a78bfa','#38bdf8','#fb923c','#2dd4bf'];
 var LS_PROFILE='wa_profile', LS_WALLETS='wa_wallets', LS_GROUPS='wa_groups', LS_GATE='wa_site_unlocked';
 var SITE_PASSWORD_HASH = 'REPLACE_WITH_SITE_PASSWORD_HASH';
-var APP_VERSION = '0.10.1';
+var APP_VERSION = '0.10.2';
+var SOLANA_RPC_URL = 'REPLACE_WITH_SOLANA_RPC_URL';
 
 /* ================= state ================= */
 var state = {
@@ -1357,7 +1365,7 @@ function renderTable(tableEl, list, onRowClick){
       '<td><div class="wallet-cell"><div class="wallet-icon" style="background:'+w.color+'22;color:'+w.color+'">'+walletIcon(w.icon)+'</div><div><div class="wallet-name">'+esc(w.name)+'</div><div class="wallet-addr addr-copy" data-addr="'+esc(w.address)+'" title="'+t('copy_address_title')+'">'+esc(shortAddr(w.address))+' <span class="copy-ic">⧉</span></div></div></div></td>'+
       '<td data-label="'+t('col_purpose')+'"><span class="badge" style="background:'+pur.color+'22;color:'+pur.color+'">'+pur.label+'</span></td>'+
       '<td data-label="'+t('col_network')+'"><span class="net-badge">'+netIcon(w.network,15)+' '+net.label+'</span></td>'+
-      '<td data-label="'+t('col_balance')+'">'+esc(maskBal(balText(w)))+'</td>'+
+      '<td data-label="'+t('col_balance')+'"><div class="bal-cell"><div>'+esc(maskBal(balText(w)))+'</div>'+nativeSub(w,'bal-native')+'</div></td>'+
       '<td data-label="'+t('col_lastused')+'">'+fmtAgo(w.lastUsed)+'</td>'+
       '<td data-label="'+t('col_usedwith')+'"><div class="usedwith-chips">'+uw+extra+'</div></td>'+
       '<td data-label="'+t('col_status')+'"><span class="badge" style="background:'+st.bg+';color:'+st.color+'">'+st.label+'</span></td>'+
@@ -1393,7 +1401,7 @@ function chainFetch(url, opts){
   return fetch(url, o).then(function(r){
     if(timer) clearTimeout(timer);
     if(r.status===429) throw new Error('RATE');
-    if(r.status===403) throw new Error('RATE');
+    if(r.status===403) throw new Error('FORBIDDEN');
     if(!r.ok) throw new Error('HTTP '+r.status);
     return r.json();
   }, function(){ if(timer) clearTimeout(timer); throw new Error('NET'); });
@@ -1431,7 +1439,9 @@ function fetchChainData(w){
         var t0 = sigs && sigs[0] && sigs[0].blockTime;
         out.lastUsed = dateFromUnix(t0); out.hasDate = !!t0;
       }, function(){})
-      .then(function(){ return fetchSolanaTokens(a, native).then(function(tok){ out.tokens = tok; }, function(e){ out.tokErr = String(e && e.message || 'NET'); }); })
+      .then(function(){ return fetchSolanaTokens(a, native).then(function(tok){ out.tokens = tok; }, function(e){
+        out.tokErr = String(e && e.message || 'NET');
+        return dexPrices([WSOL]).then(function(m){ var pr=m[WSOL]; out.usd = pr ? (Number(native)/1e9)*pr.price : null; }, function(){}); }); })
       .then(function(){ return out; });
     });
   }
@@ -1458,6 +1468,7 @@ function refreshWalletFromChain(id){
     w.balance = r.balance;
     if(r.hasDate) w.lastUsed = r.lastUsed;
     if(r.tokens){ w.tok = r.tokens; w.usd = r.tokens.total; }
+    else if(r.tokens===null){ if(!w.tok){ if(typeof r.usd==='number') w.usd = r.usd; else delete w.usd; } }
     else if(r.tokens===undefined){ if(typeof r.usd==='number') w.usd = r.usd; else delete w.usd; }
     delete lastErr[id];
     if(r.tokens!==undefined && !r.tokens) lastTokErr[id]=r.tokErr||'NET'; else delete lastTokErr[id];
@@ -1470,20 +1481,24 @@ function refreshWalletFromChain(id){
   }).catch(function(e){
     var m = String(e && e.message || 'NET');
     lastErr[id]=m; renderCurrentView();
-    toast(m==='RATE' ? t('refresh_rate') : (m.indexOf('RPC')===0 ? t('refresh_bad_addr') : t('refresh_net')));
+    toast(m==='RATE' ? t('refresh_rate') : (m==='FORBIDDEN' ? t('refresh_forbidden') : (m.indexOf('RPC')===0 ? t('refresh_bad_addr') : t('refresh_net'))));
     track('chain_refresh', {network:w.network, ok:false, reason:m.slice(0,30), file:(location.protocol==='file:')});
   }).then(function(){ refreshing[id]=false; var b=$('#det-refresh'); if(b) b.classList.remove('spin'); });
 }
 /* ================= network resilience + diagnostics ================= */
-var SOL_RPCS=['https://solana.publicnode.com','https://solana-rpc.publicnode.com','https://api.mainnet-beta.solana.com'], solRpcIdx=0;
-var lastErr={}, lastTokErr={}, lastNetCheck='';
+var SOL_GEN=['https://solana.publicnode.com','https://solana-rpc.publicnode.com','https://api.mainnet-beta.solana.com','https://solana.api.onfinality.io/public'];
+var SOL_TOK=['https://solana.api.onfinality.io/public','https://solana.publicnode.com','https://solana-rpc.publicnode.com','https://api.mainnet-beta.solana.com'];
+var solIdx={}, lastErr={}, lastTokErr={}, lastNetCheck='';
+function customRpc(){ return /^https:\/\/\S+$/.test(SOLANA_RPC_URL) ? SOLANA_RPC_URL : null; }
+function solHosts(method){ var base=(method==='getTokenAccountsByOwner')?SOL_TOK:SOL_GEN, c=customRpc(); return c?[c].concat(base):base.slice(); }
+function hostLabel(u){ return String(u).split('?')[0].replace('https://',''); }
 function solRpc(method, params){
-  var lastE=null;
+  var hosts=solHosts(method), start=solIdx[method]||0, firstE=null;
   function attempt(k){
-    if(k>=SOL_RPCS.length) return Promise.reject(lastE||new Error('NET'));
-    var idx=(solRpcIdx+k)%SOL_RPCS.length;
-    return Promise.resolve().then(function(){ return rpcCall(SOL_RPCS[idx], method, params); })
-      .then(function(r){ solRpcIdx=idx; return r; }, function(e){ lastE=e; return attempt(k+1); });
+    if(k>=hosts.length) return Promise.reject(firstE||new Error('NET'));
+    var idx=(start+k)%hosts.length;
+    return Promise.resolve().then(function(){ return rpcCall(hosts[idx], method, params); })
+      .then(function(r){ solIdx[method]=idx; return r; }, function(e){ if(!firstE) firstE=e; return attempt(k+1); });
   }
   return attempt(0);
 }
@@ -1503,7 +1518,7 @@ function jupPrices(mints){
 }
 function refreshNoteHtml(w){
   var e=lastErr[w.id], te=lastTokErr[w.id]; if(!e && !te) return '';
-  var m=String(e||te), key=(m==='RATE')?'refresh_rate':(m.indexOf('RPC')===0?'refresh_bad_addr':'refresh_net_detail');
+  var m=String(e||te), key=(m==='RATE')?'refresh_rate':(m==='FORBIDDEN'?'refresh_forbidden':(m.indexOf('RPC')===0?'refresh_bad_addr':'refresh_net_detail'));
   var txt=t(key); if(key==='refresh_net_detail' && location.protocol==='file:') txt+=' '+t('refresh_file_hint');
   return '<div class="chk-note">'+uiIcon('alert',14)+'<span>'+(!e && te ? esc(t('refresh_tok_prefix'))+' ' : '')+esc(txt)+'</span></div>';
 }
@@ -1522,11 +1537,13 @@ function diagFetch(label, url, opts, check){
   });
 }
 function runNetDiag(){
-  var sys='11111111111111111111111111111111', tests=[];
-  SOL_RPCS.forEach(function(u){
-    tests.push(diagFetch('Solana RPC '+u.replace('https://',''), u, rpcInit('getBalance',[sys]), function(j){ return (j&&j.result&&typeof j.result.value==='number') ? true : (j&&j.error ? ('error '+String(j.error.message||'')).slice(0,60) : 'unexpected reply'); }));
+  var sys='11111111111111111111111111111111', tests=[], seen={};
+  var hosts=[].concat(customRpc()?[customRpc()]:[], SOL_GEN, SOL_TOK).filter(function(u){ if(seen[u]) return false; seen[u]=1; return true; });
+  hosts.forEach(function(u){
+    var lab=hostLabel(u)+(u===customRpc()?' (own key)':'');
+    tests.push(diagFetch('Solana '+lab+' balance', u, rpcInit('getBalance',[sys]), function(j){ return (j&&j.result&&typeof j.result.value==='number') ? true : (j&&j.error ? ('error '+String(j.error.message||'')).slice(0,60) : 'unexpected reply'); }));
+    tests.push(diagFetch('Solana '+lab+' token list', u, rpcInit('getTokenAccountsByOwner',[sys,{programId:TOK_PROGRAMS[0]},{encoding:'jsonParsed'}]), function(j){ return (j&&j.result&&Array.isArray(j.result.value)) ? true : (j&&j.error ? ('error '+String(j.error.message||'')).slice(0,60) : 'unexpected reply'); }));
   });
-  tests.push(diagFetch('Solana token list method', SOL_RPCS[0], rpcInit('getTokenAccountsByOwner',[sys,{programId:TOK_PROGRAMS[0]},{encoding:'jsonParsed'}]), function(j){ return (j&&j.result&&Array.isArray(j.result.value)) ? true : (j&&j.error ? ('error '+String(j.error.message||'')).slice(0,60) : 'unexpected reply'); }));
   tests.push(diagFetch('DexScreener prices', 'https://api.dexscreener.com/tokens/v1/solana/'+WSOL, null, function(j){ return (Array.isArray(j)&&j.length) ? true : 'empty reply'; }));
   tests.push(diagFetch('Jupiter prices (fallback)', 'https://lite-api.jup.ag/price/v3?ids='+WSOL, null, function(j){ var d=(j&&j.data)?j.data:j; return (d&&d[WSOL]) ? true : 'empty reply'; }));
   tests.push(diagFetch('EVM RPC (Ethereum)', CHAIN_SRC.ethereum.url, rpcInit('eth_getBalance',['0x0000000000000000000000000000000000000000','latest']), function(j){ return (j&&j.result) ? true : 'unexpected reply'; }));
@@ -1624,10 +1641,15 @@ function fmtAmt(a){
   if(a===0) return '0';
   var s=a.toPrecision(2); return s.indexOf('e')>-1 ? '<0.00001' : trimZ(s);
 }
+function nativeSub(w, cls){
+  if(typeof w.usd!=='number') return '';
+  var b=String(w.balance||''); if(!b || /^\s*\$?\s*[\d.,]+\s*$/.test(b)) return '';
+  return '<div class="'+cls+'">'+esc(maskBal(b))+'</div>';
+}
 function balText(w){ return (typeof w.usd==='number') ? fmtUsd(w.usd) : (w.balance||'—'); }
 function tokRow(i, hide){
   var warn=(i.l!=null && i.l<1000 && i.m!==WSOL && !STABLE_USD[i.m]) ? ' <span class="tok-warn" title="'+esc(t('tok_lowliq'))+'">'+uiIcon('alert',12)+'</span>' : '';
-  return '<div class="tok-row" title="'+esc(i.n||i.m)+'"><span class="tok-sym">'+esc(i.s||shortAddr(i.m))+warn+'</span><span class="tok-amt">'+(hide?'••':esc(fmtAmt(i.a)))+'</span><span class="tok-val">'+(i.v==null?'—':esc(maskBal(fmtUsd(i.v))))+'</span></div>';
+  return '<div class="tok-row" title="'+esc(i.n||i.m)+'"><span class="tok-sym"><span class="tok-tick">'+esc(i.s||shortAddr(i.m))+'</span>'+((i.n && i.n!==i.s)?'<span class="tok-name">'+esc(i.n)+'</span>':'')+warn+'</span><span class="tok-amt">'+(hide?'••':esc(fmtAmt(i.a)))+'</span><span class="tok-val">'+(i.v==null?'—':esc(maskBal(fmtUsd(i.v))))+'</span></div>';
 }
 function tokGroup(label, valueHtml, rowsHtml, note){
   return '<details class="tok-det"><summary><span>'+label+'</span><span class="tok-val">'+valueHtml+'</span></summary>'+(note?'<div class="tok-note">'+note+'</div>':'')+rowsHtml+'</details>';
@@ -1723,7 +1745,7 @@ function renderDetail(target, list){
       '<span class="badge" style="background:'+st.bg+';color:'+st.color+'">'+st.label+'</span>'+
     '</div>'+
     '<div class="detail-body">'+
-      '<div><div class="detail-balance">'+esc(maskBal(balText(w)))+'</div></div>'+
+      '<div><div class="detail-balance">'+esc(maskBal(balText(w)))+'</div>'+nativeSub(w,'detail-native')+'</div>'+
       refreshNoteHtml(w)+renderTokensHtml(w)+
       '<div><div class="dsec-label">'+t('detail_purpose')+'</div><span class="badge" style="background:'+pur.color+'22;color:'+pur.color+'">'+pur.label+'</span></div>'+
       (tags?('<div><div class="dsec-label">'+t('detail_tags')+'</div><div class="tag-row">'+tags+'</div></div>'):'')+
