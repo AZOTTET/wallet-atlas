@@ -193,6 +193,9 @@ a{color:inherit;}
 .detail-native{font-size:12.5px;color:var(--text-dim);margin-top:3px;}
 .tok-tick{flex-shrink:0;}
 .tok-name{font-weight:400;color:var(--text-faint);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+.rpc-status{margin-top:10px;font-size:12.5px;line-height:1.5;}
+.rpc-status.ok{color:var(--green);}
+.rpc-status.bad{color:var(--amber);}
 .chk-note{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--amber);background:var(--amber-soft);border-radius:9px;padding:9px 11px;line-height:1.45;}
 .chk-note svg{flex-shrink:0;margin-top:1px;}
 .forgotten-chips{display:flex;gap:8px;flex-wrap:wrap;}
@@ -639,6 +642,13 @@ tbody tr:last-child td{border-bottom:none;}
           </div>
         </div>
         <div class="settings-section">
+          <h3 data-i18n="rpc_title">Solana RPC для списка токенов</h3>
+          <p class="desc" data-i18n="rpc_desc">Бесплатные публичные узлы Solana закрывают список токенов от сайтов. Свой бесплатный ключ решает это: зарегистрируйся на helius.dev, создай ключ и вставь сюда RPC URL (вида https://mainnet.helius-rpc.com/?api-key=…). Ключ хранится только в этом браузере.</p>
+          <div class="field" style="margin-bottom:10px"><input type="text" id="rpc-url" autocomplete="off" spellcheck="false" placeholder="https://mainnet.helius-rpc.com/?api-key=…" style="font-family:var(--font-mono);font-size:12.5px"></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-soft" id="rpc-save-btn" data-i18n="rpc_save">Сохранить</button><button class="btn btn-soft" id="rpc-test-btn" data-i18n="rpc_test">Проверить</button></div>
+          <div id="rpc-status" class="rpc-status"></div>
+        </div>
+        <div class="settings-section">
           <h3 data-i18n="about_title">О приложении</h3>
           <p class="desc"><span data-i18n="about_version">Версия</span> <b id="app-version"></b>. <span data-i18n="about_desc">Если что-то сломалось — нажми «Сообщить о проблеме».</span></p>
           <button class="btn btn-soft" id="report-btn" data-i18n="report_btn">Сообщить о проблеме</button>
@@ -847,7 +857,8 @@ security_empty_title:"Нечего проверять", security_empty_desc:"В�
 sec_mark_active:"Отметить Active", sec_archive:"Архивировать", sec_edit:"Открыть",
 forgotten_view_title:"Забытые кошельки",
 nav_more:"Ещё", add_wallet_short:"Добавить",
-refresh_forbidden:"Бесплатные публичные узлы не отдают эти данные браузеру (доступ запрещён). Нужен свой бесплатный Solana RPC-ключ — напиши тому, кто дал ссылку.",
+rpc_title:"Solana RPC для списка токенов", rpc_desc:"Бесплатные публичные узлы Solana закрывают список токенов от сайтов. Свой бесплатный ключ решает это: зарегистрируйся на helius.dev, создай ключ и вставь сюда RPC URL (вида https://mainnet.helius-rpc.com/?api-key=…). Ключ хранится только в этом браузере.", rpc_save:"Сохранить", rpc_test:"Проверить", rpc_saved:"Ключ сохранён", rpc_cleared:"Ключ удалён", rpc_invalid:"Нужна ссылка, начинающаяся с https://", rpc_testing:"Проверяю…", rpc_ok:"✓ Работает: узел отдаёт список токенов", rpc_bad_key:"✗ Узел не принял запрос (доступ запрещён): проверь ключ и что на тарифе разрешён этот метод", rpc_bad_rate:"✗ Узел ограничил запросы, попробуй позже", rpc_bad_net:"✗ Узел недоступен из браузера (заблокирован или нет сети)", rpc_bad_other:"✗ Ответ узла непонятен", rpc_baked:"Сейчас используется ключ, встроенный владельцем сайта. Свой ключ, если введёшь, будет приоритетнее.", refresh_forbidden_own:"Твой Solana RPC не принял запрос: проверь ключ и что на тарифе разрешён список токенов (Настройки → Solana RPC → «Проверить»).",
+refresh_forbidden:"Бесплатные публичные узлы не отдают список токенов браузеру (доступ запрещён). Подключи свой бесплатный Solana RPC-ключ: Настройки → «Solana RPC для списка токенов».",
 refresh_net_detail:"Запрос к сети не прошёл: браузер его заблокировал или нет интернета. Нажми «Сообщить о проблеме» → «Проверить сеть» и пришли отчёт.", refresh_file_hint:"Страница открыта как файл с компьютера — часть сервисов не принимает такие запросы. Открой сайт по https-ссылке (GitHub Pages).", refresh_tok_prefix:"Токены:", report_netcheck:"Проверить сеть", netcheck_running:"Проверяю…",
 tok_title:"Токены", tok_updated:"обновлено: {ago}", tok_threshold:"Показывать от", tok_total:"Всего по токенам", tok_other_n:"Другие · {n}", tok_noprice:"Без цены", tok_noprice_hint:"Рыночной цены нет — это может быть мусорный airdrop или совсем новый токен. В сумму не входят; ссылки и кнопки из таких токенов лучше не открывать.", tok_more_big:"Ещё {n} токенов от {th}", tok_empty:"Нажми «Обновить с блокчейна» (кнопка со стрелками), чтобы увидеть токены этого кошелька.", tok_lowliq:"Тонкая ликвидность: продать по этой цене будет трудно", tok_skipped:"Ещё {n} токенов не проверено (их слишком много)", tok_search_line:"{w} кошельк. · {amt} · {usd}", refresh_ok_tokens:"Обновлено: баланс, дата и токены ({n})", refresh_tokens_fail:"Баланс обновлён, а токены получить не удалось — попробуй позже",
 snapshot_title:"Копия до обновления", snapshot_info:"Сохранена {date}, версия {v}. Создаётся автоматически при первом запуске новой версии.", snapshot_restore:"Вернуть данные до обновления", snapshot_confirm:"Вернуть данные на момент до обновления? Всё, что ты изменил после обновления, будет потеряно.",
@@ -936,7 +947,8 @@ security_empty_title:"Nothing to review", security_empty_desc:"All wallets look 
 sec_mark_active:"Mark Active", sec_archive:"Archive", sec_edit:"Open",
 forgotten_view_title:"Forgotten wallets",
 nav_more:"More", add_wallet_short:"Add",
-refresh_forbidden:"Free public nodes refuse to give this data to a browser (access denied). A free Solana RPC key of your own is needed — tell whoever gave you the link.",
+rpc_title:"Solana RPC for the token list", rpc_desc:"Free public Solana nodes block token lists for websites. A free key of your own solves it: sign up at helius.dev, create a key and paste the RPC URL here (like https://mainnet.helius-rpc.com/?api-key=…). The key stays in this browser only.", rpc_save:"Save", rpc_test:"Test", rpc_saved:"Key saved", rpc_cleared:"Key removed", rpc_invalid:"Enter a link starting with https://", rpc_testing:"Testing…", rpc_ok:"✓ Works: the node returns the token list", rpc_bad_key:"✗ The node refused the request (access denied): check the key and that your plan allows this method", rpc_bad_rate:"✗ The node limited requests, try later", rpc_bad_net:"✗ The node isn't reachable from the browser (blocked or offline)", rpc_bad_other:"✗ The node's reply isn't understood", rpc_baked:"A key built in by the site owner is currently used. Your own key, if you enter one, takes priority.", refresh_forbidden_own:"Your Solana RPC refused the request: check the key and that your plan allows token lists (Settings → Solana RPC → Test).",
+refresh_forbidden:"Free public nodes refuse to give the token list to a browser (access denied). Connect a free Solana RPC key of your own: Settings → «Solana RPC for the token list».",
 refresh_net_detail:"The network request failed: the browser blocked it or you're offline. Press «Report a problem» → «Check network» and send the report.", refresh_file_hint:"The page is opened as a local file — some services reject such requests. Open the site via its https link (GitHub Pages).", refresh_tok_prefix:"Tokens:", report_netcheck:"Check network", netcheck_running:"Checking…",
 tok_title:"Tokens", tok_updated:"updated: {ago}", tok_threshold:"Show from", tok_total:"Total in tokens", tok_other_n:"Other · {n}", tok_noprice:"No price", tok_noprice_hint:"No market price — could be a junk airdrop or a very new token. Not included in the total; avoid opening links or buttons tied to such tokens.", tok_more_big:"{n} more tokens from {th}", tok_empty:"Press «Refresh from blockchain» (the arrows button) to see this wallet's tokens.", tok_lowliq:"Thin liquidity: selling at this price would be hard", tok_skipped:"{n} more tokens weren't checked (too many)", tok_search_line:"{w} wallets · {amt} · {usd}", refresh_ok_tokens:"Updated: balance, date and tokens ({n})", refresh_tokens_fail:"Balance updated, but tokens couldn't be fetched — try again later",
 snapshot_title:"Pre-update copy", snapshot_info:"Saved {date}, version {v}. Created automatically the first time a new version starts.", snapshot_restore:"Restore data from before the update", snapshot_confirm:"Restore your data as it was before the update? Anything you changed after the update will be lost.",
@@ -1032,7 +1044,7 @@ var WALLET_ICONS = ["briefcase", "chart", "sprout", "flame", "coins", "image", "
 var COLORS = ['#5b7cff','#34d399','#f5a524','#f5556c','#a78bfa','#38bdf8','#fb923c','#2dd4bf'];
 var LS_PROFILE='wa_profile', LS_WALLETS='wa_wallets', LS_GROUPS='wa_groups', LS_GATE='wa_site_unlocked';
 var SITE_PASSWORD_HASH = 'REPLACE_WITH_SITE_PASSWORD_HASH';
-var APP_VERSION = '0.10.2';
+var APP_VERSION = '0.10.3';
 var SOLANA_RPC_URL = 'REPLACE_WITH_SOLANA_RPC_URL';
 
 /* ================= state ================= */
@@ -1129,7 +1141,7 @@ function normalizeData(){
     p.nickname = String(p.nickname||'Anon').slice(0,24);
     if(!AVATAR_DEFS[p.avatar]) p.avatar='fox';
     if(!p.createdAt) p.createdAt=Date.now();
-    p.hideBalance = !!p.hideBalance; p.tokThreshold = [1,10,50,100].indexOf(+p.tokThreshold)>-1 ? +p.tokThreshold : 10; p.analyticsOptOut = !!p.analyticsOptOut; if(p.pinHash===undefined) p.pinHash=null;
+    p.hideBalance = !!p.hideBalance; p.rpcUrl = (typeof p.rpcUrl==='string' && /^https:\/\/\S{8,400}$/.test(p.rpcUrl)) ? p.rpcUrl : ''; p.tokThreshold = [1,10,50,100].indexOf(+p.tokThreshold)>-1 ? +p.tokThreshold : 10; p.analyticsOptOut = !!p.analyticsOptOut; if(p.pinHash===undefined) p.pinHash=null;
     p.theme = p.theme==='light' ? 'light' : 'dark';
     p.lang = p.lang==='en' ? 'en' : 'ru';
   }
@@ -1387,11 +1399,11 @@ function renderTable(tableEl, list, onRowClick){
 }
 var CHAIN_SRC = {
   solana:{kind:'solana', url:'https://solana.publicnode.com', symbol:'SOL', host:'publicnode.com'},
-  ethereum:{kind:'evm', url:'https://rpc.nodeflare.app/eth/public', symbol:'ETH', host:'nodeflare.app', dex:'ethereum', wrapped:'0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'},
-  base:{kind:'evm', url:'https://rpc.nodeflare.app/base/public', symbol:'ETH', host:'nodeflare.app', dex:'base', wrapped:'0x4200000000000000000000000000000000000006'},
-  bnb:{kind:'evm', url:'https://rpc.nodeflare.app/bnb/public', symbol:'BNB', host:'nodeflare.app', dex:'bsc', wrapped:'0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c'},
-  arbitrum:{kind:'evm', url:'https://rpc.nodeflare.app/arb/public', symbol:'ETH', host:'nodeflare.app', dex:'arbitrum', wrapped:'0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'},
-  polygon:{kind:'evm', url:'https://rpc.nodeflare.app/polygon/public', symbol:'POL', host:'nodeflare.app', dex:'polygon', wrapped:'0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270'},
+  ethereum:{kind:'evm', url:'https://rpc.nodeflare.app/eth/public', symbol:'ETH', host:'nodeflare.app', dex:'ethereum', wrapped:'0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', alt:'https://ethereum-rpc.publicnode.com'},
+  base:{kind:'evm', url:'https://rpc.nodeflare.app/base/public', symbol:'ETH', host:'nodeflare.app', dex:'base', wrapped:'0x4200000000000000000000000000000000000006', alt:'https://base-rpc.publicnode.com'},
+  bnb:{kind:'evm', url:'https://rpc.nodeflare.app/bnb/public', symbol:'BNB', host:'nodeflare.app', dex:'bsc', wrapped:'0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', alt:'https://bsc-rpc.publicnode.com'},
+  arbitrum:{kind:'evm', url:'https://rpc.nodeflare.app/arb/public', symbol:'ETH', host:'nodeflare.app', dex:'arbitrum', wrapped:'0x82aF49447D8a07e3bd95BD0d56f35241523fBab1', alt:'https://arbitrum-one-rpc.publicnode.com'},
+  polygon:{kind:'evm', url:'https://rpc.nodeflare.app/polygon/public', symbol:'POL', host:'nodeflare.app', dex:'polygon', wrapped:'0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', alt:'https://polygon-bor-rpc.publicnode.com'},
   ton:{kind:'ton', url:'https://toncenter.com/api/v2', symbol:'TON', host:'toncenter.com'}
 };
 function chainFetch(url, opts){
@@ -1422,7 +1434,7 @@ function fetchChainData(w){
   var src = CHAIN_SRC[w.network]; var a = w.address;
   if(!src) return Promise.reject(new Error('UNSUPPORTED'));
   if(src.kind==='evm'){
-    return rpcCall(src.url, 'eth_getBalance', [a, 'latest']).then(function(hex){
+    return rpcAny([src.url].concat(src.alt?[src.alt]:[]), 'eth_getBalance', [a, 'latest']).then(function(hex){
       var wei = BigInt(hex), out = {balance: fmtUnits(wei, 18, src.symbol), lastUsed:'', hasDate:false, usd:null};
       var amt = Number(wei)/1e18;
       if(!(amt>0)){ out.usd = 0; return out; }
@@ -1487,18 +1499,18 @@ function refreshWalletFromChain(id){
 }
 /* ================= network resilience + diagnostics ================= */
 var SOL_GEN=['https://solana.publicnode.com','https://solana-rpc.publicnode.com','https://api.mainnet-beta.solana.com','https://solana.api.onfinality.io/public'];
-var SOL_TOK=['https://solana.api.onfinality.io/public','https://solana.publicnode.com','https://solana-rpc.publicnode.com','https://api.mainnet-beta.solana.com'];
+var SOL_TOK=['https://solana.api.pocket.network/','https://public.rpc.solanavibestation.com/','https://solana-mainnet.g.alchemy.com/v2/demo','https://solana.publicnode.com','https://solana-rpc.publicnode.com','https://api.mainnet-beta.solana.com','https://solana.api.onfinality.io/public'];
 var solIdx={}, lastErr={}, lastTokErr={}, lastNetCheck='';
-function customRpc(){ return /^https:\/\/\S+$/.test(SOLANA_RPC_URL) ? SOLANA_RPC_URL : null; }
+function customRpc(){ var u=(state.profile&&state.profile.rpcUrl)||SOLANA_RPC_URL; return /^https:\/\/\S+$/.test(u) ? u : null; }
 function solHosts(method){ var base=(method==='getTokenAccountsByOwner')?SOL_TOK:SOL_GEN, c=customRpc(); return c?[c].concat(base):base.slice(); }
 function hostLabel(u){ return String(u).split('?')[0].replace('https://',''); }
 function solRpc(method, params){
-  var hosts=solHosts(method), start=solIdx[method]||0, firstE=null;
+  var hosts=solHosts(method), start=solIdx[method]||0, firstE=null, allE=[];
   function attempt(k){
-    if(k>=hosts.length) return Promise.reject(firstE||new Error('NET'));
+    if(k>=hosts.length) return Promise.reject(method==='getTokenAccountsByOwner' ? pickErr(allE) : (firstE||new Error('NET')));
     var idx=(start+k)%hosts.length;
     return Promise.resolve().then(function(){ return rpcCall(hosts[idx], method, params); })
-      .then(function(r){ solIdx[method]=idx; return r; }, function(e){ if(!firstE) firstE=e; return attempt(k+1); });
+      .then(function(r){ solIdx[method]=idx; return r; }, function(e){ if(!firstE) firstE=e; allE.push(e); return attempt(k+1); });
   }
   return attempt(0);
 }
@@ -1519,6 +1531,7 @@ function jupPrices(mints){
 function refreshNoteHtml(w){
   var e=lastErr[w.id], te=lastTokErr[w.id]; if(!e && !te) return '';
   var m=String(e||te), key=(m==='RATE')?'refresh_rate':(m==='FORBIDDEN'?'refresh_forbidden':(m.indexOf('RPC')===0?'refresh_bad_addr':'refresh_net_detail'));
+  if(key==='refresh_forbidden' && customRpc()) key='refresh_forbidden_own';
   var txt=t(key); if(key==='refresh_net_detail' && location.protocol==='file:') txt+=' '+t('refresh_file_hint');
   return '<div class="chk-note">'+uiIcon('alert',14)+'<span>'+(!e && te ? esc(t('refresh_tok_prefix'))+' ' : '')+esc(txt)+'</span></div>';
 }
@@ -1546,6 +1559,8 @@ function runNetDiag(){
   });
   tests.push(diagFetch('DexScreener prices', 'https://api.dexscreener.com/tokens/v1/solana/'+WSOL, null, function(j){ return (Array.isArray(j)&&j.length) ? true : 'empty reply'; }));
   tests.push(diagFetch('Jupiter prices (fallback)', 'https://lite-api.jup.ag/price/v3?ids='+WSOL, null, function(j){ var d=(j&&j.data)?j.data:j; return (d&&d[WSOL]) ? true : 'empty reply'; }));
+  tests.push(diagFetch('Jupiter token balances', 'https://lite-api.jup.ag/ultra/v1/balances/'+sys, null, function(j){ return (j && typeof j==='object' && !j.error) ? true : 'unexpected reply'; }));
+  tests.push(diagFetch('EVM RPC (Ethereum, 2nd host)', CHAIN_SRC.ethereum.alt, rpcInit('eth_getBalance',['0x0000000000000000000000000000000000000000','latest']), function(j){ return (j&&j.result) ? true : 'unexpected reply'; }));
   tests.push(diagFetch('EVM RPC (Ethereum)', CHAIN_SRC.ethereum.url, rpcInit('eth_getBalance',['0x0000000000000000000000000000000000000000','latest']), function(j){ return (j&&j.result) ? true : 'unexpected reply'; }));
   tests.push(diagFetch('TON API', 'https://toncenter.com/api/v2/getAddressBalance?address=Ef8zMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzM0vF', null, function(j){ return (j&&j.ok) ? true : 'unexpected reply'; }));
   return Promise.all(tests).then(function(lines){ return 'Network check (page: '+location.protocol+'//'+(location.host||'-')+'):\n'+lines.join('\n'); });
@@ -1562,6 +1577,53 @@ var WSOL='So11111111111111111111111111111111111111112';
 var STABLE_USD={'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v':'USDC','Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB':'USDT'};
 var DEX_URL='https://api.dexscreener.com/tokens/v1/solana/';
 var TOK_MAX_MINTS=240, TOK_UNPRICED_KEEP=40, TOK_THRESHOLDS=[1,10,50,100];
+/* ---- where to get the list of token balances ---- */
+function pickErr(errs){
+  var rank=function(e){ var m=String(e&&e.message||''); return m==='FORBIDDEN'?4 : m==='RATE'?3 : m.indexOf('RPC')===0?2 : 1; };
+  return errs.filter(Boolean).sort(function(x,y){ return rank(y)-rank(x); })[0] || new Error('NET');
+}
+function rpcHoldings(a){
+  var terr=null;
+  return Promise.all(TOK_PROGRAMS.map(function(pid){
+    return Promise.resolve().then(function(){ return solRpc('getTokenAccountsByOwner',[a,{programId:pid},{encoding:'jsonParsed'}]); }).then(function(r){ return (r&&r.value)||[]; }, function(e){ if(!terr) terr=e; return null; });
+  })).then(function(lists){
+    if(lists[0]===null) throw (terr||new Error('NET'));
+    var out=[];
+    lists.forEach(function(list){ (list||[]).forEach(function(acc){
+      try{ var info=acc.account.data.parsed.info; out.push({m:info.mint, a:parseFloat(info.tokenAmount.uiAmountString)}); }catch(e){}
+    }); });
+    return out;
+  });
+}
+function jupHoldings(a){
+  var base='https://lite-api.jup.ag/ultra/v1/';
+  function parse(res){
+    if(!res || typeof res!=='object' || res.error) throw new Error('RPC '+String(res&&res.error||'bad reply').slice(0,40));
+    if(!(res.tokens && typeof res.tokens==='object') && !('SOL' in res)) throw new Error('RPC unexpected shape');
+    var out=[];
+    if(res.tokens && typeof res.tokens==='object'){
+      Object.keys(res.tokens).forEach(function(m){ (res.tokens[m]||[]).forEach(function(acc){ out.push({m:m, a:parseFloat(acc.uiAmountString!=null?acc.uiAmountString:acc.uiAmount)}); }); });
+    } else {
+      Object.keys(res).forEach(function(k){ var o=res[k]; if(k!=='SOL' && o && typeof o==='object') out.push({m:k, a:parseFloat(o.uiAmount)}); });
+    }
+    return out;
+  }
+  return Promise.resolve().then(function(){ return chainFetch(base+'holdings/'+encodeURIComponent(a)); }).then(parse, function(e1){
+    return Promise.resolve().then(function(){ return chainFetch(base+'balances/'+encodeURIComponent(a)); }).then(parse, function(e2){ throw pickErr([e1,e2]); });
+  });
+}
+function fetchHoldings(a){
+  if(customRpc()) return rpcHoldings(a).then(null, function(e){ return jupHoldings(a).then(null, function(){ throw e; }); });
+  return jupHoldings(a).then(null, function(je){ return rpcHoldings(a).then(null, function(re){ throw pickErr([re,je]); }); });
+}
+function rpcAny(urls, method, params){
+  var firstE=null;
+  function attempt(k){
+    if(k>=urls.length) return Promise.reject(firstE||new Error('NET'));
+    return Promise.resolve().then(function(){ return rpcCall(urls[k], method, params); }).then(null, function(e){ if(!firstE) firstE=e; return attempt(k+1); });
+  }
+  return attempt(0);
+}
 function dexPrices(mints, chain){
   chain=chain||'solana'; var ci=(chain!=='solana');
   var chunks=[]; for(var i=0;i<mints.length;i+=30) chunks.push(mints.slice(i,i+30));
@@ -1592,20 +1654,13 @@ function dexPrices(mints, chain){
   });
 }
 function fetchSolanaTokens(a, native){
-  var terr=null;
-  return Promise.all(TOK_PROGRAMS.map(function(pid){
-    return Promise.resolve().then(function(){ return solRpc('getTokenAccountsByOwner',[a,{programId:pid},{encoding:'jsonParsed'}]); }).then(function(r){ return (r&&r.value)||[]; }, function(e){ if(!terr) terr=e; return null; });
-  })).then(function(lists){
-    if(lists[0]===null) throw (terr||new Error('NET'));
+  return fetchHoldings(a).then(function(list){
     var amounts={}, order=[];
-    lists.forEach(function(list){ (list||[]).forEach(function(acc){
-      try{
-        var info=acc.account.data.parsed.info, amt=parseFloat(info.tokenAmount.uiAmountString), m=info.mint;
-        if(!m||!(amt>0)) return;
-        if(!(m in amounts)){ amounts[m]=0; order.push(m); }
-        amounts[m]+=amt;
-      }catch(e){}
-    }); });
+    list.forEach(function(x){
+      var m=x.m, amt=x.a; if(!m||!(amt>0)) return;
+      if(!(m in amounts)){ amounts[m]=0; order.push(m); }
+      amounts[m]+=amt;
+    });
     var nat=Number(native)/1e9;
     if(nat>0){ if(!(WSOL in amounts)){ amounts[WSOL]=0; order.unshift(WSOL); } amounts[WSOL]+=nat; }
     var skipped=Math.max(0, order.length-TOK_MAX_MINTS), mints=order.slice(0,TOK_MAX_MINTS);
@@ -1892,6 +1947,8 @@ function renderSettings(){
   buildAvatarPicker($('#set-avatars'), state.profile.avatar, function(a){ state.profile.avatar=a; save(); renderProfileChrome(); });
   applyBalanceToggleUI();
   $('#app-version').textContent='v'+APP_VERSION;
+  $('#rpc-url').value=(state.profile&&state.profile.rpcUrl)||'';
+  var rs=$('#rpc-status'); rs.className='rpc-status'; rs.textContent=(!(state.profile&&state.profile.rpcUrl) && /^https:\/\//.test(SOLANA_RPC_URL)) ? t('rpc_baked') : '';
   var sn=getSnapshot(); $('#snapshot-row').classList.toggle('hidden', !sn);
   if(sn) $('#snapshot-info').textContent=t('snapshot_info',{date:new Date(sn.t).toLocaleDateString(state.lang==='ru'?'ru-RU':'en-GB'), v:sn.from});
   $('#pin-switch').classList.toggle('on', !!state.profile.pinHash);
@@ -2107,7 +2164,7 @@ function copyReport(btn){
 }
 
 /* ================= backup: plain + encrypted ================= */
-function backupPayload(){ return {profile:state.profile, wallets:state.wallets, groups:state.groups, exportedAt:new Date().toISOString()}; }
+function backupPayload(){ var pr=Object.assign({}, state.profile); delete pr.rpcUrl; return {profile:pr, wallets:state.wallets, groups:state.groups, exportedAt:new Date().toISOString()}; }
 function downloadText(name, text){
   var blob=new Blob([text],{type:'application/json'});
   var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download=name; a.click(); URL.revokeObjectURL(url);
@@ -2152,7 +2209,9 @@ function applyImport(data){
   if(!data || typeof data!=='object' || !Array.isArray(data.wallets)) throw new Error('bad format');
   state.wallets=data.wallets;
   if(Array.isArray(data.groups)) state.groups=data.groups;
+  var keepRpc=(state.profile&&state.profile.rpcUrl)||'';
   if(data.profile && typeof data.profile==='object') state.profile=Object.assign({}, state.profile||{}, data.profile);
+  state.profile.rpcUrl=keepRpc;
   normalizeData(); state.profile.appVersion=APP_VERSION;
   state.lang=state.profile.lang; state.selectedId=null; state.filterGroupId=null; state.filterForgotten=false;
   save(); applyTheme(); applyI18n(); applyBalanceToggleUI(); fillGroupSelect(); renderProfileChrome(); renderCurrentView(); toast(t('toast_import_done')); track('backup_imported');
@@ -2298,6 +2357,23 @@ function wireExtraEvents(){
   $('#bulk-evm-net').addEventListener('change', updateBulkPreview);
   $('#bulk-confirm').addEventListener('click', confirmBulk);
   $('#snapshot-restore-btn').addEventListener('click', restoreSnapshot);
+  $('#rpc-save-btn').addEventListener('click', function(){
+    var v=$('#rpc-url').value.trim();
+    if(v && !/^https:\/\/\S{8,400}$/.test(v)){ toast(t('rpc_invalid')); return; }
+    state.profile.rpcUrl=v; save(); solIdx={}; toast(v?t('rpc_saved'):t('rpc_cleared'));
+    if(v) track('rpc_saved'); renderSettings();
+  });
+  $('#rpc-test-btn').addEventListener('click', function(){
+    var v=$('#rpc-url').value.trim(), st=$('#rpc-status'), btn=this;
+    if(!/^https:\/\/\S{8,400}$/.test(v)){ st.className='rpc-status bad'; st.textContent=t('rpc_invalid'); return; }
+    st.className='rpc-status'; st.textContent=t('rpc_testing'); btn.disabled=true;
+    rpcCall(v,'getTokenAccountsByOwner',['11111111111111111111111111111111',{programId:TOK_PROGRAMS[0]},{encoding:'jsonParsed'}]).then(function(r){
+      st.className='rpc-status '+((r&&Array.isArray(r.value))?'ok':'bad'); st.textContent=(r&&Array.isArray(r.value))?t('rpc_ok'):t('rpc_bad_other');
+    }, function(e){
+      var m=String(e&&e.message||''); st.className='rpc-status bad';
+      st.textContent = m==='FORBIDDEN' ? t('rpc_bad_key') : m==='RATE' ? t('rpc_bad_rate') : m.indexOf('RPC')===0 ? t('rpc_bad_key') : t('rpc_bad_net');
+    }).then(function(){ btn.disabled=false; });
+  });
   wireSheetEvents();
 }
 
